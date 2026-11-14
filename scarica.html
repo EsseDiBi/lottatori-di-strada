@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Scarica Lottatori di Strada</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:#0e0b1c;color:#f3efe6;font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;justify-content:center;padding:24px 16px 40px}
+  main{max-width:560px;width:100%;text-align:center}
+  .logo{width:128px;height:128px;border-radius:24px;image-rendering:pixelated;box-shadow:0 0 0 4px #ffc933,0 10px 30px rgba(0,0,0,.5)}
+  h1{font-size:30px;margin:18px 0 4px;color:#ffc933;letter-spacing:.5px;text-shadow:3px 3px 0 #ec3a52}
+  .sub{margin:0 0 22px;color:#bdb6cc}
+  .btn{display:block;width:100%;padding:16px;margin:10px 0;border:0;border-radius:14px;font-size:19px;font-weight:700;cursor:pointer;text-decoration:none}
+  .go{background:#ffc933;color:#120d22;box-shadow:0 5px 0 #b8860b}
+  .inst{background:#ec3a52;color:#fff;box-shadow:0 5px 0 #8f1d2c}
+  .inst[hidden]{display:none}
+  .ok{background:#1f3b2a;color:#9ff0b9;padding:12px;border-radius:12px;margin:10px 0}
+  .ok[hidden]{display:none}
+  .card{background:#1a1530;border:2px solid #2d2650;border-radius:16px;padding:16px 18px;margin:18px 0;text-align:left}
+  .card h2{margin:0 0 8px;font-size:18px;color:#3fd6ff}
+  .card ol{margin:0;padding-left:22px}
+  .card li{margin:4px 0}
+  .qr{background:#fff;padding:10px;border-radius:12px;width:220px;max-width:70vw}
+  .small{font-size:13px;color:#8f88a3}
+  .here{outline:3px solid #ffc933}
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="icona-512.png" alt="Icona di Lottatori di Strada">
+  <h1>LOTTATORI DI STRADA</h1>
+  <p class="sub">Il picchiaduro fra amici. Si installa dal browser, senza store.</p>
+
+  <a class="btn go" href="./">Gioca subito</a>
+  <button class="btn inst" id="inst" type="button" hidden>Installa l'app</button>
+  <div class="ok" id="ok" hidden>App installata. La trovi fra le tue app con l'icona del gioco.</div>
+
+  <div class="card" id="cAndroid">
+    <h2>Android (Chrome)</h2>
+    <ol>
+      <li>Tocca "Installa l'app" qui sopra.</li>
+      <li>Se il tasto non compare: menu con i tre puntini in alto a destra, poi "Installa app" o "Aggiungi a schermata Home".</li>
+      <li>Conferma. L'icona compare fra le app.</li>
+    </ol>
+  </div>
+
+  <div class="card" id="cIos">
+    <h2>iPhone e iPad (Safari)</h2>
+    <ol>
+      <li>Apri questa pagina con Safari.</li>
+      <li>Tocca il tasto "Condividi" (il quadrato con la freccia verso l'alto).</li>
+      <li>Scorri e scegli "Aggiungi alla schermata Home", poi "Aggiungi".</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Dal computer</h2>
+    <ol>
+      <li>Inquadra il codice con la fotocamera del telefono.</li>
+      <li>Si apre questa pagina: segui i passi per il tuo telefono.</li>
+    </ol>
+    <p style="text-align:center;margin:14px 0 4px"><img class="qr" src="qr-scarica.png" alt="Codice QR della pagina di download"></p>
+  </div>
+
+  <p class="small">Si gioca in orizzontale. Funziona anche senza rete e si aggiorna da solo quando c'è connessione.</p>
+</main>
+<script>
+(function(){
+  var ua=navigator.userAgent, ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), and=/Android/.test(ua);
+  var standalone=(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))||navigator.standalone;
+  var inst=document.getElementById('inst'), ok=document.getElementById('ok'), dp=null;
+  if(ios) document.getElementById('cIos').classList.add('here'); else if(and) document.getElementById('cAndroid').classList.add('here');
+  if(standalone){ ok.hidden=false; }
+  addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); dp=e; inst.hidden=false; });
+  inst.addEventListener('click',function(){ if(!dp) return; dp.prompt(); dp.userChoice.then(function(){ dp=null; inst.hidden=true; }); });
+  addEventListener('appinstalled',function(){ inst.hidden=true; ok.hidden=false; });
+  if('serviceWorker' in navigator&&location.protocol==='https:') addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+})();
+</script>
+</body>
+</html>
