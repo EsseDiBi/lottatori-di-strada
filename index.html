@@ -1,4 +1,4 @@
-<!doctype html><html><head><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Lottatori di Strada</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -150,6 +150,18 @@ body.coarse.sc-fight .topbar,body.coarse.sc-fight .legend{display:none}
 .card{padding:6px;gap:4px;align-items:center;min-height:0;color:var(--fg);font:inherit}
 .card canvas{flex:1;min-height:0;width:100%;height:auto;aspect-ratio:auto;object-fit:contain}
 .cname{font-family:var(--font-d);font-size:clamp(9px,1.4vw,18px);color:var(--gold);text-transform:uppercase;white-space:nowrap;overflow:hidden;max-width:100%;letter-spacing:0}
+/* scelta a griglia di ritratti */
+.vsel{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:clamp(6px,2vw,24px);width:100%;max-width:1100px;margin:0 auto}
+.vsel .bigsel{width:100%;height:100%;min-height:0;max-height:100%;object-fit:contain;display:block}
+#roster.pgrid{--ps:clamp(44px,min(calc((100dvh - 230px)/3),9vw),96px);display:grid;grid-template-columns:repeat(3,var(--ps));grid-template-rows:none;gap:6px;flex:none;width:auto;max-width:none;margin:0}
+.pcard{position:relative;padding:0;background:#1d1838;border:3px solid #3a3166;border-radius:4px;display:flex;flex-direction:column;align-items:center;cursor:pointer;color:var(--fg);font:inherit;min-width:0}
+.pcard img,.pcard i{display:block;width:100%;aspect-ratio:1;image-rendering:pixelated;object-fit:cover;object-position:50% 0}
+.pcard .cname{font-family:var(--font-u);font-weight:700;font-size:clamp(8px,1.12vw,12px);letter-spacing:-.02em;color:#c9c2e6;padding:1px 0 2px}
+.pcard .badges{display:none}
+.pcard.s1{border-color:var(--cyan)} .pcard.s2{border-color:var(--red)} .pcard.s1.s2{border-color:var(--gold)}
+.pcard.s1 .cname{color:var(--cyan)} .pcard.s2 .cname{color:#ff8090}
+.pcard:focus-visible{outline:3px dashed #fff;outline-offset:3px}
+@media (max-height:520px){ #roster.pgrid{--ps:clamp(40px,min(calc((100dvh - 150px)/3 - 16px),9vw),96px);gap:4px} }
 @media (max-height:520px){ .roster{gap:6px} .card{padding:3px;border-width:2px} .badges{top:6px;left:6px} .chip{font-size:10px;padding:1px 4px} }
 .pickbar{margin:4px 0 8px}
 .arenas{flex:1;min-height:0;grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:8px}
@@ -183,7 +195,7 @@ body.coarse.sc-fight .topbar,body.coarse.sc-fight .legend{display:none}
     </div>
   </div>
   <div class="step" data-step="1" hidden>
-    <div class="pickbar"><span class="hint" id="pickHint">Tocca una scheda per il Giocatore 1</span></div>
+    <div class="pickbar"><span class="hint" id="pickHint">Tocca un ritratto per il Giocatore 1</span></div>
     <div class="roster" id="roster"></div>
   </div>
   <div class="step" data-step="2" hidden>
@@ -1856,15 +1868,18 @@ function render(){
 let cards=[];
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const opt=(map,val)=>Object.entries(map).map(([k,v])=>'<option value="'+k+'"'+(String(k)===String(val)?' selected':'')+'>'+esc(v)+'</option>').join('');
-function buildCards(){ // scheda essenziale: figura e nome, un tocco per scegliere
-  const root=$('#roster'); root.innerHTML=''; cards=[];
-  root.style.setProperty('--n',ROSTER.length);
+const SELC=[], SELF=[]; // scelta a griglia di ritratti: i due scelti grandi ai lati, in proporzione
+function buildCards(){
+  const root=$('#roster'); root.innerHTML=''; cards=[]; root.className='pgrid';
+  if(!root.parentNode.classList.contains('vsel')){ const w=document.createElement('div'); w.className='vsel'; root.parentNode.insertBefore(w,root);
+    const mk=s=>{ const c=document.createElement('canvas'); c.width=260*DPR; c.height=330*DPR; c.className='bigsel'; c.setAttribute('aria-hidden','true'); return c; };
+    SELC[0]=mk(0); SELC[1]=mk(1); w.appendChild(SELC[0]); w.appendChild(root); w.appendChild(SELC[1]); }
   ROSTER.forEach((r,i)=>{
-    const el=document.createElement('button'); el.type='button'; el.className='card';
-    el.innerHTML='<div class="badges"></div><canvas width="'+112*DPR+'" height="'+190*DPR+'"></canvas><span class="cname">'+esc(r.name)+'</span>';
+    const el=document.createElement('button'); el.type='button'; el.className='pcard'; el.setAttribute('aria-label',r.name);
+    const SP=SPRITES[r.spriteKey]||{}, R=(SP.ritratto&&SP.ritratto.src)||(SP.guardia&&SP.guardia.src)||'';
+    el.innerHTML='<div class="badges"></div>'+(R?'<img alt="" src="'+R+'">':'<i></i>')+'<span class="cname">'+esc(r.name)+'</span>';
     el.addEventListener('click',()=>{ ac(); SFX.select(); choose(i); });
-    root.appendChild(el);
-    cards.push({el,g:el.querySelector('canvas').getContext('2d'),F:{def:r,state:'idle',t:(rnd()*100)|0,facing:1,flash:0,atk:null}});
+    root.appendChild(el); cards.push({el});
   });
   refreshPicks();
 }
@@ -1878,13 +1893,17 @@ function refreshPicks(){
   const lbl2=sel.mode==='cpu'?'CPU':'G2';
   cards.forEach((c,i)=>{ c.el.classList.toggle('s1',sel.picks[0]===i); c.el.classList.toggle('s2',sel.picks[1]===i);
     c.el.querySelector('.badges').innerHTML=(sel.picks[0]===i?'<span class="chip p1">G1</span>':'')+(sel.picks[1]===i?'<span class="chip p2">'+lbl2+'</span>':''); });
-  $('#pickHint').textContent=sel.turn===0?'Tocca una scheda per il Giocatore 1':(sel.mode==='cpu'?'Ora scegli l\'avversario del computer':'Ora scegli il Giocatore 2');
+  $('#pickHint').textContent=sel.turn===0?'Tocca un ritratto per il Giocatore 1':(sel.mode==='cpu'?'Ora scegli l\'avversario del computer':'Ora scegli il Giocatore 2');
 }
 function drawCards(){
-  cards.forEach((c,i)=>{ const g=c.g; c.F.t++; c.F.state=sel.picks.includes(i)?'win':'idle';
-    g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,112,190);
-    g.fillStyle='rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(56,178,36,7,0,0,7); g.fill();
-    drawFighter(g,c.F,53,176,0.8); });
+  for(let s=0;s<2;s++){ const cv=SELC[s]; if(!cv) continue; const r=ROSTER[sel.picks[s]]; if(!r) continue; const g=cv.getContext('2d');
+    let F=SELF[s]; if(!F||F.def!==r){ F=SELF[s]={def:r,state:'idle',t:s*7,facing:1,flash:0,atk:null}; } F.facing=s?-1:1; F.t++;
+    const col=s?'#ec3a52':'#3fd6ff', on=sel.turn===s;
+    g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,260,330);
+    g.fillStyle=s?'rgba(236,58,82,'+(on?.4:.2)+')':'rgba(63,214,255,'+(on?.38:.18)+')'; g.beginPath(); g.ellipse(130,298,104,18,0,0,7); g.fill(); g.lineWidth=on?4:2.5; g.strokeStyle=col; g.stroke();
+    drawFighter(g,F,130,294,1.12); // proporzioni vere: la taglia del lottatore resta
+    const lab=s?(sel.mode==='cpu'?'CPU':'G2'):'G1'; g.textAlign='center'; g.lineJoin='round'; g.font='16px '+FD; g.fillStyle=col; g.fillRect(s?204:12,8,44,22); g.fillStyle=s?'#ffffff':'#120d22'; g.fillText(lab,s?226:34,25);
+    g.font='24px '+FD; g.lineWidth=6; g.strokeStyle='#120d22'; g.strokeText(r.name.toUpperCase(),130,326); g.fillStyle='#ffc933'; g.fillText(r.name.toUpperCase(),130,326); }
 }
 document.querySelectorAll('input[name=mode]').forEach(r=>r.addEventListener('change',()=>{ sel.mode=r.value; $('#diffSeg').hidden=sel.mode!=='cpu'; document.querySelectorAll('input[name=diff]').forEach(d=>d.disabled=sel.mode!=='cpu'); refreshPicks(); }));
 document.querySelectorAll('input[name=diff]').forEach(r=>r.addEventListener('change',()=>{ sel.diff=r.value; }));
