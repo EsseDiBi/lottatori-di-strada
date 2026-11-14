@@ -425,8 +425,10 @@ function stepMaria(f){ const M=f.maria; M.t++; const o=M.tgt;
   if(M.hitOk&&o&&(M.t===58||M.t===70||M.t===82)){ const last=M.t===82; if(Math.abs(o.x-M.x)<MX.rng&&!['ko','down'].includes(o.state)){ hit(f,o,last?MX.d2:MX.d1,last?12:2,last?40:20,{sup:true,low:true,air:true,heavy:last,launch:last,dirx:o.x>=M.x?1:-1,y:o.y-90});
       if(o.state==='hit') floatText(last?'NANNA!':(M.t===58?'PIM!':'PUM!'),o.x,o.y-210,'#ffc21a',last?28:22,50); if(last) G.shake=Math.max(G.shake,9); } }
   if(M.t>=150) f.maria=null; }
+let HOOPI=null; function hoopImgs(){ if(!HOOPI){ HOOPI=[new Image(),new Image()]; HOOPI[0].src='img/zeta/canestro1.png'; HOOPI[1].src='img/zeta/canestro2.png'; } return HOOPI; } hoopImgs(); /*ZETA3 canestro disegnato con ChatGPT*/
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
+  { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
   ctx.save(); ctx.translate(x+sh,y); ctx.imageSmoothingEnabled=false;
   ctx.fillStyle='#120d22'; ctx.fillRect(-4,-140,8,100); ctx.fillRect(-52,-48,104,66);
   ctx.fillStyle='#f4efe6'; ctx.fillRect(-48,-44,96,58); ctx.fillStyle='#d8262a'; ctx.fillRect(-20,-20,40,4); ctx.fillRect(-20,-20,4,26); ctx.fillRect(16,-20,4,26);
