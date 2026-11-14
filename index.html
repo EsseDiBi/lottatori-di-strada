@@ -372,7 +372,7 @@ COUPLE.stefano=COUPLE.stefano||{}; if(!COUPLE.stefano.faja) COUPLE.stefano.faja=
 COUPLE.max=COUPLE.max||{}; if(!COUPLE.max.faja) COUPLE.max.faja={intro:["Faja, il mare è del popolo.","Surf? Roba da borghesi."],win:["Bracciata proletaria.","Torna a contare i pesci."],lose:["Il mare è capitalista.","Mi serve una camomilla. Salata."]};
 if(SPRITES.faja){ const F=SPRITES.faja; F.aterra=F.ko; F.rialzo=F.accovacciato; F.tifo=F.montante; F.caricapugno=F.guardia2; F.stordita=F.stordito; }
 
-/*SOCCIAMAN1*/QUOTES.socciaman={intro:["Prima i tortellini, poi le botte.","A Bologna si mangia. E si mena.","Una tirata di pipa e comincio.","Il ragù cuoce quattro ore. Tu meno.","Araldo, seduto. Ci penso io."],win:["Al ristorante paghi tu.","Forza Bologna, sempre.","Tortellino d'oro per me.","Brodo per due, grazie.","Bravo Araldo. Biscotto."],lose:["Mi serve un piatto di lasagne.","Araldo mi vuole bene lo stesso."]};
+/*SOCCIAMAN1*/QUOTES.socciaman={intro:["Prima i tortellini, poi le botte.","A Bologna si mangia. E si mena.","Una tirata di pipa e comincio.","Il ragù cuoce quattro ore. Tu meno.","Araldo, seduto. Ci penso io."],win:["SOCC'MEL!"],lose:["Mi serve un piatto di lasagne.","Araldo mi vuole bene lo stesso."]};
 COUPLE.socciaman=COUPLE.socciaman||{}; if(!COUPLE.socciaman.stefano) COUPLE.socciaman.stefano={intro:["Avvocato, a Bologna si paga in tortellini.","Ti querelo io. Col ragù."],win:["Parcella pagata in mortadella.","Torna a Bergamo, avvocato."],lose:["Va bene, offro io la cena.","Ricorro. In trattoria."]};
 COUPLE.stefano=COUPLE.stefano||{}; if(!COUPLE.stefano.socciaman) COUPLE.stefano.socciaman={intro:["Nicola, la pipa qui non si fuma.","Ti difendo gratis. Dopo cena."],win:["Sentenza: i tortellini li porti tu.","Obiezione accolta. Soccmel."],lose:["Ricorro in Cassazione. A Bologna.","Mi arrendo. Ma solo al ragù."]};
 if(SPRITES.socciaman){ const S=SPRITES.socciaman; S.entrata=S.ingresso; S.lancio=S.caricatortellino; S.lancio2=S.lanciotortellino; S.provocazione=S.pranzo; S.stordita=S.stordito; S.aterra=S.ko; }
@@ -444,6 +444,19 @@ function drawOndaFaja(){ if(!ONDAF.complete||!ONDAF.width) return; for(let i=OND
   if(t>(W+Wd)/sp||t<0){ ONDE.splice(i,1); continue; } const L=o.dir>0?t*sp:W-t*sp;
   G.shake=Math.max(G.shake,5); ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(L,GROUND+34+Math.sin(t*0.4)*4); ctx.scale(o.dir,1); ctx.drawImage(ONDAF,-Wd,-Hd,Wd,Hd); ctx.restore();
   const F=o.f; if(F&&F.atk&&F.atk.type==='sup') drawFighter(ctx,F,F.x,F.y,1); } }
+/*ROSEGPT1 - Rose nere di JJ con la grafica di ChatGPT (15.11.2026): rosa in volo, rovi che esplodono dal pavimento, rosa gigante che sboccia */
+const ROSX={}; ['rosa0','rosa1','rosa2','rosa3','rovo0','rovo1','rovo2','rovo3','rovo4','boccio0','boccio1','boccio2'].forEach(k=>{ const im=new Image(); im.src='img/fx/jj_'+k+'.png'; ROSX[k]=im; });
+const ROSV=[];
+function rosOk(im){ return im&&im.complete&&im.width; }
+function drawRoseGPT(p){ const im=ROSX['rosa'+((G.frame>>2)%4)]; if(!rosOk(im)) return false; const d=Math.sign(p.vx)||1, s=1.25;
+  if(p._last===undefined) p._last=p.x; if(Math.abs(p.x-p._last)>=60){ p._last=p.x; ROSV.push({k:'rovo',x:p.x-d*20,b:G.frame,s:1.3+rnd()*0.3}); }
+  ctx.save(); ctx.translate(p.x,p.y); ctx.scale(d,1); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,-im.width*s*0.62,-im.height*s/2,im.width*s,im.height*s); ctx.restore(); return true; }
+function roseBloomGPT(opp){ ROSV.push({k:'rovo',x:opp.x,b:G.frame,s:2.0,big:1}); ROSV.push({k:'boccio',x:opp.x,y:opp.y-110,b:G.frame}); G.shake=Math.max(G.shake,16); }
+function drawRoseBack(){ for(let i=ROSV.length-1;i>=0;i--){ const o=ROSV[i], a=G.frame-o.b; if(o.k!=='rovo') continue; const L=o.big?70:44; if(a>L||a<0){ ROSV.splice(i,1); continue; }
+  const st=a<10?Math.min(4,(a/2)|0):(a>L-10?Math.max(0,4-(((a-(L-10))/2)|0)):4), im=ROSX['rovo'+st]; if(!rosOk(im)) continue;
+  ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,o.x-im.width*o.s/2,GROUND+6-im.height*o.s,im.width*o.s,im.height*o.s); ctx.restore(); } }
+function drawRoseFront(){ for(let i=ROSV.length-1;i>=0;i--){ const o=ROSV[i], a=G.frame-o.b; if(o.k!=='boccio') continue; if(a>40||a<0){ ROSV.splice(i,1); continue; }
+  const im=ROSX['boccio'+Math.min(2,(a/5)|0)]; if(!rosOk(im)) continue; const s=1.5; ctx.save(); ctx.imageSmoothingEnabled=false; if(a>30) ctx.globalAlpha=(40-a)/10; ctx.drawImage(im,o.x-im.width*s/2,o.y-im.height*s/2,im.width*s,im.height*s); ctx.restore(); } }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -840,7 +853,7 @@ document.querySelectorAll('#pad .acts button').forEach(b=>{
 /* SDB e Cugi insieme: STRAORDINERIO (ordine dell'Avvocato, 14.11.2026) */
 COUPLE.stefano=COUPLE.stefano||{}; COUPLE.cugi=COUPLE.cugi||{}; COUPLE.stefano.cugi={intro:['STRAORDINERIO!'],win:['STRAORDINERIO!'],lose:['Straordinerio lo stesso.']}; COUPLE.cugi.stefano={intro:['STRAORDINERIO!'],win:['STRAORDINERIO!'],lose:['Straordinerio lo stesso.']};
 const STRAO=(a,b)=>(a==='stefano'&&b==='cugi')||(a==='cugi'&&b==='stefano');
-const COMBOF={stefano:'OBIEZIONE!',marouges:'BOING!',jj:'CIAO.',max:'ROSSO!',frisbee:'ZAC!',cugi:'MISCHIA!',laura:'LIKE!',marico:'HOORAH!',yoghi:'BUCA!',biscio:'FERIE!',zeta:'CANESTRO!',carolluz:'CHECK-IN!',morex:'SPOLVERATA!',chooby:'DROP!'}; COMBOF.socciaman='SOCCMEL!';
+const COMBOF={stefano:'OBIEZIONE!',marouges:'BOING!',jj:'CIAO.',max:'ROSSO!',frisbee:'ZAC!',cugi:'MISCHIA!',laura:'LIKE!',marico:'HOORAH!',yoghi:'BUCA!',biscio:'FERIE!',zeta:'CANESTRO!',carolluz:'CHECK-IN!',morex:'SPOLVERATA!',chooby:'DROP!'}; COMBOF.socciaman='SOCC\'MEL!';
 const MOVES={
  punch:{s:4,a:4,r:9,dmg:5,reach:76,hy:-124,hh:32,kb:3,stun:15},
  kick:{s:7,a:5,r:14,dmg:8,reach:102,hy:-72,hh:38,kb:5,stun:19,heavy:1},
@@ -963,7 +976,7 @@ function updFighter(f,o,inp){
         if(a.caught&&a.f===m.s+22) floatText('Ninna nanna...',f.x,f.y-250,f.def.accent,15,50,'balloon');
         if(a.caught&&a.f===m.s+50){ o.wrapT=0; o.stun=0; o.x=Math.max(60,Math.min(W-60,f.x+f.facing*70)); hit(f,o,16,13,40,{sup:true,heavy:true,launch:true,low:true,air:true,dirx:f.facing,y:o.y-100}); floatText('NANNA!',o.x,o.y-220,'#ffc21a',28,70); G.shake=Math.max(G.shake,10); } }
       else if(a.type==='sup'&&f.def.spriteKey==='jj'){ f.vx=0; if(a.f===m.s) spawnRose(f); }
-      else if(a.type==='sup'&&f.def.spriteKey==='socciaman'){ f.vx=0; if(a.f===m.s+1){ floatText('SOCCMEL!',f.x,f.y-275,'#ffc21a',26,70); G.excite=1; } }
+      else if(a.type==='sup'&&f.def.spriteKey==='socciaman'){ f.vx=0; if(a.f===m.s+1){ floatText('SOCC\'MEL!',f.x,f.y-275,'#ffc21a',26,70); G.excite=1; } }
       else if(a.type==='cascata'){ cascataStep(f,o,a,m,fwd); }
       else if(a.type==='sup'&&f.def.superCats){ f.vx=0; if(a.f===2) floatText(f.def.spriteKey==='stefano'?'Boogie! Mocambo!':'Gatti!',f.x,f.y-250,f.def.accent,17,46,'balloon'); if(a.f===m.s){ spawnCatFan(f,o,0,0); spawnCatFan(f,o,3,10); } }
       else if(a.type==='sup'&&f.def.superRage){ f.vx=0; // si arrabbia, chiude gli occhi e urla: escono simboli al posto delle parolacce
@@ -1158,7 +1171,7 @@ function updProj(){
       if(p.kind==='frisbee'&&opp.state==='hit') floatText('ZIIING!',opp.x,opp.y-205,'#ff6fa8',22);
       if(p.kind==='flash'&&opp.state==='hit') floatText('CLICK!',opp.x,opp.y-205,'#ffffff',22);
       if(p.kind==='gelo'&&opp.state==='hit') floatText('BRRR!',opp.x,opp.y-205,'#9fe7ff',22);
-      if(p.kind==='rose'&&opp.state==='hit') floatText('SPINE!',opp.x,opp.y-210,'#ff3b5c',24);
+      if(p.kind==='rose'){ try{ roseBloomGPT(opp); }catch(e){} }
       if(p.kind==='cuss'&&p.big&&opp.state==='hit') floatText('CENSURATO!',opp.x,opp.y-210,'#ffffff',22);
       if(p.kind==='pallone'&&opp.state==='hit') floatText('CIUFF!',opp.x,opp.y-205,'#ffc933',22);
       if(p.kind==='golf'&&opp.state==='hit') floatText('FORE!',opp.x,opp.y-205,'#ffffff',22);
@@ -1294,7 +1307,7 @@ const GESTO={
   chooby:{dist:120,pose:'fischio',q:['Fischio. E si va a casa.','Fine del set.','Bis? N-n-no.']},
   morex:{dist:120,pose:'aspirapolvere2',q:['Ecco, ora sei pulito.','Un po\' di polvere. Via.','E adesso, divano.']},
   faja:{dist:120,pose:'provocazione',q:['Esemplare raro. Lo annoto.','Specie: battuta. Comune.','Vado a dirlo alle remore.']},
-  socciaman:{dist:120,pose:'pranzo',q:['Tortellino? Te lo sei meritato.','Brodo per tutti.','Al ristorante paghi tu.']},
+  socciaman:{dist:120,pose:'pranzo',q:['SOCC\'MEL!']},
   carolluz:{dist:130,pose:'predica',q:['Te l\'avevo detto.','Lo dico per te.','La prossima volta leggi il regolamento.']},
   marico:{dist:120,pose:'grigliata',q:['Arepa? Te la sei meritata.','Siediti, ti cucino qualcosa.','Prima le botte, poi la grigliata.']},
   zeta:{dist:120,pose:'vittoria',q:['Ciuff. Solo rete.','Partita chiusa. Docce.','Torna in panchina.']},
@@ -2277,8 +2290,9 @@ function render(){
   try{ drawScenic(); }catch(e){}
   try{ drawRuota(); }catch(e){}
   try{ for(const a of AUR) drawAura(ctx,a,true); drawAuraFlash(ctx); }catch(e){}
-  for(const p of P){ let dn=false; if(p.kind==='codice'){ try{ dn=drawCodiceGPT(p); }catch(e){} } if(!dn) drawProj(p); }
-  try{ drawCodiceBoom(); }catch(e){}
+  try{ drawRoseBack(); }catch(e){}
+  for(const p of P){ let dn=false; if(p.kind==='codice'){ try{ dn=drawCodiceGPT(p); }catch(e){} } if(p.kind==='rose'){ try{ dn=drawRoseGPT(p); }catch(e){} } if(!dn) drawProj(p); }
+  try{ drawCodiceBoom(); drawRoseFront(); }catch(e){}
   try{ ondaFajaCheck(); drawOndaFaja(); }catch(e){}
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
   if(G.f1) drawMaria(G.f1); if(G.f2) drawMaria(G.f2); if(G.f1) drawHoop(G.f1); if(G.f2) drawHoop(G.f2);
