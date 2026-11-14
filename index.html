@@ -1,4 +1,4 @@
-<!doctype html><html><head><!--/*OCCHIKO1*/--><!--/*OCCHIMAX1*/--><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><!--/*OCCHIPOSE1*/--><!--/*OCCHIKO1*/--><!--/*OCCHIMAX1*/--><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Lottatori di Strada</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1208,8 +1208,24 @@ function scarred(im,lv,key){ if(!lv||!im||!im.width) return im; let c=SCARC.get(
   if(K.includes('cerotto')){ const plaster=(x,y,L,an)=>{ g.save(); g.translate(x,y); g.rotate(an); g.fillStyle='#f2cfa0'; g.strokeStyle='#120d22'; g.lineWidth=Math.max(1,hh/90); g.beginPath(); g.rect(-L/2,-L*0.15,L,L*0.3); g.fill(); g.stroke(); g.fillStyle='#e3b682'; g.fillRect(-L*0.14,-L*0.13,L*0.28,L*0.26); g.fillStyle='#b98a5a'; for(const q of [-0.32,0.32]) g.fillRect(L*q-1,-1,2,2); g.restore(); };
     const L=Math.max(9,hh*0.14); plaster(hx+L*0.15,hy,L,0.6); plaster(hx+L*0.15,hy,L,-0.6); }
   c[lv]=cv2; return cv2; }
+/* occhi chiusi nelle pose a terra: centri degli occhi, raggio da coprire, occhiali (JJ) */
+const KOFIX={jj:{e:[[29,15],[36,9]],r:4.6,specs:1},marouges:{e:[[33,18.5],[39,10]],r:4.8}};
+function fixKo(SP,key){ SP.__kofix=1; const im=SP.ko, F=KOFIX[key]; const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,0,0);
+  let ID; try{ ID=g.getImageData(0,0,c.width,c.height); }catch(e){ return; } const D=ID.data, W=c.width;
+  const at=(x,y)=>(y*W+x)*4, skin=[0,0,0]; let n=0; // colore della pelle: media dei pixel chiari attorno agli occhi
+  for(const [ex,ey] of F.e) for(let y=Math.round(ey-7);y<=ey+7;y++) for(let x=Math.round(ex-7);x<=ex+7;x++){ if(x<0||y<0||x>=W||y>=c.height) continue; const i=at(x,y); const R=D[i],G2=D[i+1],B=D[i+2]; if(D[i+3]>200&&R>170&&G2>95&&B>55&&R>G2&&G2>B&&R-B>60){ skin[0]+=R; skin[1]+=G2; skin[2]+=B; n++; } }
+  if(!n) return; const sk=skin.map(v=>Math.round(v/n));
+  const put=(x,y,col)=>{ x=Math.round(x); y=Math.round(y); if(x<0||y<0||x>=W||y>=c.height) return; const i=at(x,y); if(D[i+3]<128) return; D[i]=col[0]; D[i+1]=col[1]; D[i+2]=col[2]; D[i+3]=255; };
+  for(const [ex,ey] of F.e) for(let y=Math.floor(ey-F.r);y<=ey+F.r;y++) for(let x=Math.floor(ex-F.r);x<=ex+F.r;x++) if((x-ex)*(x-ex)+(y-ey)*(y-ey)<=F.r*F.r) put(x,y,sk);
+  const ink=[58,28,20], dark=[18,13,34];
+  // testa sdraiata: l'occhio chiuso e' una linea quasi verticale, un po' curva, con le ciglia
+  for(const [ex,ey] of F.e){ for(let t=-2;t<=2;t++) put(ex+(Math.abs(t)===2?0:1),ey+t,ink); put(ex+2,ey-2,ink); }
+  if(F.specs){ for(const [ex,ey] of F.e){ for(const q of [0,0.7]) for(let a=0;a<32;a++){ const an=a/32*Math.PI*2; put(ex+Math.cos(an)*(3.3+q),ey+Math.sin(an)*(3.8+q),dark); } }
+    const [a,b]=F.e; for(let k=1;k<4;k++){ const t=k/4; put(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,dark); } }
+  g.putImageData(ID,0,0); c.complete=true; for(const p of ['ax','hip']) if(im[p]!==undefined) c[p]=im[p]; SP.ko=c; }
 function drawSprite(g,F,ox,oy,sc,SP){
   // ogni stato usa la sua posa; dove manca, la guardia deformata come prima
+  if(KOFIX[F.def.spriteKey]&&!SP.__kofix&&SP.ko&&SP.ko.complete&&SP.ko.width) fixKo(SP,F.def.spriteKey);
   const st=F.state, a=F.atk, d=F.def; let im=SP.guardia, dx=0, rot=0, sy=1, bob=0, koPose=false, flyKo=false;
   const loser=G&&(G.phase==='end'||G.phase==='gesto'||G.phase==='over')&&G.winner>=0&&(G.winner?G.f1:G.f2)===F;
   const early=a&&a.f<=a.m.s;
