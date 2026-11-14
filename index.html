@@ -457,6 +457,26 @@ function drawRoseBack(){ for(let i=ROSV.length-1;i>=0;i--){ const o=ROSV[i], a=G
   ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,o.x-im.width*o.s/2,GROUND+6-im.height*o.s,im.width*o.s,im.height*o.s); ctx.restore(); } }
 function drawRoseFront(){ for(let i=ROSV.length-1;i>=0;i--){ const o=ROSV[i], a=G.frame-o.b; if(o.k!=='boccio') continue; if(a>40||a<0){ ROSV.splice(i,1); continue; }
   const im=ROSX['boccio'+Math.min(2,(a/5)|0)]; if(!rosOk(im)) continue; const s=1.5; ctx.save(); ctx.imageSmoothingEnabled=false; if(a>30) ctx.globalAlpha=(40-a)/10; ctx.drawImage(im,o.x-im.width*s/2,o.y-im.height*s/2,im.width*s,im.height*s); ctx.restore(); } }
+/*BLASGPT1 - Blasfemia di Marouges: luce dal cielo e vecchio stupito sulla nuvola, grafica ChatGPT (15.11.2026) */
+const BLASL=[0,1,2].map(k=>{ const i=new Image(); i.src='img/fx/blas_luce'+k+'.png'; return i; });
+const BLASV=[1,2,3].map(k=>{ const i=new Image(); i.src='img/fx/blas_vecchio'+k+'.png'; return i; });
+function drawBlasGPT(back){ if(!G||!G.f1||!G.f2) return;
+  for(const f of [G.f1,G.f2]){ const a=f.atk; if(!a||a.type!=='sup'||!f.def.superRage) continue;
+    const m=a.m, t=a.f, s=m.s, end=s+m.a+m.r;
+    // luce dall'alto su di lei
+    if(t>=s-6){ const li=t<s+2?BLASL[0]:BLASL[1+(((t-s)>>2)&1)];
+      if(li.complete&&li.width){ const fin=Math.min(1,(t-s+7)/6), fout=Math.max(0,Math.min(1,(end-t)/10)), al=(back?0.95:0.28)*fin*fout;
+        if(al>0){ const sz=f.def.size||1, w=li.width*sz*1.1, h=li.height*1.0; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=al; ctx.imageSmoothingEnabled=false; ctx.drawImage(li,f.x-w/2,GROUND+6-h*0.93,w,h); ctx.restore(); } }
+      if(back&&t===s+1){ G.shake=Math.max(G.shake,14); } }
+    // il vecchio sulla nuvola si affaccia in un angolo in alto
+    const v0=s+2, v1=s+m.a+12; if(back||t<v0||t>v1) continue;
+    const im=t<v0+12?BLASV[0]:t<v1-16?BLASV[1]:BLASV[2]; if(!im.complete||!im.width) continue;
+    const right=f.x<W/2, k=0.82, w=im.width*k, h=im.height*k;
+    const inn=Math.min(1,(t-v0)/8), out=Math.min(1,(v1-t)/8), dy=(1-Math.min(inn,out))*-(h+20);
+    const x=right?W-w-14:14, y=62+dy;
+    ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,Math.min(inn,out)*1.5);
+    if(right) ctx.drawImage(im,x,y,w,h); else { ctx.translate(x+w,y); ctx.scale(-1,1); ctx.drawImage(im,0,0,w,h); }
+    ctx.restore(); } }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -2283,6 +2303,7 @@ function render(){
   for(const f of fs){ const s=1-(GROUND-f.y)/320; ctx.fillStyle='rgba(0,0,0,.38)'; ctx.beginPath(); ctx.ellipse(f.x,GROUND+3,44*s,9*s,0,0,7); ctx.fill(); }
   fs.sort((a,b)=>(a.atk?1:0)-(b.atk?1:0));
   try{ for(const a of AUR) drawAura(ctx,a,false); }catch(e){}
+  try{ drawBlasGPT(true); }catch(e){}
   for(const f of fs){
     if(f.atk&&f.atk.type==='sup'){ const gr=ctx.createRadialGradient(f.x,f.y-100,10,f.x,f.y-100,130); gr.addColorStop(0,f.def.accent); gr.addColorStop(1,'rgba(0,0,0,0)'); ctx.globalAlpha=.5; ctx.fillStyle=gr; ctx.fillRect(f.x-140,f.y-240,280,260); ctx.globalAlpha=1; }
     drawFighter(ctx,f,f.x,f.y,1);
@@ -2294,6 +2315,7 @@ function render(){
   for(const p of P){ let dn=false; if(p.kind==='codice'){ try{ dn=drawCodiceGPT(p); }catch(e){} } if(p.kind==='rose'){ try{ dn=drawRoseGPT(p); }catch(e){} } if(!dn) drawProj(p); }
   try{ drawCodiceBoom(); drawRoseFront(); }catch(e){}
   try{ ondaFajaCheck(); drawOndaFaja(); }catch(e){}
+  try{ drawBlasGPT(false); }catch(e){}
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
   if(G.f1) drawMaria(G.f1); if(G.f2) drawMaria(G.f2); if(G.f1) drawHoop(G.f1); if(G.f2) drawHoop(G.f2);
   if(G.f1) drawHusky(G.f1); if(G.f2) drawHusky(G.f2);
