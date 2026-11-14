@@ -1,4 +1,4 @@
-<!doctype html><html><head><!--/*OCCHIPOSE1*/--><!--/*OCCHIKO1*/--><!--/*OCCHIMAX1*/--><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><!--/*RITRATTIUGUALI1*/--><!--/*OCCHIPOSE1*/--><!--/*OCCHIKO1*/--><!--/*OCCHIMAX1*/--><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Lottatori di Strada</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1892,7 +1892,7 @@ function buildCards(){
     SELC[0]=mk(0); SELC[1]=mk(1); w.appendChild(SELC[0]); w.appendChild(root); w.appendChild(SELC[1]); }
   ROSTER.forEach((r,i)=>{
     const el=document.createElement('button'); el.type='button'; el.className='pcard'; el.setAttribute('aria-label',r.name);
-    const SP=SPRITES[r.spriteKey]||{}, R=(SP.ritratto&&SP.ritratto.src)||(SP.guardia&&SP.guardia.src)||'';
+    const SP=SPRITES[r.spriteKey]||{}, R=portraitOf(r.spriteKey)||(SP.ritratto&&SP.ritratto.src)||(SP.guardia&&SP.guardia.src)||'';
     el.innerHTML='<div class="badges"></div>'+(R?'<img alt="" src="'+R+'">':'<i></i>')+'<span class="cname">'+esc(r.name)+'</span>';
     el.addEventListener('click',()=>{ ac(); SFX.select(); choose(i); });
     root.appendChild(el); cards.push({el});
@@ -1911,7 +1911,18 @@ function refreshPicks(){
     c.el.querySelector('.badges').innerHTML=(sel.picks[0]===i?'<span class="chip p1">G1</span>':'')+(sel.picks[1]===i?'<span class="chip p2">'+lbl2+'</span>':''); });
   $('#pickHint').textContent=sel.turn===0?'Tocca un ritratto per il Giocatore 1':(sel.mode==='cpu'?'Ora scegli l\'avversario del computer':'Ora scegli il Giocatore 2');
 }
+/* ritratto uniforme per la griglia: testa e spalle ritagliate dalla guardia, stessa misura per tutti */
+const PORTC={};
+function portraitOf(key){ if(PORTC[key]) return PORTC[key]; const SP=SPRITES[key]; const im=SP&&SP.guardia; if(!im||!im.complete||!im.width) return null;
+  const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,0,0); let D; try{ D=g.getImageData(0,0,c.width,c.height).data; }catch(e){ return null; }
+  const W=c.width,H=c.height, A=(x,y)=>D[(y*W+x)*4+3]>40; let yT=H,yB=0; for(let y=0;y<H;y++) for(let x=0;x<W;x++) if(A(x,y)){ if(y<yT) yT=y; yB=y; }
+  const hh=yB-yT; let sx=0,n=0; for(let y=yT;y<yT+hh*0.14;y++) for(let x=0;x<W;x++) if(A(x,y)){ sx+=x; n++; } const cx=n?sx/n:W/2;
+  const ws=[]; for(let y=Math.round(yT+hh*0.05);y<yT+hh*0.13;y++){ let l=-1,r=-1; for(let x=0;x<W;x++) if(A(x,y)){ if(l<0) l=x; r=x; } if(l>=0) ws.push(r-l+1); } ws.sort((p,q)=>p-q);
+  const hw=ws.length?ws[ws.length>>1]:hh*0.16, side=Math.round(Math.max(hh*0.26,Math.min(hh*0.42,hw*2.05))), x0=Math.round(cx-side/2), y0=Math.round(yT-side*0.06); // la testa occupa sempre la stessa parte del riquadro
+  const o=document.createElement('canvas'); o.width=side*2; o.height=side*2; const q=o.getContext('2d'); q.imageSmoothingEnabled=false;
+  q.drawImage(im,x0,y0,side,side,0,0,side*2,side*2); return PORTC[key]=o.toDataURL(); }
 function drawCards(){
+  cards.forEach((c,i)=>{ if(c.pdone) return; const k=ROSTER[i]&&ROSTER[i].spriteKey, u=k&&portraitOf(k), im=c.el.querySelector('img'); if(u&&im){ im.src=u; c.pdone=1; } });
   for(let s=0;s<2;s++){ const cv=SELC[s]; if(!cv) continue; const r=ROSTER[sel.picks[s]]; if(!r) continue; const g=cv.getContext('2d');
     let F=SELF[s]; if(!F||F.def!==r){ F=SELF[s]={def:r,state:'idle',t:s*7,facing:1,flash:0,atk:null}; } F.facing=s?-1:1; F.t++;
     const col=s?'#ec3a52':'#3fd6ff', on=sel.turn===s;
