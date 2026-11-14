@@ -1,4 +1,4 @@
-<!doctype html><html><head><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Lottatori di Strada</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -149,7 +149,8 @@ body.coarse.sc-fight .topbar,body.coarse.sc-fight .legend{display:none}
 .roster{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));grid-template-rows:minmax(0,1fr);gap:12px;max-width:900px;width:100%;margin:0 auto}
 .card{padding:6px;gap:4px;align-items:center;min-height:0;color:var(--fg);font:inherit}
 .card canvas{flex:1;min-height:0;width:100%;height:auto;aspect-ratio:auto;object-fit:contain}
-.cname{font-family:var(--font-d);font-size:clamp(12px,2.2vw,18px);color:var(--gold);text-transform:uppercase}
+.cname{font-family:var(--font-d);font-size:clamp(9px,1.4vw,18px);color:var(--gold);text-transform:uppercase;white-space:nowrap;overflow:hidden;max-width:100%;letter-spacing:0}
+@media (max-height:520px){ .roster{gap:6px} .card{padding:3px;border-width:2px} .badges{top:6px;left:6px} .chip{font-size:10px;padding:1px 4px} }
 .pickbar{margin:4px 0 8px}
 .arenas{flex:1;min-height:0;grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:8px}
 .arena{aspect-ratio:auto;min-height:0}
@@ -354,7 +355,7 @@ PRESETS.splice(2,0,{base:'JJ',kind:'hoodie',suit:'#16131a',legs:'#1d1a22',accent
    bio:'Sorella di Marouges. Solo nero, occhiali spessi, rose tatuate sulle braccia. Cinica fuori, tenera di nascosto: se ti abbraccia, non è successo niente.'});
 PRESETS.push({base:'Frisbee',kind:'coat',suit:'#e8789e',legs:'#e8789e',accent:'#ff6fa8',tie:'#ffffff',top:'#f7a8c4',shoes:'#f2f2f2',skin:'#d9925f',hair:'#4a2a18',longHair:false,lashes:true,special:'Frisbee boomerang',superName:'Onda perfetta',proj:'frisbee',size:0.96,spriteKey:'frisbee',
    bio:'Ostetrica in divisa rosa. Frisbee, surf e danza. Lancia il disco che torna indietro, gira in piroetta e arriva sull\'onda.'});
-PRESETS.splice(3,0,{base:'Max',kind:'hoodie',suit:'#c0262f',legs:'#3b5d92',accent:'#ff5a2a',tie:'#ffc933',top:'#c0262f',shoes:'#f2f2f2',skin:'#e8b48e',hair:'#5a3420',special:'Lancio del cactus',superName:'Carica rossa',proj:'cactus',size:0.92,spriteKey:'max',
+PRESETS.splice(3,0,{base:'Max',kind:'hoodie',suit:'#c0262f',legs:'#3b5d92',accent:'#ff5a2a',tie:'#ffc933',top:'#c0262f',shoes:'#f2f2f2',skin:'#e8b48e',hair:'#5a3420',special:'Lancio del cactus',superName:'Carica rossa',proj:'cactus',size:0.98,spriteKey:'max',
    bio:'Ama le piante, il nuoto e il sol dell\'avvenire. Si arrabbia in un attimo e diventa incandescente: quando fuma, picchia più forte.'});
 PRESETS.splice(4,0,{base:'Cugi',kind:'hoodie',suit:'#1e2c5a',legs:'#1e2c5a',accent:'#ffc21a',tie:'#f4f1ea',top:'#1e2c5a',shoes:'#141414',skin:'#e8b48e',hair:'#2e1d14',special:'Rimessa in touche',superName:'Meta in tuffo',proj:'ovale',size:1.0,spriteKey:'cugi',
    bio:'Cugino di SDB. Tallonatore, prima linea: placca tutto quello che si muove. Ma davanti a una macchina fotografica diventa un fotomodello.'});
@@ -395,7 +396,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='marico')){ const mp=PRESETS.find(p=>p.spriteKey==='marico'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
   for(const r of ROSTER) if(r.spriteKey==='cugi'&&(r.name==='CUGI'||r.base==='CUGI')){ if(r.name==='CUGI') r.name='Cugi'; r.base='Cugi'; try{ save(); }catch(e){} } // nome corretto anche nei roster salvati
   if(!ROSTER.some(r=>r.spriteKey==='yoghi')){ const yp=PRESETS.find(p=>p.spriteKey==='yoghi'); if(yp){ ROSTER.push(fromPreset(yp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='yoghi') r.size=1.16; });
+  ROSTER.forEach(r=>{ if(r.spriteKey==='yoghi') r.size=1.16; if(r.spriteKey==='max') r.size=0.98; });
   if(!ROSTER.some(r=>r.spriteKey==='cugi')){ const cp=PRESETS.find(p=>p.spriteKey==='cugi'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
   if(!ROSTER.some(r=>r.spriteKey==='laura')){ const lp=PRESETS.find(p=>p.spriteKey==='laura'); if(lp){ ROSTER.push(fromPreset(lp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='laura'){ r.size=0.94; } });
@@ -1860,7 +1861,7 @@ function buildCards(){ // scheda essenziale: figura e nome, un tocco per sceglie
   root.style.setProperty('--n',ROSTER.length);
   ROSTER.forEach((r,i)=>{
     const el=document.createElement('button'); el.type='button'; el.className='card';
-    el.innerHTML='<div class="badges"></div><canvas width="'+160*DPR+'" height="'+190*DPR+'"></canvas><span class="cname">'+esc(r.name)+'</span>';
+    el.innerHTML='<div class="badges"></div><canvas width="'+112*DPR+'" height="'+190*DPR+'"></canvas><span class="cname">'+esc(r.name)+'</span>';
     el.addEventListener('click',()=>{ ac(); SFX.select(); choose(i); });
     root.appendChild(el);
     cards.push({el,g:el.querySelector('canvas').getContext('2d'),F:{def:r,state:'idle',t:(rnd()*100)|0,facing:1,flash:0,atk:null}});
@@ -1881,9 +1882,9 @@ function refreshPicks(){
 }
 function drawCards(){
   cards.forEach((c,i)=>{ const g=c.g; c.F.t++; c.F.state=sel.picks.includes(i)?'win':'idle';
-    g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,160,190);
-    g.fillStyle='rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(80,178,40,7,0,0,7); g.fill();
-    drawFighter(g,c.F,74,176,0.82); });
+    g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,112,190);
+    g.fillStyle='rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(56,178,36,7,0,0,7); g.fill();
+    drawFighter(g,c.F,53,176,0.8); });
 }
 document.querySelectorAll('input[name=mode]').forEach(r=>r.addEventListener('change',()=>{ sel.mode=r.value; $('#diffSeg').hidden=sel.mode!=='cpu'; document.querySelectorAll('input[name=diff]').forEach(d=>d.disabled=sel.mode!=='cpu'); refreshPicks(); }));
 document.querySelectorAll('input[name=diff]').forEach(r=>r.addEventListener('change',()=>{ sel.diff=r.value; }));
@@ -1963,7 +1964,8 @@ function buildLogo(){ LOGO=makeLogo(); const u=document.createElement('canvas');
 buildLogo(); if(document.fonts&&document.fonts.load) document.fonts.load('40px Bungee').then(buildLogo).catch(()=>{});
 const tcv=$('#tcv'), tctx=tcv.getContext('2d'); tcv.width=W*DPR; tcv.height=H*DPR;
 const TDEF=k=>ROSTER.find(r=>r.spriteKey===k)||fromPreset(PRESETS.find(p=>p.spriteKey===k));
-const TF=[{key:'stefano',x:230,facing:1},{key:'marouges',x:730,facing:-1}];
+const TF=[{key:'stefano',x:230,facing:1},{key:'marouges',x:730,facing:-1}]; const TFC={}; let TPC=null;
+function titlePairs(){ if(TPC) return TPC; const ks=ROSTER.map(r=>r.spriteKey).filter((k,i,a)=>k&&a.indexOf(k)===i&&SPRITES[k]&&SPRITES[k].guardia&&k!=='stefano'&&k!=='marouges'); const P=[['stefano','marouges']]; for(let i=0;i<ks.length;i+=2) P.push([ks[i],ks[i+1]||'marouges']); return TPC=P; }
 function titlePress(){ if(TT.go) return; ac(); TT.go=1; SFX.coin(); }
 function goMenu(){ TT.go=0; showScreen('select'); setStep(0); }
 function renderTitle(){
@@ -1975,8 +1977,9 @@ function renderTitle(){
   // raggi che girano dietro il logo
   g.save(); g.translate(W/2,170); g.rotate(t*0.004); for(let i=0;i<18;i++){ g.fillStyle=i%2?'rgba(255,201,51,.10)':'rgba(236,58,82,.10)'; g.beginPath(); g.moveTo(0,0); g.arc(0,0,700,i*Math.PI/9,(i+1)*Math.PI/9); g.closePath(); g.fill(); } g.restore();
   // lottatori in guardia, uno di fronte all'altro
-  for(const f of TF){ const F=f.F||(f.F={def:TDEF(f.key),state:'idle',t:(f.x|0),facing:f.facing,flash:0,atk:null}); F.t++;
-    g.fillStyle='rgba(0,0,0,.45)'; g.beginPath(); g.ellipse(f.x,488,58,11,0,0,7); g.fill(); drawFighter(g,F,f.x,486,1.25); }
+  { const TP=titlePairs(), PL=300, pi=(t/PL|0)%TP.length, u=t%PL, sl=(u<24&&t>=PL)?(24-u)/24:u>PL-24?(u-(PL-24))/24:0, e=sl*sl; // coppie a rotazione: prima SDB e Marouges
+    TP[pi].forEach((key,j)=>{ const x=(j?730:230)+(j?1:-1)*e*460, F=TFC[key]||(TFC[key]={def:TDEF(key),state:'idle',t:j*7,facing:1,flash:0,atk:null}); F.facing=j?-1:1; F.t++;
+      g.fillStyle='rgba(0,0,0,.45)'; g.beginPath(); g.ellipse(x,488,58,11,0,0,7); g.fill(); drawFighter(g,F,x,486,1.25); }); }
   // logo con piccolo rimbalzo d'ingresso
   if(LOGO){ const k2=Math.min(1,t/24), s=3*(k2<1?1.6-0.6*k2:1+Math.sin(t*0.05)*0.012), lw=LOGO.width*s, lh=LOGO.height*s;
     g.imageSmoothingEnabled=false; g.drawImage(LOGO,W/2-lw/2,160-lh/2+(1-k2)*-120,lw,lh); }
