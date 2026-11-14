@@ -437,6 +437,13 @@ function drawCodiceGPT(p){ const k='volo'+((G.frame>>2)%4), fr=CODX[k]; if(!codO
 function codiceBoomGPT(x,y){ CODB.push({x,y,b:G.frame}); G.shake=Math.max(G.shake,14); }
 function drawCodiceBoom(){ for(let i=CODB.length-1;i>=0;i--){ const o=CODB[i], a=G.frame-o.b; if(a>26||a<0){ CODB.splice(i,1); continue; } const im=CODX['boom'+Math.min(2,(a/9)|0)]; if(!codOk(im)) continue; const s=1.35;
   ctx.save(); ctx.imageSmoothingEnabled=false; if(a>18) ctx.globalAlpha=(26-a)/8; ctx.drawImage(im,o.x-im.width*s/2,o.y-im.height*s/2,im.width*s,im.height*s); ctx.restore(); } }
+/*ONDAFAJA1 - Ira di Poseidone: onda gigante disegnata con ChatGPT che attraversa tutto lo schermo (15.11.2026) */
+const ONDAF=new Image(); ONDAF.src='img/fx/onda_faja.png'; const ONDE=[];
+function ondaFajaCheck(){ for(const f of [G.f1,G.f2]){ const a=f&&f.atk; if(a&&a.type==='sup'&&f.def.spriteKey==='faja'&&a.f>a.m.s&&!a._onda){ a._onda=1; ONDE.push({f,dir:f.facing||1,b:G.frame}); G.shake=Math.max(G.shake,10); } } }
+function drawOndaFaja(){ if(!ONDAF.complete||!ONDAF.width) return; for(let i=ONDE.length-1;i>=0;i--){ const o=ONDE[i], t=G.frame-o.b, Wd=ONDAF.width*1.05, Hd=ONDAF.height*1.05, sp=20;
+  if(t>(W+Wd)/sp||t<0){ ONDE.splice(i,1); continue; } const L=o.dir>0?t*sp:W-t*sp;
+  G.shake=Math.max(G.shake,5); ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(L,GROUND+34+Math.sin(t*0.4)*4); ctx.scale(o.dir,1); ctx.drawImage(ONDAF,-Wd,-Hd,Wd,Hd); ctx.restore();
+  const F=o.f; if(F&&F.atk&&F.atk.type==='sup') drawFighter(ctx,F,F.x,F.y,1); } }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -2272,6 +2279,7 @@ function render(){
   try{ for(const a of AUR) drawAura(ctx,a,true); drawAuraFlash(ctx); }catch(e){}
   for(const p of P){ let dn=false; if(p.kind==='codice'){ try{ dn=drawCodiceGPT(p); }catch(e){} } if(!dn) drawProj(p); }
   try{ drawCodiceBoom(); }catch(e){}
+  try{ ondaFajaCheck(); drawOndaFaja(); }catch(e){}
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
   if(G.f1) drawMaria(G.f1); if(G.f2) drawMaria(G.f2); if(G.f1) drawHoop(G.f1); if(G.f2) drawHoop(G.f2);
   if(G.f1) drawHusky(G.f1); if(G.f2) drawHusky(G.f2);
