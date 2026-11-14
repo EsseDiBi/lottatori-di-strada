@@ -434,7 +434,7 @@ STATS.yoghi={forza:8,resistenza:6,velocita:4,agilita:6}; STATS_BASE['Yoghi']='yo
 MOVESET.carolluz={ranged:'valigia',sp:'campo',rName:'Valigia volante',sName:'Campo minato',uName:'Montante',supName:'Fagottino'};
 STATS.carolluz={forza:5,resistenza:5,velocita:7,agilita:7}; STATS_BASE['Carolluz']='carolluz';
 PROJ.valigia={l:'Valigia',v:9,d:10}; PROJLBL.valigia=PROJ.valigia.l;
-if(!PRESETS.some(p=>p.spriteKey==='carolluz')) PRESETS.push({base:'Carolluz',kind:'hoodie',suit:'#2f6fd6',legs:'#d8c49a',accent:'#2f6fd6',tie:'#111111',top:'#2f6fd6',shoes:'#f2f2f2',skin:'#e8a878',hair:'#4a2618',longHair:true,special:'Valigia volante',superName:'Fagottino',proj:'valigia',size:1.02,spriteKey:'carolluz',
+if(!PRESETS.some(p=>p.spriteKey==='carolluz')) PRESETS.push({base:'Carolluz',kind:'hoodie',suit:'#2f6fd6',legs:'#d8c49a',accent:'#2f6fd6',tie:'#111111',top:'#2f6fd6',shoes:'#f2f2f2',skin:'#e8a878',hair:'#4a2618',longHair:true,special:'Valigia volante',superName:'Fagottino',proj:'valigia',size:1.06,spriteKey:'carolluz',
    bio:'Ostetrica e viaggiatrice, migliore amica di Marouges. Un po\' rompiscatole: ha sempre ragione lei.'});
 MOVESET.morex={ranged:'ciabatta',sp:'aspira',rName:'Ciabatta volante',sName:'Aspirapolvere',uName:'Stacco da terra',supName:'Arriva Maria!'};
 STATS.morex={forza:7,resistenza:6,velocita:6,agilita:5}; STATS_BASE['Morex']='morex';
@@ -464,7 +464,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='yoghi')){ const yp=PRESETS.find(p=>p.spriteKey==='yoghi'); if(yp){ ROSTER.push(fromPreset(yp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='yoghi') r.size=1.18; if(r.spriteKey==='max') r.size=0.98; });
   if(!ROSTER.some(r=>r.spriteKey==='carolluz')){ const cp=PRESETS.find(p=>p.spriteKey==='carolluz'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='carolluz') r.size=1.02; });
+  ROSTER.forEach(r=>{ if(r.spriteKey==='carolluz') r.size=1.06; });
   if(!ROSTER.some(r=>r.spriteKey==='morex')){ const mp=PRESETS.find(p=>p.spriteKey==='morex'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='morex') r.size=1.02; });
   if(!ROSTER.some(r=>r.spriteKey==='cugi')){ const cp=PRESETS.find(p=>p.spriteKey==='cugi'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
