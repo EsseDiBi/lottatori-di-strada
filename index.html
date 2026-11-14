@@ -1158,7 +1158,7 @@ function updProj(){
 /* ---------- Effetti ---------- */
 /*AURA1*/const AURA={stefano:['#3fa8ff','#e6f6ff','fulmine'],marouges:['#ff4f9a','#ffd6ea','fiamma'],jj:['#7a3cff','#e2d2ff','fiamma'],frisbee:['#ffb21a','#fff3c4','vortice'],max:['#ff3b1f','#ffd27a','fiamma'],cugi:['#2fbf5a','#d9ffd9','vortice'],laura:['#22d3e6','#d8fbff','vortice'],marico:['#ff7a1a','#ffe6b0','fulmine'],carolluz:['#2f6fd6','#cfe0ff','vortice'],morex:['#ff5a5a','#ffe0e0','fulmine'],yoghi:['#ffd21a','#fff7c8','fiamma'],pm:['#d8d8ea','#ffffff','fulmine'],faja:['#18b4c8','#d6fbff','onda']};
 const AUR=[]; let AURFL=0;
-function auraStart(f){ if(({cugi:1,laura:1,zeta:1,chooby:1,yoghi:1,carolluz:1})[f.def.spriteKey]) return; const a=AURA[f.def.spriteKey]||['#ffc933','#fff6c8','fiamma']; AUR.push({f,c:a[0],l:a[1],k:a[2],t:0,life:46,x:f.x,y:f.y,dir:f.facing,s:f.def.size||1,seed:(rnd()*1000)|0}); G.shake=Math.max(G.shake,10); AURFL=0.32; spark(f.x,GROUND-6,a[0],12); spark(f.x,GROUND-6,a[1],8); }
+function auraStart(f){ if(({cugi:1,laura:1,zeta:1,chooby:1,yoghi:1,carolluz:1,marouges:1,frisbee:1,biscio:1,socciaman:1})[f.def.spriteKey]) return; const a=AURA[f.def.spriteKey]||['#ffc933','#fff6c8','fiamma']; AUR.push({f,c:a[0],l:a[1],k:a[2],t:0,life:46,x:f.x,y:f.y,dir:f.facing,s:f.def.size||1,seed:(rnd()*1000)|0}); G.shake=Math.max(G.shake,10); AURFL=0.32; spark(f.x,GROUND-6,a[0],12); spark(f.x,GROUND-6,a[1],8); }
 function updAura(){ for(let i=AUR.length-1;i>=0;i--){ const a=AUR[i]; a.t++; if(a.t<26&&a.f){ a.x=a.f.x; a.y=a.f.y; } if(a.t%3===0&&a.t<30) spark(a.x+(rnd()-.5)*70,a.y-rnd()*200*a.s,rnd()<.5?a.c:a.l,1); if(a.t>=a.life) AUR.splice(i,1); } AURFL*=0.82; if(AURFL<0.01) AURFL=0; }
 function auraH(n){ n=(n^61)^(n>>>16); n=n+(n<<3); n=n^(n>>>4); n=Math.imul(n,0x27d4eb2d); n=n^(n>>>15); return (n>>>0)/4294967295; }
 function drawAura(g,a,front){
@@ -2168,6 +2168,42 @@ function drawVS(){ // i due lottatori faccia a faccia, con la battuta d'ingresso
   ctx.restore();
   if(out>0){ ctx.fillStyle='rgba(10,7,22,'+Math.min(1,out)+')'; ctx.fillRect(0,0,W,H); }
 }
+/*RUOTA1 - terzo stile del montante: cono di luce dall'alto, ruota di raggi, particelle a tema (14.11.2026) */
+const RUOTA={marouges:['#ff4f9a','#ffd6ea','cuori'],frisbee:['#3fc8ff','#e6fbff','bolle'],biscio:['#8fd8ff','#ffffff','stelle'],socciaman:['#ffb21a','#fff0b0','stelle']}; const RUO=[];
+function ruoPart(x,y,c,k){ RUO.push({x,y,vx:(rnd()-.5)*2.4,vy:-1.5-rnd()*3.5,life:26,max:26,c,k,s:1+rnd()}); }
+function drawRuota(){ if(!G||!G.f1||!G.f2) return;
+  for(const f of [G.f1,G.f2]){ const a=f.atk, R=RUOTA[f.def.spriteKey];
+    if(!R||!a||a.type!=='rise'){ f._ruo=null; continue; }
+    const t=a.f, life=Math.max(0,1-t/30), sz=f.def.size||1, cx=f.x, cy=f.y-110*sz, c=R[0], l=R[1];
+    if(!f._ruo){ f._ruo={x:f.x,hit:false}; G.shake=Math.max(G.shake||0,8); for(let k=0;k<10;k++) ruoPart(cx+(rnd()-.5)*90,GROUND-10-rnd()*40,rnd()<.5?c:l,R[2]); }
+    if(a.hit&&!f._ruo.hit){ f._ruo.hit=true; G.shake=Math.max(G.shake||0,12); for(let k=0;k<18;k++){ const an=rnd()*6.283, v=3+rnd()*6; RUO.push({x:cx+f.facing*50,y:cy-30,vx:Math.cos(an)*v,vy:Math.sin(an)*v,life:24,max:24,c:rnd()<.5?c:l,k:R[2],s:1.2+rnd()}); } }
+    if(life<=0) continue;
+    if(t%2===0) for(let k=0;k<3;k++) ruoPart(cx+(rnd()-.5)*120*sz,cy+40-rnd()*160,rnd()<.5?c:l,R[2]);
+    ctx.save(); ctx.globalCompositeOperation='lighter';
+    // cono di luce dall'alto, stretto in cielo e largo a terra
+    const top=-30, wt=26+20*life, wb=(110+40*(1-life))*sz, g1=ctx.createLinearGradient(0,top,0,GROUND);
+    g1.addColorStop(0,'rgba(255,255,255,0)'); g1.addColorStop(0.45,c); g1.addColorStop(1,l);
+    ctx.globalAlpha=0.4*life; ctx.fillStyle=g1; ctx.beginPath(); ctx.moveTo(cx-wt,top); ctx.lineTo(cx+wt,top); ctx.lineTo(cx+wb,GROUND); ctx.lineTo(cx-wb,GROUND); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha=0.25*life; ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.moveTo(cx-wt*0.3,top); ctx.lineTo(cx+wt*0.3,top); ctx.lineTo(cx+wb*0.25,GROUND); ctx.lineTo(cx-wb*0.25,GROUND); ctx.closePath(); ctx.fill();
+    // ruota di luce: anello bianco, anello colorato e raggi che girano
+    const Rr=(64+t*1.6)*sz, rot=t*0.09;
+    ctx.globalAlpha=0.9*life; ctx.lineWidth=3; ctx.strokeStyle='#ffffff'; ctx.beginPath(); ctx.arc(cx,cy,Rr,0,7); ctx.stroke();
+    ctx.lineWidth=5; ctx.strokeStyle=c; ctx.beginPath(); ctx.arc(cx,cy,Rr-7,0,7); ctx.stroke();
+    ctx.lineWidth=2; ctx.strokeStyle=l;
+    for(let k=0;k<16;k++){ const an=rot+k*Math.PI/8, r0=Rr*(k%2?0.55:0.35); ctx.beginPath(); ctx.moveTo(cx+Math.cos(an)*r0,cy+Math.sin(an)*r0); ctx.lineTo(cx+Math.cos(an)*(Rr-10),cy+Math.sin(an)*(Rr-10)); ctx.stroke(); }
+    const rg=ctx.createRadialGradient(cx,cy,2,cx,cy,Rr*0.5); rg.addColorStop(0,'#ffffff'); rg.addColorStop(0.5,c); rg.addColorStop(1,'rgba(0,0,0,0)');
+    if(t<6){ ctx.globalAlpha=0.6*(1-t/6); ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(cx,cy,Rr*0.5,0,7); ctx.fill(); }
+    // anello a terra
+    if(t<20){ ctx.globalAlpha=(1-t/20); ctx.lineWidth=4; ctx.strokeStyle=c; ctx.beginPath(); ctx.ellipse(f._ruo.x,GROUND+2,30+t*7,(30+t*7)*0.2,0,0,7); ctx.stroke(); }
+    ctx.restore(); }
+  // particelle a tema, in pixel
+  ctx.save();
+  for(let i=RUO.length-1;i>=0;i--){ const p=RUO[i]; if(--p.life<=0){ RUO.splice(i,1); continue; } p.x+=p.vx; p.y+=p.vy; p.vx*=0.96; p.vy*=0.96;
+    const k=p.life/p.max, s=Math.round(3+2*p.s), x=Math.round(p.x/3)*3, y=Math.round(p.y/3)*3; ctx.globalAlpha=Math.min(1,k*1.6);
+    if(p.k==='cuori'){ ctx.fillStyle='#120d22'; ctx.fillRect(x-2*s,y-s,5*s,3*s); ctx.fillRect(x-s,y+2*s,3*s,s); ctx.fillStyle=p.c; ctx.fillRect(x-1.5*s,y-0.5*s,1.4*s,1.4*s); ctx.fillRect(x+0.1*s,y-0.5*s,1.4*s,1.4*s); ctx.fillRect(x-1.5*s,y+0.5*s,3*s,s); ctx.fillRect(x-0.5*s,y+1.5*s,s,0.8*s); }
+    else if(p.k==='bolle'){ ctx.strokeStyle=p.c; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(x,y,2*s,0,7); ctx.stroke(); ctx.fillStyle='#ffffff'; ctx.fillRect(x-s,y-s,s,s); }
+    else { ctx.fillStyle=p.c; ctx.fillRect(x-2*s,y,5*s,s); ctx.fillRect(x,y-2*s,s,5*s); ctx.fillStyle='#ffffff'; ctx.fillRect(x,y,s,s); } }
+  ctx.restore(); ctx.globalAlpha=1; }
 /*SCENICO1*/ const SCENO=[];
 function drawScenic(){ if(!G||!G.f1||!G.f2) return;
   for(const f of [G.f1,G.f2]){ const a=f.atk;
@@ -2218,6 +2254,7 @@ function render(){
     drawFighter(ctx,f,f.x,f.y,1);
   }
   try{ drawScenic(); }catch(e){}
+  try{ drawRuota(); }catch(e){}
   try{ for(const a of AUR) drawAura(ctx,a,true); drawAuraFlash(ctx); }catch(e){}
   for(const p of P) drawProj(p);
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
