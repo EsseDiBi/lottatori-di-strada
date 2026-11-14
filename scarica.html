@@ -16,6 +16,8 @@
   .go{background:#ffc933;color:#120d22;box-shadow:0 5px 0 #b8860b}
   .inst{background:#ec3a52;color:#fff;box-shadow:0 5px 0 #8f1d2c}
   .inst[hidden]{display:none}
+  .card[hidden]{display:none}
+  .sh{width:26px;height:26px;vertical-align:-7px}
   .ok{background:#1f3b2a;color:#9ff0b9;padding:12px;border-radius:12px;margin:10px 0}
   .ok[hidden]{display:none}
   .card{background:#1a1530;border:2px solid #2d2650;border-radius:16px;padding:16px 18px;margin:18px 0;text-align:left}
@@ -49,10 +51,24 @@
   <div class="card" id="cIos">
     <h2>iPhone e iPad (Safari)</h2>
     <ol>
-      <li>Apri questa pagina con Safari.</li>
-      <li>Tocca il tasto "Condividi" (il quadrato con la freccia verso l'alto).</li>
-      <li>Scorri e scegli "Aggiungi alla schermata Home", poi "Aggiungi".</li>
+      <li>Tocca il tasto "Condividi" <svg class="sh" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="#3fd6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>: il quadrato con la freccia verso l'alto, in basso al centro.</li>
+      <li>Scorri l'elenco verso il basso e scegli "Aggiungi alla schermata Home".</li>
+      <li>Tocca "Aggiungi" in alto a destra. L'icona compare fra le app.</li>
     </ol>
+  </div>
+
+  <div class="card" id="cIosChrome">
+    <h2>iPhone e iPad (Chrome)</h2>
+    <ol>
+      <li>Tocca il tasto "Condividi" <svg class="sh" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M6 11H5v10h14V11h-1" fill="none" stroke="#3fd6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>: il quadrato con la freccia verso l'alto, in alto a destra, dentro la barra dell'indirizzo.</li>
+      <li>Scorri l'elenco verso il basso e scegli "Aggiungi a schermata Home".</li>
+      <li>Tocca "Aggiungi". L'icona compare fra le app.</li>
+    </ol>
+    <p class="small">Se la voce non c'è, apri questa pagina con Safari e segui i passi del riquadro sopra.</p>
+  </div>
+
+  <div class="card" id="cIosNota" hidden>
+    <p style="margin:0">Su iPhone non esiste un tasto che installa da solo: lo vieta Apple. Si fa a mano con "Condividi", una volta sola. Poi il gioco si apre a tutto schermo e si aggiorna da solo.</p>
   </div>
 
   <div class="card">
@@ -71,7 +87,7 @@
   var ua=navigator.userAgent, ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), and=/Android/.test(ua);
   var standalone=(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))||navigator.standalone;
   var inst=document.getElementById('inst'), ok=document.getElementById('ok'), dp=null;
-  if(ios) document.getElementById('cIos').classList.add('here'); else if(and) document.getElementById('cAndroid').classList.add('here');
+  if(ios){ var cr=/CriOS/.test(ua); document.getElementById(cr?'cIosChrome':'cIos').classList.add('here'); document.getElementById('cIosNota').hidden=false; var m=document.querySelector('main'), n=document.getElementById('cIosNota'), k=document.getElementById(cr?'cIosChrome':'cIos'), an=document.getElementById('cAndroid'); m.insertBefore(k,an); m.insertBefore(n,k); } else if(and) document.getElementById('cAndroid').classList.add('here');
   if(standalone){ ok.hidden=false; }
   addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); dp=e; inst.hidden=false; });
   inst.addEventListener('click',function(){ if(!dp) return; dp.prompt(); dp.userChoice.then(function(){ dp=null; inst.hidden=true; }); });
