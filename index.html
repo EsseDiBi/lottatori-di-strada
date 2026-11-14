@@ -1625,7 +1625,7 @@ function drawSprite(g,F,ox,oy,sc,SP){
   else if(a&&!early&&(a.type==='punch'||a.type==='kick')){ g.scale(1.06,0.97); }
   g.imageSmoothingEnabled=false; if(F.flash>0) g.filter='brightness(1.9)'; else if(F.burn>0) g.filter='saturate(1.35) brightness('+(1.04+0.08*Math.sin(F.t*0.3)).toFixed(2)+') drop-shadow(0 0 '+(5+3*Math.sin(F.t*0.25)).toFixed(1)+'px #ff4a1a)';
   const x0=-im.width*S*(im.ax||0.5), y0=-im.height*S;
-  if(a&&a.type==='sup'&&d.surf&&!early){ const t=a.f, L=-150*sc, R=60*sc; g.save(); g.lineWidth=3; g.strokeStyle='#120d22'; // onda che spinge da dietro
+  if(a&&a.type==='sup'&&d.surf&&!early&&d.spriteKey!=='faja'){ const t=a.f, L=-150*sc, R=60*sc; g.save(); g.lineWidth=3; g.strokeStyle='#120d22'; // onda che spinge da dietro
     g.fillStyle='#2f7fd1'; g.beginPath(); g.moveTo(L-40*sc,8*sc); g.quadraticCurveTo(L,-150*sc,L+70*sc,-120*sc); g.quadraticCurveTo(L+20*sc,-100*sc,L+40*sc,-40*sc); g.quadraticCurveTo(L+90*sc,-10*sc,R,4*sc); g.lineTo(R,10*sc); g.lineTo(L-40*sc,10*sc); g.closePath(); g.fill(); g.stroke();
     g.fillStyle='#5ab4ff'; g.beginPath(); g.moveTo(L-20*sc,6*sc); g.quadraticCurveTo(L+10*sc,-90*sc,L+50*sc,-100*sc); g.quadraticCurveTo(L+20*sc,-60*sc,L+50*sc,-20*sc); g.quadraticCurveTo(L+80*sc,0,R-10*sc,6*sc); g.closePath(); g.fill();
     g.fillStyle='#e9fbff'; for(let k=0;k<7;k++){ const fx=L+(k*28+t*2)%170*sc, fy=-110*sc+Math.abs(Math.sin(k+t*0.2))*14*sc+k*14*sc; g.beginPath(); g.arc(fx,fy,(3+(k%3))*sc,0,7); g.fill(); } g.restore(); }
