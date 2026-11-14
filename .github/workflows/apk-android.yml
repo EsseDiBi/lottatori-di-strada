@@ -60,9 +60,17 @@ jobs:
           sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/; s/versionName \"1.0\"/versionName \"1.${{ github.run_number }}\"/" app/build.gradle
 
       - name: Firma fissa (cosi' gli aggiornamenti si installano sopra)
+        working-directory: build/android
         run: |
-          mkdir -p ~/.android
-          cp app-android/firma.keystore ~/.android/debug.keystore
+          cp ../../app-android/firma.keystore app/firma.keystore
+          python3 - <<'PY'
+          p='app/build.gradle'; s=open(p).read()
+          cfg="android {\n    signingConfigs {\n        debug {\n            storeFile file('firma.keystore')\n            storePassword 'android'\n            keyAlias 'androiddebugkey'\n            keyPassword 'android'\n        }\n    }\n"
+          assert s.count('android {')>=1
+          s=s.replace('android {',cfg,1)
+          open(p,'w').write(s)
+          PY
+          grep -n -A6 signingConfigs app/build.gradle
 
       - name: Costruisci l'APK
         working-directory: build/android

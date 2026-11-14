@@ -15,7 +15,8 @@
   .btn{display:block;width:100%;padding:16px;margin:10px 0;border:0;border-radius:14px;font-size:19px;font-weight:700;cursor:pointer;text-decoration:none}
   .go{background:#ffc933;color:#120d22;box-shadow:0 5px 0 #b8860b}
   .inst{background:#ec3a52;color:#fff;box-shadow:0 5px 0 #8f1d2c}
-  .inst[hidden]{display:none}
+  .inst[hidden],.apk[hidden]{display:none}
+ .apk{background:#3fd6ff;color:#120d22;box-shadow:0 5px 0 #1b7d99}
   .card[hidden]{display:none}
   .sh{width:26px;height:26px;vertical-align:-7px}
   .ok{background:#1f3b2a;color:#9ff0b9;padding:12px;border-radius:12px;margin:10px 0}
@@ -33,14 +34,27 @@
 <main>
   <img class="logo" src="icona-512.png" alt="Icona di Lottatori di Strada">
   <h1>LOTTATORI DI STRADA</h1>
-  <p class="sub">Il picchiaduro fra amici. Si installa dal browser, senza store.</p>
+  <p class="sub">Il picchiaduro fra amici. Si installa senza store e poi gira anche senza rete.</p>
 
   <a class="btn go" href="./">Gioca subito</a>
   <button class="btn inst" id="inst" type="button" hidden>Installa l'app</button>
   <div class="ok" id="ok" hidden>App installata. La trovi fra le tue app con l'icona del gioco.</div>
 
+  <a class="btn apk" id="apk" href="https://github.com/EsseDiBi/lottatori-di-strada/releases/download/android/lottatori-di-strada.apk">Scarica l'app Android (APK)</a>
+
+  <div class="card" id="cApk">
+    <h2>Android: app vera (file APK)</h2>
+    <ol>
+      <li>Tocca "Scarica l'app Android (APK)" qui sopra e conferma lo scaricamento.</li>
+      <li>Apri il file scaricato (dalla notifica o dalla cartella Download).</li>
+      <li>Il telefono chiede il permesso di installare app da questa fonte: tocca "Impostazioni", attiva "Consenti da questa fonte" e torna indietro.</li>
+      <li>Tocca "Installa". Il gioco si apre a tutto schermo, in orizzontale, anche senza rete.</li>
+    </ol>
+    <p class="small">Quando il gioco si aggiorna, riscarica il file e installalo sopra: i progressi restano. Se Play Protect avvisa che l'app non è conosciuta, tocca "Installa comunque": è il nostro gioco, non è nello store.</p>
+  </div>
+
   <div class="card" id="cAndroid">
-    <h2>Android (Chrome)</h2>
+    <h2>Android, in alternativa (Chrome)</h2>
     <ol>
       <li>Tocca "Installa l'app" qui sopra.</li>
       <li>Se il tasto non compare: menu con i tre puntini in alto a destra, poi "Installa app" o "Aggiungi a schermata Home".</li>
@@ -87,7 +101,7 @@
   var ua=navigator.userAgent, ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1), and=/Android/.test(ua);
   var standalone=(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))||navigator.standalone;
   var inst=document.getElementById('inst'), ok=document.getElementById('ok'), dp=null;
-  if(ios){ var cr=/CriOS/.test(ua); document.getElementById(cr?'cIosChrome':'cIos').classList.add('here'); document.getElementById('cIosNota').hidden=false; var m=document.querySelector('main'), n=document.getElementById('cIosNota'), k=document.getElementById(cr?'cIosChrome':'cIos'), an=document.getElementById('cAndroid'); m.insertBefore(k,an); m.insertBefore(n,k); } else if(and) document.getElementById('cAndroid').classList.add('here');
+  if(ios){ var cr=/CriOS/.test(ua); document.getElementById(cr?'cIosChrome':'cIos').classList.add('here'); document.getElementById('cIosNota').hidden=false; var m=document.querySelector('main'), n=document.getElementById('cIosNota'), k=document.getElementById(cr?'cIosChrome':'cIos'), an=document.getElementById('cAndroid'); m.insertBefore(k,an); m.insertBefore(n,k); document.getElementById('apk').hidden=true; document.getElementById('cApk').hidden=true; } else if(and) document.getElementById('cApk').classList.add('here');
   if(standalone){ ok.hidden=false; }
   addEventListener('beforeinstallprompt',function(e){ e.preventDefault(); dp=e; inst.hidden=false; });
   inst.addEventListener('click',function(){ if(!dp) return; dp.prompt(); dp.userChoice.then(function(){ dp=null; inst.hidden=true; }); });
