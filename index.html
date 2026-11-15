@@ -1381,8 +1381,8 @@ function checkHits(a,d){
     if(at.f>m.s&&at.f<=m.s+m.a&&at.f-at.last>=10&&at.hits<3){
       const box={x0:a.facing===1?a.x:a.x-110,x1:a.facing===1?a.x+110:a.x,y0:a.y-120,y1:a.y-30};
       if(ov(box,hurt(d))){ at.last=at.f; at.hits++; const fin=at.hits===3; hit(a,d,(fin?7:4)-(a.def.hot?1.5:0),fin?11:3,fin?30:16,{heavy:fin,launch:fin,y:a.y-80});
-        if(d.state==='hit') floatText(a.def.spriteKey==='laura'?'ZOOM!':'SPLASH!',d.x,d.y-200-at.hits*12,a.def.spriteKey==='laura'?'#ffffff':'#5ab4ff',fin?24:19);
-        for(let k=0;k<10;k++) FX.push({x:d.x,y:d.y-90,vx:(rnd()-.5)*9,vy:-rnd()*7,life:22,c:k%2?'#bfefff':'#5ab4ff'}); }
+        if(d.state==='hit'&&a.def.spriteKey!=='biscio') floatText(a.def.spriteKey==='laura'?'ZOOM!':'SPLASH!',d.x,d.y-200-at.hits*12,a.def.spriteKey==='laura'?'#ffffff':'#5ab4ff',fin?24:19);
+        if(a.def.spriteKey!=='biscio') for(let k=0;k<10;k++) FX.push({x:d.x,y:d.y-90,vx:(rnd()-.5)*9,vy:-rnd()*7,life:22,c:k%2?'#bfefff':'#5ab4ff'}); }
     } return; }
   if(at.type==='piroetta'){
     if(at.f>m.s&&at.f<=m.s+m.a&&at.f-at.last>=10&&at.hits<3){
@@ -1501,7 +1501,7 @@ function updProj(){
       if(p.kind==='codice'){ try{ codiceBoomGPT(p.x,p.y); }catch(e){} } if(p.kind==='codice'&&opp.state==='hit') floatText('SBAM!',opp.x,opp.y-200,'#ffffff',22);
       if(p.kind==='cat'&&opp.state==='hit'){ floatText('MIAO!',opp.x,opp.y-200,'#ffffff',22); if(p.g){ G.shake=Math.max(G.shake,8); for(let k=0;k<6;k++) FX.push({x:p.x,y:p.y,vx:(rnd()-.5)*9,vy:(rnd()-.5)*9,life:14,c:'#ffffff'}); } } // scoppio solo sull'impatto
       if(stunK&&opp.state==='hit'){ opp.dizzy=true; } if(p.fan){ p.mode='back'; p.t=0; p.g=0; continue; } P.splice(i,1); continue; }
-    for(let j=P.length-1;j>=0;j--){ const q=P[j]; if(q!==p&&q.o!==p.o&&!p.g&&!q.g&&!p.trap&&!q.trap&&!q.noHit&&!p.fan&&!q.fan&&Math.abs(q.x-p.x)<34){ spark((p.x+q.x)/2,p.y,'#ffffff',14); floatText('SCONTRO!',(p.x+q.x)/2,p.y-50,'#ffffff',15); P.splice(Math.max(i,j),1); P.splice(Math.min(i,j),1); i=P.length; break; } }
+    for(let j=P.length-1;j>=0;j--){ const q=P[j]; if(q!==p&&q.o!==p.o&&!p.g&&!q.g&&!p.trap&&!q.trap&&!q.noHit&&!p.fan&&!q.fan&&Math.abs(q.x-p.x)<34){ /*SPERMA2*/ if(p.kind==='sperma'||q.kind==='sperma'){ if(p.kind==='sperma'&&q.kind==='sperma'){ spark((p.x+q.x)/2,p.y,'#ffffff',14); P.splice(Math.max(i,j),1); P.splice(Math.min(i,j),1); i=P.length; break; } const loser=p.kind==='sperma'?j:i; spark(P[loser].x,P[loser].y,'#ffffff',10); P.splice(loser,1); if(loser===i){ i=P.length; break; } if(j<i) i--; continue; } spark((p.x+q.x)/2,p.y,'#ffffff',14); floatText('SCONTRO!',(p.x+q.x)/2,p.y-50,'#ffffff',15); P.splice(Math.max(i,j),1); P.splice(Math.min(i,j),1); i=P.length; break; } }
   }
 }
 
