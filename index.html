@@ -1873,7 +1873,7 @@ function drawSprite(g,F,ox,oy,sc,SP){
   if(d.hot&&F.burn>0&&st!=='ko'&&st!=='down'&&!(F.gp&&F.gp.indexOf('maxc_')===0)){ // testa in fiamme quando si arrabbia
     let pk=null; for(const k in SP) if(SP[k]===im) pk=k; const HH=HEADS[d.spriteKey]||{}, hd=pk in HH?HH[pk]:[im.width*0.55,8,22]; if(hd){
     const hx=x0+hd[0]*S, hy=y0+hd[1]*S, hw=(hd[2]||22)*S*1.15, t=F.t, fade=Math.min(1,F.burn/40);
-    g.globalAlpha=fade; const fc=fuocoGPT(g,hx,hy,hw,t,pk)?null:hairFire(im,hd,t); if(fc){ g.imageSmoothingEnabled=false; g.drawImage(fc,x0,y0-HFM*S,fc.width*S,fc.height*S); }
+    g.globalAlpha=fade; const fc=hairFire(im,hd,t); if(fc){ g.imageSmoothingEnabled=false; g.drawImage(fc,x0,y0-HFM*S,fc.width*S,fc.height*S); }
     if(rnd()<0.3) FX.push({x:F.x+(rnd()-.5)*20,y:F.y-200*(d.size||1),vx:(rnd()-.5)*2,vy:-2-rnd()*2,life:18,c:rnd()<.5?'#ff9a1f':'#ffe14d'});
     g.globalAlpha=1; } }
   if(false){ // bandiera rossa al vento: tolta il 14.11.2026 (ordine dell'Avvocato)
