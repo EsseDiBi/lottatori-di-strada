@@ -531,7 +531,7 @@ function gok(im){ return im&&im.complete&&im.width; }
 function drawGattiBack(){ for(let i=GTE.length-1;i>=0;i--){ const e=GTE[i], t=G.frame-e.b; if(t>96||t<0){ GTE.splice(i,1); continue; }
   const fin=Math.min(1,t/8), fout=Math.min(1,(96-t)/14), al=fin*fout, c=GTX.cerchio;
   // spiriti giganti alle spalle di SDB
-  const sp=[[GTX.spirito_bianco,-1,4],[GTX.spirito_marrone,1,10]];
+  const sp=[]; // spiriti giganti tolti su indicazione dell'Avvocato (01:27)
   for(const [im,side,d0] of sp){ if(!gok(im)) continue; const k=Math.max(0,Math.min(1,(t-d0)/14)), h=im.height*(0.8+0.2*k), w=im.width*(0.8+0.2*k);
     if(k<=0) continue; const x=e.x-e.dir*60+side*70, y=GROUND-40-(1-k)*-60;
     ctx.save(); ctx.globalAlpha=0.8*al*k; ctx.imageSmoothingEnabled=false; ctx.translate(x,y); ctx.scale(e.dir,1); ctx.drawImage(im,-w/2,-h,w,h); ctx.restore(); }
