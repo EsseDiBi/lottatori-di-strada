@@ -765,6 +765,12 @@ function dizzyGPT(g,cx,hy,t){ if(!fx2Ok('stordito')) return false; const im=FX2.
 function projFx2(p,s){ let k=null; if(p.kind==='sbuff') k=p.bassi?'bassi':'sbuffo'; else if(p.kind==='cuss') k='censura'; if(!k||!fx2Ok(k)) return false; const im=FX2[k];
   let sc=1; if(k==='sbuffo') sc=0.9+(24-(p.life||0))*0.03; else if(k==='bassi') sc=0.8+(32-(p.life||0))*0.025; else sc=p.big?1.25:0.9;
   const w=im.width*sc, h=im.height*sc; ctx.save(); ctx.imageSmoothingEnabled=false; if(k==='censura') ctx.rotate(Math.sin(p.r*3)*0.15); ctx.globalAlpha=k==='censura'?1:Math.max(.35,(p.life||0)/(k==='bassi'?32:24)); ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); return true; }
+/*TROLLEY1 - Biscio (15.11.2026, scelta dell'Avvocato delle 03:03): la speciale "Bomba in piscina" diventa "Trolley rotante": si carica col trolley, gira su se stesso come un lanciatore del martello avanzando, l'ultimo colpo sbatte il trolley con gli adesivi. Pose disegnate con ChatGPT (img/biscio/trol_*). Danni e tempi invariati (4+4+7). */
+if(SPRITES.biscio){ const S=SPRITES.biscio; [['trol_carica',0.6],['trol_gira1',0.36],['trol_gira2',0.56],['trol_colpo',0.32]].forEach(([k,ax])=>{ const im=new Image(); im.src='img/biscio/'+k+'.png'; im.ax=ax; S[k]=im; }); }
+function trolStep(f){ if(!f||f.def.spriteKey!=='biscio') return; const a=f.atk, SP=SPRITES.biscio;
+  if(a&&a.type==='nuoto'){ const m=a.m; let p; if(a.f<=m.s) p='trol_carica'; else if(a.hits>=3||a.f>m.s+m.a) p='trol_colpo'; else p=(((a.f-m.s)>>2)&1)?'trol_gira2':'trol_gira1';
+    if(SP&&SP[p]&&SP[p].complete&&SP[p].width) f.gp=p; }
+  else if(f.gp&&f.gp.indexOf('trol_')===0) f.gp=null; }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -850,7 +856,7 @@ STATS.zeta={forza:5,resistenza:5,velocita:6,agilita:8}; STATS_BASE['Zeta']='zeta
 PROJ.pallone={l:'Pallone',v:9,d:9}; PROJLBL.pallone=PROJ.pallone.l;
 MOVESET.yoghi={ranged:'golf',sp:'criceto',rName:'Drive',sName:'Beneficenza',uName:'Swing',supName:'Criceto mannaro'};
 PROJ.sperma={l:'Onda di spermatozoi',v:9,d:10}; PROJLBL.sperma=PROJ.sperma.l;
-MOVESET.biscio={ranged:'sperma',sp:'nuoto',rName:'Onda di spermatozoi',sName:'Bomba in piscina',uName:'Montante da spiaggia',supName:'Esodo estivo'};
+MOVESET.biscio={ranged:'sperma',sp:'nuoto',rName:'Onda di spermatozoi',sName:'Trolley rotante',uName:'Montante da spiaggia',supName:'Esodo estivo'};
 STATS.biscio={forza:5,resistenza:7,velocita:6,agilita:6}; STATS_BASE['Biscio']='biscio';
 STATS.yoghi={forza:8,resistenza:6,velocita:4,agilita:6}; STATS_BASE['Yoghi']='yoghi';
 MOVESET.carolluz={ranged:'valigia',sp:'campo',rName:'Valigia volante',sName:'Campo minato',uName:'Montante',supName:'Fagottino'};
@@ -1706,7 +1712,7 @@ function step(){
   updFighter(G.f1,G.f2,i1); updFighter(G.f2,G.f1,i2);
   try{ zetaDive(G.f1,G.f2); zetaDive(G.f2,G.f1); }catch(e){}
   try{ maxCometa(G.f1,G.f2); maxCometa(G.f2,G.f1); biscioEsodo(G.f1,G.f2); biscioEsodo(G.f2,G.f1); }catch(e){}
-  try{ gattiStep(G.f1); gattiStep(G.f2); evocaStep(G.f1); evocaStep(G.f2); grillStep(G.f1); grillStep(G.f2); beneStep(G.f1,G.f2); beneStep(G.f2,G.f1); fagoStep(G.f1); fagoStep(G.f2); metaStep(G.f1); metaStep(G.f2); direttaStep(G.f1); direttaStep(G.f2); ondaStep(G.f1); ondaStep(G.f2); tarStep(G.f1); tarStep(G.f2); }catch(e){}
+  try{ gattiStep(G.f1); gattiStep(G.f2); evocaStep(G.f1); evocaStep(G.f2); grillStep(G.f1); grillStep(G.f2); beneStep(G.f1,G.f2); beneStep(G.f2,G.f1); fagoStep(G.f1); fagoStep(G.f2); metaStep(G.f1); metaStep(G.f2); direttaStep(G.f1); direttaStep(G.f2); ondaStep(G.f1); ondaStep(G.f2); tarStep(G.f1); tarStep(G.f2); trolStep(G.f1); trolStep(G.f2); }catch(e){}
   separate(G.f1,G.f2); checkHits(G.f1,G.f2); checkHits(G.f2,G.f1); updProj();
   for(const f of [G.f1,G.f2]) if(f.dhp>f.hp) f.dhp=Math.max(f.hp,f.dhp-0.6);
   if(G.phase==='fight'){
