@@ -186,6 +186,18 @@ body.coarse.sc-fight .topbar,body.coarse.sc-fight .legend{display:none}
   .bigbtn{font-size:16px;padding:6px 16px} .btn{padding:5px 10px;font-size:11px} .mtile{padding:10px 8px} .mtile b{font-size:18px} .mtile span{font-size:11px}
   .seg label{padding:5px 10px;font-size:13px} .seg legend{margin-bottom:2px} .opts{margin:8px 0 0} .modes{margin:4px auto} .pickbar .hint{font-size:12px} .arena span{font-size:11px;padding:3px 6px} .navrow{position:static;padding:0;margin-top:6px} }
 /*CROCE1*/ .stick{left:calc(1% + env(safe-area-inset-left,0px));bottom:2%;width:19%;max-width:136px;background:none;border:0;border-radius:0} .stick #knob{display:none} .dpad{width:78%;height:78%;margin:11%;display:block;opacity:.9} .dpad .arm{fill:rgba(255,255,255,.10);stroke:rgba(255,255,255,.48);stroke-width:1.8} .dpad .mid{fill:rgba(255,255,255,.07);stroke:none} .dpad .arm.on{fill:rgba(255,201,51,.45);stroke:rgba(255,201,51,.8)} .dpad .tri{fill:rgba(255,255,255,.5);pointer-events:none}
+/*TASTI2*/ body.coarse.sc-fight #scrFight .stage,body.coarse.sc-title #scrTitle .stage{width:min(100vw,200vh,200dvh);height:min(100vh,100dvh,56.25vw);aspect-ratio:auto}
+body.coarse.sc-fight #scrFight .stage{overflow:visible}
+body.coarse .stick{left:calc(1.5% + env(safe-area-inset-left,0px));bottom:3%;width:25%;max-width:190px}
+body.coarse .stick::before{content:"";position:absolute;inset:-70% -75% -30% -40%}
+body.coarse .dpad{position:relative;width:92%;height:92%;margin:4%;opacity:.95}
+body.coarse .dpad .arm{stroke-width:2.2}
+body.coarse .acts{right:calc(1.5% + env(safe-area-inset-right,0px));bottom:5%;width:28%;max-width:250px}
+body.coarse .acts .bp,body.coarse .acts .bk{width:47%;font-size:clamp(18px,3.2vw,28px);border-width:3px}
+body.coarse .acts .bp{background:rgba(63,214,255,.38)} body.coarse .acts .bk{background:rgba(236,58,82,.4)}
+body.coarse .acts button::before{content:"";position:absolute;inset:-18%;border-radius:50%}
+body.coarse .acts button,body.coarse .stick{-webkit-tap-highlight-color:transparent;outline:none}
+body.coarse .acts .bx{width:44%}
 </style>
 
 <div class="wrap">
