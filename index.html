@@ -495,6 +495,14 @@ function zetaDive(f,o){ const a=f.atk, on=a&&a.type==='sup'&&f.def.spriteKey==='
 function drawZetaBoom(){ for(let i=ZBOOM.length-1;i>=0;i--){ const b=ZBOOM[i]; b.t++; if(b.t>30){ ZBOOM.splice(i,1); continue; }
   const im=ZPOLV; if(!im.complete||!im.width) continue; const k=0.7+Math.min(1,b.t/6)*0.45+b.t*0.006, w=im.width*k, h=im.height*k;
   ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=b.t<22?1:(30-b.t)/8; ctx.drawImage(im,b.x-w/2,GROUND+14-h,w,h); ctx.restore(); } }
+/*SPERMAGPT1 - Onda di spermatozoi di Biscio con grafica ChatGPT (15.11.2026): sciame buffo in 4 fotogrammi e schizzo d'impatto in 3 */
+const SPX={}; ['volo0','volo1','volo2','volo3','schizzo0','schizzo1','schizzo2'].forEach(k=>{ const im=new Image(); im.src='img/fx/sperma_'+k+'.png'; SPX[k]=im; }); const SPB=[];
+function drawSpermaGPT(p){ if(p._t===undefined) p._t=0; p._t++; const n=p._t<4?0:p._t<8?1:2+((p._t>>2)&1), im=SPX['volo'+n]; if(!im||!im.complete||!im.width) return false;
+  const d=Math.sign(p.vx)||1, sc=1.25, bob=Math.sin(p._t*0.5)*2; ctx.save(); ctx.translate(p.x,p.y+bob); ctx.scale(d,1); ctx.imageSmoothingEnabled=false;
+  ctx.drawImage(im,-im.width*sc*0.62,-im.height*sc/2,im.width*sc,im.height*sc); ctx.restore(); return true; }
+function spermaBoom(x,y){ SPB.push({x,y,b:G.frame}); }
+function drawSpermaBoom(){ for(let i=SPB.length-1;i>=0;i--){ const o=SPB[i], a=G.frame-o.b; if(a>27||a<0){ SPB.splice(i,1); continue; } const im=SPX['schizzo'+Math.min(2,(a/6)|0)]; if(!im||!im.complete||!im.width) continue; const s=1.3;
+  ctx.save(); ctx.imageSmoothingEnabled=false; if(a>19) ctx.globalAlpha=(27-a)/8; ctx.drawImage(im,o.x-im.width*s/2,o.y-im.height*s*0.75,im.width*s,im.height*s); ctx.restore(); } }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -1214,7 +1222,7 @@ function updProj(){
       if(p.kind==='cuss'&&p.big&&opp.state==='hit') floatText('CENSURATO!',opp.x,opp.y-210,'#ffffff',22);
       if(p.kind==='pallone'&&opp.state==='hit') floatText('CIUFF!',opp.x,opp.y-205,'#ffc933',22);
       if(p.kind==='golf'&&opp.state==='hit') floatText('FORE!',opp.x,opp.y-205,'#ffffff',22);
-      if(p.kind==='sperma'&&opp.state==='hit'){ floatText('PAPÀÀÀ!',opp.x,opp.y-210,'#ffffff',26,60); G.shake=Math.max(G.shake,8); for(let k2=0;k2<16;k2++) FX.push({x:opp.x,y:opp.y-120,vx:(rnd()-.5)*11,vy:(rnd()-.5)*11,life:18,c:k2%2?'#ffffff':'#9fe7ff'}); }
+      if(p.kind==='sperma'){ try{ spermaBoom(opp.x,opp.y-100); }catch(e){} } if(p.kind==='sperma'&&opp.state==='hit'){ floatText('PAPÀÀÀ!',opp.x,opp.y-210,'#ffffff',26,60); G.shake=Math.max(G.shake,8); for(let k2=0;k2<16;k2++) FX.push({x:opp.x,y:opp.y-120,vx:(rnd()-.5)*11,vy:(rnd()-.5)*11,life:18,c:k2%2?'#ffffff':'#9fe7ff'}); }
       if(p.kind==='ciabatta'&&opp.state==='hit') floatText('FLOP!',opp.x,opp.y-205,'#ffffff',22);
       if(p.kind==='remora'&&opp.state==='hit'){ floatText('SCIAC!',opp.x,opp.y-205,'#18b4c8',22); opp.remT=120; } // la remora si attacca: 2 secondi più lento
       if(p.kind==='vinile'&&opp.state==='hit') floatText('SCRATCH!',opp.x,opp.y-205,'#ffffff',22);
@@ -2332,11 +2340,11 @@ function render(){
   try{ drawRuota(); }catch(e){}
   try{ for(const a of AUR) drawAura(ctx,a,true); drawAuraFlash(ctx); }catch(e){}
   try{ drawRoseBack(); }catch(e){}
-  for(const p of P){ let dn=false; if(p.kind==='codice'){ try{ dn=drawCodiceGPT(p); }catch(e){} } if(p.kind==='rose'){ try{ dn=drawRoseGPT(p); }catch(e){} } if(!dn) drawProj(p); }
+  for(const p of P){ let dn=false; if(p.kind==='codice'){ try{ dn=drawCodiceGPT(p); }catch(e){} } if(p.kind==='rose'){ try{ dn=drawRoseGPT(p); }catch(e){} } if(p.kind==='sperma'){ try{ dn=drawSpermaGPT(p); }catch(e){} } if(!dn) drawProj(p); }
   try{ drawCodiceBoom(); drawRoseFront(); }catch(e){}
   try{ ondaFajaCheck(); drawOndaFaja(); }catch(e){}
   try{ drawBlasGPT(false); }catch(e){}
-  try{ drawZetaBoom(); }catch(e){}
+  try{ drawZetaBoom(); drawSpermaBoom(); }catch(e){}
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
   if(G.f1) drawMaria(G.f1); if(G.f2) drawMaria(G.f2); if(G.f1) drawHoop(G.f1); if(G.f2) drawHoop(G.f2);
   if(G.f1) drawHusky(G.f1); if(G.f2) drawHusky(G.f2);
