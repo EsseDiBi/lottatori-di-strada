@@ -1788,9 +1788,15 @@ function drawFighter(g,F,ox,oy,sc){
 }
 function catImg(p){ const G2=SPRITES.gatti||{}, n=p.slot===0?'mocambo':'boogie', fr=((p.r*1.4|0)%2)+1;
   const k=p.mode==='off'?(p.t<12?n+'_occhiali':n+'_pronta'):n+'_corsa'+fr; const im=G2[k]||G2[(p.brown?'marrone':'bianco')+fr]; return im&&im.complete&&im.width?im:null; }
+/*AURAGATTI1 - aura colorata ChatGPT su Boogie (azzurra) e Mocambo (arancione) quando corrono e saltano all'attacco (15.11.2026) */
+const AGX={}; ['az0','az1','or0','or1'].forEach(k=>{ const im=new Image(); im.src='img/fx/aura_gatto_'+k+'.png'; AGX[k]=im; });
+function drawCatAura(p,w,h){ if(p.mode!=='run'&&p.mode!=='leap') return; const im=AGX[(p.brown?'or':'az')+((p.t>>2)&1)]; if(!im||!im.complete||!im.width) return;
+  const W2=w*2.3, H2=W2*im.height/im.width, s=p.dir||1, cy=p.mode==='leap'?p.y:p.y-h/2;
+  ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.globalAlpha=0.95; ctx.imageSmoothingEnabled=false; ctx.translate(p.x,cy); ctx.scale(s,1); if(p.mode==='leap') ctx.rotate(Math.max(-0.5,Math.min(0.5,p.vy*0.05))); ctx.drawImage(im,-W2*0.68,-H2/2,W2,H2); ctx.restore(); }
 function drawFanCat(p){ const im=catImg(p); if(!im) return; ctx.imageSmoothingEnabled=false;
   const h=p.mode==='off'?72:80, w=im.width*h/im.height, s=p.dir||1;
   if(p.mode!=='off'){ ctx.globalAlpha=0.3; ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(p.x,GROUND-2,w*0.35,6,0,0,7); ctx.fill(); ctx.globalAlpha=1; }
+  try{ drawCatAura(p,w,h); }catch(e){}
   ctx.save(); ctx.translate(p.x,p.y); ctx.scale(s,1);
   if(p.mode==='leap'){ ctx.rotate(Math.max(-0.5,Math.min(0.5,p.vy*0.05))); ctx.drawImage(im,-w/2,-h/2,w,h); } else ctx.drawImage(im,-w/2,-h,w,h);
   ctx.restore(); }
