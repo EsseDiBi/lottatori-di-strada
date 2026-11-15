@@ -396,7 +396,8 @@ function stepSocc(f,o){
   else if(A.mode==='sit'){ A.st++; const tx=Math.max(30,Math.min(W-30,f.x-f.facing*85)), dx=tx-A.x; if(Math.abs(dx)>14){ A.dir=dx>0?1:-1; A.x+=A.dir*Math.min(9,Math.abs(dx)); A.walk=1; } else { A.walk=0; A.dir=f.facing; } if(A.st>150) f.araldo=null; } }
 function drawImgAt(im,x,y,S,dir){ if(!im||!im.complete||!im.width) return; ctx.save(); ctx.translate(x,y); ctx.scale(dir,1); ctx.imageSmoothingEnabled=false; const ax=(im.ax||0.5)*im.width*S; ctx.drawImage(im,-ax,-im.height*S,im.width*S,im.height*S); ctx.restore(); }
 function drawSocc(F){ if(!F||!F.def||F.def.spriteKey!=='socciaman') return; const SP=SPRITES.socciaman; if(!SP||!SP.guardia||!SP.guardia.height) return; const S=(196/SP.guardia.height)*(F.def.size||1);
-  if(F.casc){ const c=F.casc, k=Math.min(1,c.t/8)*Math.min(1,(44-c.t)/10), fwd=c.fwd, cx=F.x+fwd*120, cy=F.y-70;
+  if(F.casc&&cascGPT(F)){}
+  else if(F.casc){ const c=F.casc, k=Math.min(1,c.t/8)*Math.min(1,(44-c.t)/10), fwd=c.fwd, cx=F.x+fwd*120, cy=F.y-70;
     ctx.save(); ctx.globalAlpha=0.22*k; ctx.fillStyle='#1a0f02'; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation='lighter';
     const R=150+Math.sin(c.t*0.5)*18, gr=ctx.createRadialGradient(cx,cy,8,cx,cy,R); gr.addColorStop(0,'rgba(255,214,90,'+(0.85*k)+')'); gr.addColorStop(0.45,'rgba(240,160,40,'+(0.45*k)+')'); gr.addColorStop(1,'rgba(240,160,40,0)'); ctx.globalAlpha=1; ctx.fillStyle=gr; ctx.fillRect(cx-R,cy-R,R*2,R*2);
     for(let i=0;i<7;i++){ const an=-Math.PI/2+(i-3)*0.32+Math.sin(c.t*0.2+i)*0.05; ctx.globalAlpha=0.18*k; ctx.fillStyle='#ffe08a'; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(an-0.06)*260,cy+Math.sin(an-0.06)*260); ctx.lineTo(cx+Math.cos(an+0.06)*260,cy+Math.sin(an+0.06)*260); ctx.fill(); }
@@ -650,6 +651,19 @@ function drawOndaBack(){ for(const f of [G.f1,G.f2]){ const a=f&&f.atk; if(!a||a
   const S=ONX.scia; if(drOk(S)&&t>m.s){ const w=S.width, h=S.height; ctx.save(); ctx.globalAlpha=0.9; ctx.imageSmoothingEnabled=false; ctx.translate(f.x-fwd*30,GROUND-h/2+6+Math.sin(t*0.5)*2); ctx.scale(fwd,1); ctx.drawImage(S,-w,-h/2,w,h); ctx.restore(); } } }
 function drawOndaFront(){ for(let i=ONB.length-1;i>=0;i--){ const b=ONB[i]; b.t++; if(b.t>24){ ONB.splice(i,1); continue; } const B=ONX.boom; if(!drOk(B)) continue; const k=0.45+Math.min(1,b.t/5)*0.55, w=B.width*k, h=B.height*k;
     ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=b.t<16?1:(24-b.t)/8; ctx.drawImage(B,b.x-w/2,b.y-h/2,w,h); ctx.restore(); } }
+/*EFFGPT1 - effetti rifatti con ChatGPT (15.11.2026): cascata di tortellini in brodo e luce dorata di Socciaman, onde BLA di SDB, corona di fiamme sui capelli di Max. Il vecchio disegno col codice resta solo come riserva se le immagini non si caricano. Meccanica invariata. */
+const EGX={}; ['casc1','casc2','casc_luce','bla','bla_big','fuoco'].forEach(k=>{ const im=new Image(); im.src='img/fx/eff_'+k+'.png'; EGX[k]=im; });
+function egOk(im){ return im&&im.complete&&im.width; }
+function cascGPT(F){ const c=F.casc, A=EGX.casc1, B=EGX.casc2, L=EGX.casc_luce; if(!egOk(A)||!egOk(B)) return false;
+  const k=Math.min(1,c.t/6)*Math.min(1,(44-c.t)/8), fwd=c.fwd;
+  ctx.save(); ctx.imageSmoothingEnabled=false;
+  if(egOk(L)){ const s=0.85+0.1*Math.sin(c.t*0.4), w=L.width*s, h=L.height*s; ctx.globalAlpha=0.9*k; ctx.drawImage(L,F.x+fwd*150-w/2,F.y-110-h/2,w,h); }
+  const im=c.t<16?A:B; ctx.globalAlpha=k; ctx.translate(F.x+fwd*30,GROUND+8); ctx.scale(fwd,1); ctx.drawImage(im,0,-im.height,im.width,im.height);
+  ctx.restore(); return true; }
+function blaGPT(p,s){ const im=p.big?EGX.bla_big:EGX.bla; if(!egOk(im)) return false; const k=blaK(p)*(p.big?0.55:0.5), w=im.width*k, h=im.height*k;
+  ctx.save(); ctx.imageSmoothingEnabled=false; ctx.scale(s,1); ctx.rotate(Math.sin(p.r*3)*0.05); ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); return true; }
+function fuocoGPT(g,hx,hy,hw,t,pk){ const im=EGX.fuoco; if(!egOk(im)) return false; if(pk==='rabbia') return true; const q=(t>>2)&3, w=hw*1.7*(1+(q===1?0.04:0)), h=w*im.height/im.width*(0.92+0.1*((q*7)%3)/2);
+  g.save(); g.imageSmoothingEnabled=false; g.translate(hx,hy+hw*0.85); if(q&1) g.scale(-1,1); g.drawImage(im,-w/2,-h,w,h); g.restore(); return true; }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -1859,7 +1873,7 @@ function drawSprite(g,F,ox,oy,sc,SP){
   if(d.hot&&F.burn>0&&st!=='ko'&&st!=='down'&&!(F.gp&&F.gp.indexOf('maxc_')===0)){ // testa in fiamme quando si arrabbia
     let pk=null; for(const k in SP) if(SP[k]===im) pk=k; const HH=HEADS[d.spriteKey]||{}, hd=pk in HH?HH[pk]:[im.width*0.55,8,22]; if(hd){
     const hx=x0+hd[0]*S, hy=y0+hd[1]*S, hw=(hd[2]||22)*S*1.15, t=F.t, fade=Math.min(1,F.burn/40);
-    g.globalAlpha=fade; const fc=hairFire(im,hd,t); if(fc){ g.imageSmoothingEnabled=false; g.drawImage(fc,x0,y0-HFM*S,fc.width*S,fc.height*S); }
+    g.globalAlpha=fade; const fc=fuocoGPT(g,hx,hy,hw,t,pk)?null:hairFire(im,hd,t); if(fc){ g.imageSmoothingEnabled=false; g.drawImage(fc,x0,y0-HFM*S,fc.width*S,fc.height*S); }
     if(rnd()<0.3) FX.push({x:F.x+(rnd()-.5)*20,y:F.y-200*(d.size||1),vx:(rnd()-.5)*2,vy:-2-rnd()*2,life:18,c:rnd()<.5?'#ff9a1f':'#ffe14d'});
     g.globalAlpha=1; } }
   if(false){ // bandiera rossa al vento: tolta il 14.11.2026 (ordine dell'Avvocato)
@@ -1969,6 +1983,7 @@ function drawProj(p){
   else if(p.kind==='scroll'){ ctx.rotate(Math.sin(p.r)*0.25); ctx.fillStyle='#f4ecd6'; ctx.fillRect(-21,-14,42,28); ctx.strokeRect(-21,-14,42,28); ctx.strokeStyle='#9b8f74'; ctx.lineWidth=1.5; for(let y=-8;y<=6;y+=5){ ctx.beginPath(); ctx.moveTo(-15,y); ctx.lineTo(9,y); ctx.stroke(); } ctx.fillStyle='#c0262f'; ctx.beginPath(); ctx.arc(12,7,6,0,7); ctx.fill(); }
   else if(p.kind==='folder'){ ctx.rotate(Math.sin(p.r)*0.15); ctx.fillStyle='#e2c88f'; ctx.fillRect(-23,-15,46,31); ctx.strokeRect(-23,-15,46,31); ctx.fillRect(-23,-21,16,7); ctx.fillStyle='#fff'; ctx.fillRect(-15,-6,30,12); ctx.fillStyle='#120d22'; ctx.font='bold 9px '+FU; ctx.textAlign='center'; ctx.fillText('FASC.',0,3); }
   else if(p.kind==='gavel'){ ctx.rotate(p.r*1.7); ctx.fillStyle='#8a5a2b'; ctx.fillRect(-3,-2,6,30); ctx.strokeRect(-3,-2,6,30); ctx.fillStyle='#5b3518'; ctx.fillRect(-17,-12,34,17); ctx.strokeRect(-17,-12,34,17); ctx.fillStyle='#d9c27a'; ctx.fillRect(-11,-12,3,17); ctx.fillRect(8,-12,3,17); }
+  else if(p.kind==='bla'&&blaGPT(p,s)){}
   else if(p.kind==='bla'){ // onda di parole: cresce man mano che si allontana da SDB
     const k=blaK(p), fs=Math.round((p.big?22:17)*k), txt=p.big?'BLA BLA BLA!':'BLA';
     const gr=ctx.createRadialGradient(-30*k,0,4,-30*k,0,70*k); gr.addColorStop(0,'rgba(170,220,255,.55)'); gr.addColorStop(1,'rgba(90,160,255,0)');
