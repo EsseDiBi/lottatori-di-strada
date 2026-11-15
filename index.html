@@ -1652,7 +1652,7 @@ try{ /*DIODOPPIO1*/ let dn=0; ROSTER=ROSTER.map(r=>(r&&(r.dio||r.mk==='poseidone
 const MUSIC={id:null,want:null,step:0,next:0,timer:null,tempo:1};
 let AC=null, muted=false, musicOn=true, noiseBuf=null, MASTER=null, MUS=null, FXG=null;
 function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); const n=AC.sampleRate*0.6|0; noiseBuf=AC.createBuffer(1,n,AC.sampleRate); const d=noiseBuf.getChannelData(0); for(let i=0;i<n;i++) d[i]=rnd()*2-1;
-    const comp=AC.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=4; comp.connect(AC.destination);
+    const comp=AC.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=4; comp.connect(AC.destination); window.__ldsComp=comp;/*ONLINE1*/
     MASTER=AC.createGain(); MASTER.gain.value=muted?0:1.5; MASTER.connect(comp);
     MUS=AC.createGain(); MUS.gain.value=musicOn?0.75:0; MUS.connect(MASTER); FXG=AC.createGain(); FXG.gain.value=1; FXG.connect(MASTER);
     initWaves(); if(MUSIC.want) setTimeout(()=>playMusic(MUSIC.want),0); }catch(e){ AC=null; } }
@@ -3797,6 +3797,56 @@ $('#titleStage').addEventListener('pointerdown',e=>{ e.preventDefault(); titlePr
 
 /* ---------- Ciclo principale ---------- */
 buildBg('aula'); buildCards(); setStep(0); showScreen('title');
+/*ONLINE1 - uno contro uno a distanza: chi ospita fa girare la partita e la trasmette, l'amico manda i comandi (PeerJS) */
+const ONL={peer:null,conn:null,role:null,code:'',call:null,stream:null,last:''};
+function onlEl(){ let o=document.getElementById('onlOv'); if(o) return o; o=document.createElement('div'); o.id='onlOv';
+  o.style.cssText='position:fixed;inset:0;z-index:99990;background:rgba(11,8,22,.94);display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#f4efe6;text-align:center;padding:16px;box-sizing:border-box';
+  o.innerHTML='<div style="max-width:520px;width:100%"><div style="font-size:30px;font-weight:800;color:#ffc933;margin-bottom:6px">ONLINE</div><div id="onlMsg" style="font-size:16px;line-height:1.4;margin:10px 0 16px"></div><div id="onlBody"></div><button id="onlX" style="margin-top:18px;padding:10px 18px;font:700 14px sans-serif;background:transparent;color:#f4efe6;border:2px solid #6d5fa0;border-radius:8px;cursor:pointer">Chiudi</button></div>';
+  document.body.appendChild(o); o.querySelector('#onlX').addEventListener('click',()=>{ if((ONL.role==='host'&&ONL.conn)||(ONL.role==='guest'&&document.getElementById('onlVid'))){ o.style.display='none'; return; } onlStop(); o.style.display='none'; }); return o; }
+function onlMsg(t){ onlEl().querySelector('#onlMsg').textContent=t; }
+function onlBtn(t){ return '<button style="padding:12px 20px;margin:6px;font:800 16px sans-serif;background:#ec3a52;color:#fff;border:3px solid #120d22;border-radius:8px;cursor:pointer">'+t+'</button>'; }
+function onlOpen(){ const o=onlEl(); o.style.display='flex'; o.style.background='rgba(11,8,22,.94)'; if(ONL.conn&&ONL.role==='host'){ onlMsg('Stanza '+ONL.code+': amico collegato. Scegli lottatore e arena e premi Combatti.'); o.querySelector('#onlBody').innerHTML=''; return; }
+  onlMsg('Uno ospita e dice il codice all\'amico. La partita gira sul dispositivo di chi ospita: tienilo acceso e in primo piano.');
+  const b=o.querySelector('#onlBody'); b.innerHTML='<div>'+onlBtn('Crea stanza')+'</div><div style="margin-top:14px"><input id="onlCode" maxlength="4" placeholder="CODICE" autocapitalize="characters" autocomplete="off" style="width:130px;padding:11px;font:800 20px monospace;text-align:center;text-transform:uppercase;background:#fff;color:#120d22;border:3px solid #120d22;border-radius:8px"> '+onlBtn('Entra')+'</div>';
+  const bs=b.querySelectorAll('button'); bs[0].addEventListener('click',onlHost); bs[1].addEventListener('click',()=>onlJoin(b.querySelector('#onlCode').value)); }
+function onlLib(cb){ if(window.Peer){ cb(); return; } onlMsg('Carico il collegamento...'); const s=document.createElement('script'); s.src='peerjs.min.js'; s.onload=cb; s.onerror=()=>onlMsg('Non riesco a caricare il collegamento. Controlla la rete e riprova.'); document.head.appendChild(s); }
+function onlOpts(){ let c=null; try{ c=localStorage.getItem('lds-peer'); }catch(e){} if(c){ const a=c.split(':'); return {host:a[0],port:+a[1],path:'/',secure:false,debug:1}; } return {debug:1}; }
+function onlStop(){ try{ if(ONL.call) ONL.call.close(); }catch(e){} try{ if(ONL.conn) ONL.conn.close(); }catch(e){} try{ if(ONL.peer) ONL.peer.destroy(); }catch(e){} if(ONL.tm) clearInterval(ONL.tm); const v=document.getElementById('onlVid'); if(v) v.remove(); const bar=document.getElementById('onlBar'); if(bar) bar.remove(); if(ONL.role==='guest'){ try{ showScreen('title'); }catch(e){} } ONL.peer=ONL.conn=ONL.call=ONL.role=null; ONL.tm=0; held[1]={}; }
+function onlErr(e){ const t=e&&e.type; onlEl().style.display='flex'; onlMsg(t==='peer-unavailable'?'Stanza non trovata. Controlla il codice: chi ospita deve avere la stanza aperta.':t==='unavailable-id'?'Codice già in uso. Riprova a creare la stanza.':t==='network'||t==='server-error'||t==='socket-error'||t==='socket-closed'?'Il servizio di collegamento non risponde. Riprova fra poco.':'Collegamento non riuscito ('+(t||'errore')+'). Riprovate, magari da un\'altra rete.'); }
+function onlSend(o){ try{ if(ONL.conn&&ONL.conn.open) ONL.conn.send(o); }catch(e){} }
+function onlStatus(m,go){ onlSend({t:'st',m,go:go?1:0}); }
+/* chi ospita */
+function onlHost(){ try{ ac(); }catch(e){} onlLib(()=>{ const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c=''; for(let i=0;i<4;i++) c+=A[(Math.random()*A.length)|0]; ONL.code=c; ONL.role='host';
+  const p=ONL.peer=new Peer('lds-strada-'+c,onlOpts()); onlMsg('Apro la stanza...');
+  p.on('open',()=>{ onlMsg('Codice stanza: '+c+'  -  dillo al tuo amico. In attesa che entri...'); onlEl().querySelector('#onlBody').innerHTML=''; });
+  p.on('error',onlErr);
+  p.on('connection',conn=>{ if(ONL.conn&&ONL.conn.open){ try{ conn.close(); }catch(e){} return; } ONL.conn=conn;
+    conn.on('open',()=>{ onlMsg('Amico collegato! Scegli il tuo lottatore e l\'arena, poi premi Combatti. Lui sceglie il suo dal suo schermo.');
+      try{ const r=document.getElementById('m-2p'); r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); showScreen('select'); setStep(1); }catch(e){}
+      try{ const cv=document.getElementById('game'), st=cv.captureStream(30); try{ const a=ac(); if(a&&window.__ldsComp){ const md=a.createMediaStreamDestination(); window.__ldsComp.connect(md); md.stream.getAudioTracks().forEach(t=>st.addTrack(t)); } }catch(e){} ONL.stream=st; ONL.call=p.call(conn.peer,st); }catch(e){ onlMsg('Questo dispositivo non riesce a trasmettere la partita. Fai ospitare l\'amico.'); }
+      onlStatus('Collegato. Chi ospita sta scegliendo lottatore e arena.'); setTimeout(()=>{ const o=onlEl(); if(ONL.conn) o.style.display='none'; },2600); });
+    conn.on('data',d=>{ if(!d) return; if(d.t==='in'){ const h={}; BTN.forEach(b=>{ if(d.h&&d.h[b]) h[b]=true; }); held[1]=h; (d.p||[]).forEach(b=>{ if(BTN.includes(b)) press[1][b]=true; }); }
+      else if(d.t==='pick'){ const i=ROSTER.findIndex(r=>(r.mk||r.spriteKey)===d.k); if(i>=0){ sel.picks[1]=i; ONL.gpick=i; try{ refreshPicks(); }catch(e){} } } });
+    conn.on('close',()=>{ ONL.conn=null; held[1]={}; onlEl().style.display='flex'; onlMsg('L\'amico si è scollegato. La stanza '+c+' resta aperta: può rientrare con lo stesso codice.'); }); }); }); }
+/* chi entra */
+function onlJoin(code){ code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,''); if(code.length!==4){ onlMsg('Il codice ha 4 caratteri.'); return; } try{ ac(); }catch(e){}
+  onlLib(()=>{ ONL.role='guest'; ONL.code=code; const p=ONL.peer=new Peer(onlOpts()); onlMsg('Cerco la stanza '+code+'...'); p.on('error',onlErr);
+    p.on('open',()=>{ const conn=ONL.conn=p.connect('lds-strada-'+code,{reliable:true});
+      conn.on('open',()=>{ const o=onlEl(), b=o.querySelector('#onlBody'); onlMsg('Sei nella stanza '+code+'. Scegli il tuo lottatore: giochi a destra.');
+        b.innerHTML='<select id="onlPick" style="background:#fff;color:#120d22;padding:11px;font:700 17px sans-serif;border:3px solid #120d22;border-radius:8px;max-width:100%">'+ROSTER.filter(r=>r.spriteKey&&r.spriteKey!=='pm').map(r=>'<option value="'+(r.mk||r.spriteKey)+'">'+r.name+'</option>').join('')+'</select><div id="onlSt" style="margin-top:12px;font-size:14px;color:#c9bfe6"></div>';
+        const sl=b.querySelector('#onlPick'); sl.selectedIndex=Math.min(1,sl.options.length-1); const snd=()=>onlSend({t:'pick',k:sl.value}); sl.addEventListener('change',snd); snd(); });
+      conn.on('data',d=>{ if(d&&d.t==='st'){ const s=document.getElementById('onlSt'); if(s) s.textContent=d.m; const bar=document.getElementById('onlBarT'); if(bar) bar.textContent=d.m; if(d.go) onlEl().style.display='none'; } });
+      conn.on('close',()=>{ onlStop(); onlEl().style.display='flex'; onlMsg('Collegamento chiuso da chi ospita.'); onlEl().querySelector('#onlBody').innerHTML=''; }); });
+    p.on('call',call=>{ ONL.call=call; call.answer(); call.on('stream',st=>{ G=null; try{ showScreen('fight'); }catch(e){} const cv=document.getElementById('game'); let v=document.getElementById('onlVid'); if(!v){ v=document.createElement('video'); v.id='onlVid'; v.autoplay=true; v.playsInline=true; v.setAttribute('playsinline',''); v.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;background:#000;z-index:2;pointer-events:none;object-fit:contain'; const par=cv.parentNode; if(getComputedStyle(par).position==='static') par.style.position='relative'; par.insertBefore(v,cv.nextSibling); }
+        v.srcObject=st; const pl=v.play(); if(pl&&pl.catch) pl.catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
+        let bar=document.getElementById('onlBar'); if(!bar){ bar=document.createElement('div'); bar.id='onlBar'; bar.style.cssText='position:fixed;left:50%;top:4px;transform:translateX(-50%);z-index:99980;background:rgba(11,8,22,.72);color:#f4efe6;font:700 12px sans-serif;padding:5px 10px;border-radius:8px;display:flex;gap:10px;align-items:center;max-width:92vw'; bar.innerHTML='<span id="onlBarT">Online - giochi a destra</span><button id="onlBarL" style="font:700 12px sans-serif;background:#6d5fa0;color:#fff;border:0;border-radius:6px;padding:4px 8px;cursor:pointer">Lottatore</button><button id="onlBarX" style="font:700 12px sans-serif;background:#ec3a52;color:#fff;border:0;border-radius:6px;padding:4px 8px;cursor:pointer">Esci</button>'; document.body.appendChild(bar); bar.querySelector('#onlBarX').addEventListener('click',()=>{ onlStop(); }); bar.querySelector('#onlBarL').addEventListener('click',()=>{ const o=onlEl(); o.style.display=o.style.display==='none'?'flex':'none'; }); }
+        { const s=document.getElementById('onlSt'); if(s&&!s.textContent) s.textContent='Collegato. Chi ospita sta scegliendo lottatore e arena.'; }
+        if(!ONL.tm) ONL.tm=setInterval(()=>{ const h={}; BTN.forEach(b=>{ if(held[0][b]||held[1][b]) h[b]=1; }); const pr=BTN.filter(b=>press[0][b]||press[1][b]); press=[{},{}]; const key=JSON.stringify(h); ONL.n=(ONL.n||0)+1; if(pr.length||key!==ONL.last||ONL.n%30===0){ ONL.last=key; onlSend({t:'in',h,p:pr}); } },16); }); }); }); }
+/* chi ospita: avvisi all'amico e lottatore scelto da lui */
+{ const _smO=startMatch; startMatch=function(){ if(ONL.role==='host'&&ONL.conn&&sel.mode==='2p'&&ONL.gpick!=null) sel.picks[1]=ONL.gpick; const r=_smO.apply(this,arguments); if(ONL.role==='host') onlStatus('Si combatte! Giochi a destra.',1); return r; };
+  const _srO=showResult; showResult=function(){ const r=_srO.apply(this,arguments); if(ONL.role==='host'){ let w=''; try{ w=document.getElementById('resWho').textContent; }catch(e){} onlStatus(w+' - chi ospita sceglie: rivincita o altri lottatori.'); } return r; }; }
+(function(){ const add=()=>{ const m=document.querySelector('.modes'); if(!m){ setTimeout(add,300); return; } if(document.getElementById('m-onl')) return; const b=document.createElement('label'); b.id='m-onl'; b.className='mtile'; b.innerHTML='<b>Online</b><span>Sfida un amico</span>'; b.addEventListener('click',e=>{ e.preventDefault(); onlOpen(); }); m.appendChild(b); try{ m.style.gridTemplateColumns='repeat(4,minmax(0,1fr))'; }catch(e){} }; add(); })();
+
 if(location.hash==='#debug') window.__lds={get G(){return G}, win:(i)=>{ G.wins[i]=1; (i?G.f1:G.f2).hp=0; }, TX, hit:(i)=>{ const A=i?G.f2:G.f1, D=i?G.f1:G.f2; hit(A,D,4,2,40,{}); }}; // solo per le prove
 if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{});
 let acc=0,last=performance.now(); const STEP=1000/60;
