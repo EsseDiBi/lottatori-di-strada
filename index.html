@@ -1645,7 +1645,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='jj')){ const jp=PRESETS.find(p=>p.spriteKey==='jj'); if(jp){ ROSTER.push(fromPreset(jp)); try{ save(); }catch(e){} } }
 }
 load();
-try{ ROSTER=ROSTER.map(r=>(r&&r.dio&&r.spriteKey!=='poseidone')?fromPreset(DIOP):r); if(localStorage.getItem('lds-poseidone')==='1'&&!ROSTER.some(r=>r.dio)) ROSTER.push(fromPreset(DIOP)); }catch(_){}
+try{ /*DIODOPPIO1*/ let dn=0; ROSTER=ROSTER.map(r=>(r&&(r.dio||r.mk==='poseidone'||r.spriteKey==='poseidone'))?fromPreset(DIOP):r).filter(r=>!(r&&r.dio)||!(dn++)); if(localStorage.getItem('lds-poseidone')==='1'&&!ROSTER.some(r=>r.dio)) ROSTER.push(fromPreset(DIOP)); if(dn>1){ try{ save(); }catch(_){} } }catch(_){}
 /*EVPLAY1*/ try{ if(localStorage.getItem('lds-evil')==='1'&&!ROSTER.some(r=>r.spriteKey==='evilsdb')) ROSTER.push(fromPreset(EVILP)); }catch(_){}
 
 /* ---------- Audio ---------- */
