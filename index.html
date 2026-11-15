@@ -721,6 +721,32 @@ function mortGPT(p){ const im=(((p.r*4)|0)%2)?SCX.mort2:SCX.mort1; if(!scOk(im))
 function mortBoom(x,y){ SCB.push({x,y,t:0}); }
 function drawMortBoom(){ for(let i=SCB.length-1;i>=0;i--){ const b=SCB[i]; if(++b.t>22){ SCB.splice(i,1); continue; } const im=SCX.mort_boom; if(!scOk(im)) continue; const k=0.55+Math.min(1,b.t/5)*0.5, w=im.width*k, h=im.height*k;
     ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=b.t<15?1:(22-b.t)/7; ctx.drawImage(im,b.x-w/2,b.y-h/2,w,h); ctx.restore(); } }
+/*TAROCCHI1 - JJ (15.11.2026, richiesta dell'Avvocato delle 02:46 e 02:49): le Rose nere diventano la mossa a distanza; la super è "Lettura dei tarocchi": JJ apre il mazzo a ventaglio, lancia le carte in cielo, sopra l'avversario si apre una stesa di tre tarocchi giganti (XVI La Torre, XVIII La Luna, XIII La Morte, figure inventate disegnate con ChatGPT) che si girano una alla volta e piombano sull'avversario: 5+5+8 di danno, come la vecchia super a una rosa da 16. */
+const TRX={}; ['retro','torre','luna','morte','volo','boom'].forEach(k=>{ const im=new Image(); im.src='img/jj/tar_'+k+'.png'; TRX[k]=im; }); const TRB=[];
+if(SPRITES.jj){ const S=SPRITES.jj; [['jj_stesa',0.5],['jj_lancia',0.35]].forEach(([k,ax])=>{ const im=new Image(); im.src='img/jj/'+k+'.png'; im.ax=ax; S[k]=im; }); }
+function trOk(im){ return im&&im.complete&&im.width; }
+function jjRoseRanged(f){ P.push({o:f,x:f.x+f.facing*70,y:f.y-96,vx:7.5*f.facing,dmg:9,kind:'rose',r:0}); SFX.proj(); }
+function tarStart(f,o){ f.tar={t:0,o,hit:[0,0,0]}; G.excite=1; G.shake=Math.max(G.shake,8); floatText('Leggo le carte...',f.x,f.y-250,f.def.accent,15,60,'balloon'); }
+const TAR_FACE=['torre','luna','morte'], TAR_DMG=[5,5,8];
+function tarPos(T,i){ const o=T.o, cx=Math.max(170,Math.min(W-170,o.x)); return [cx+(i-1)*125,150]; }
+function tarStep(f){ if(!f||f.def.spriteKey!=='jj') return; const a=f.atk;
+  if(a&&a.type==='ranged'){ if(trOk(SPRITES.jj.rose)) f.gp='rose'; } else if(a&&a.type==='sup'){ const p=a.f<=a.m.s?'jj_stesa':'jj_lancia'; if(trOk(SPRITES.jj[p])) f.gp=p; if(a.f===a.m.s&&!f.tar){ const o=f===G.f1?G.f2:G.f1; tarStart(f,o); } }
+  else if(f.gp==='rose'||f.gp==='jj_stesa'||f.gp==='jj_lancia') f.gp=null;
+  const T=f.tar; if(!T) return; T.t++; if(G.phase!=='fight'&&T.t<20){ f.tar=null; return; }
+  for(let i=0;i<3;i++){ const ht=100+i*14; if(T.t===ht&&!T.hit[i]){ T.hit[i]=1; const o=T.o; if(o&&!['ko','down'].includes(o.state)){ const last=i===2; hit(f,o,TAR_DMG[i],last?12:3,last?42:24,{sup:true,heavy:last,launch:last,dirx:o.x>=f.x?1:-1,y:o.y-120}); } TRB.push({x:o.x,y:o.y-100,t:0}); G.shake=Math.max(G.shake,i===2?12:6); } }
+  if(T.t>150) f.tar=null; }
+function drawTarot(){ for(const f of [G.f1,G.f2]){ const T=f&&f.tar; if(!T) continue; const t=T.t;
+    const V=TRX.volo; if(trOk(V)&&t<22){ const k=t/22, x=f.x+f.facing*(40+k*120), y=f.y-150-k*160; ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=1-k*0.6; ctx.translate(x,y); ctx.scale(f.facing,1); ctx.rotate(-0.6); ctx.drawImage(V,-V.width/2,-V.height/2); ctx.restore(); }
+    if(t>=14){ ctx.save(); ctx.globalAlpha=Math.min(0.35,(t-14)/30); ctx.fillStyle='#14061f'; ctx.fillRect(0,0,W,H); ctx.restore(); }
+    for(let i=0;i<3;i++){ const ft=30+i*16, ht=100+i*14; if(t<14+i*4||t>=ht+2) continue; const [px,py]=tarPos(T,i), app=Math.min(1,(t-14-i*4)/10);
+      let x=px, y=py-(1-app)*120, sx=1, face=t>=ft+4;
+      if(t>=ft&&t<ft+8) sx=Math.abs(Math.cos((t-ft)/8*Math.PI))||0.06;
+      if(t>=ht-10){ const k=(t-(ht-10))/10, o=T.o; x=px+(o.x-px)*k; y=py+((o.y-110)-py)*k*k; sx*=1-0.3*k; }
+      const im=face?TRX[TAR_FACE[i]]:TRX.retro; if(!trOk(im)) continue;
+      ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=app; ctx.translate(x,y); ctx.scale(sx,1);
+      ctx.shadowColor='#b45cff'; ctx.shadowBlur=18; ctx.drawImage(im,-im.width/2,-im.height/2); ctx.restore(); } }
+  for(let i=TRB.length-1;i>=0;i--){ const b=TRB[i]; if(++b.t>22){ TRB.splice(i,1); continue; } const im=TRX.boom; if(!trOk(im)) continue; const k=0.5+Math.min(1,b.t/5)*0.6, w=im.width*k, h=im.height*k;
+    ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=b.t<15?1:(22-b.t)/7; ctx.drawImage(im,b.x-w/2,b.y-h/2,w,h); ctx.restore(); } }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -796,7 +822,7 @@ const FIELDS=['id','name','base',...Object.keys(BASE),'photo'];
    il gioco deforma la guardia. Statistiche: 12 punti in tutto, come gli altri. */
 PRESETS.push({base:'Marico',kind:'hoodie',suit:'#5c5a34',legs:'#6b6036',accent:'#ff8a1e',tie:'#4a5226',top:'#4a5a2a',shoes:'#4a2c18',skin:'#e8a87c',hair:'#c9a05a',special:'Spara-arepas',superName:'Grigliata mista',proj:'arepa',size:1.16,spriteKey:'marico',
    bio:'Venezuelano, marine, armadio a due ante. Il più forte e il più lento: i colpi leggeri non lo fermano. Spara arepas e cucina gli avversari.'});
-const MOVESET={marico:{ranged:'arepa',sp:'padella',rName:'Spara-arepas',sName:'Padellata',uName:'Montante da marine',supName:'Grigliata mista',grill:1,armor:1},laura:{ranged:'flash',sp:'nuoto',rName:'Flash selfie',sName:'Scatto',uName:'Traguardo',supName:'Diretta'},cugi:{ranged:'ovale',sp:'posa',rName:'Rimessa in touche',sName:'Fotomodello',uName:'Placcaggio',supName:'Meta in tuffo'},frisbee:{ranged:'frisbee',sp:'piroetta',rName:'Frisbee boomerang',sName:'Piroetta',uName:'Grand jeté',supName:'Onda perfetta',surf:1},max:{ranged:'cactus',sp:'nuoto',rName:'Lancio del cactus',sName:'Bracciata',uName:'Montante fumantino',supName:'Carica rossa',hot:1},jj:{ranged:'gelo',sp:'sbuff',rName:'Occhiata gelida',sName:'Sbuffo',uName:'Montante annoiato',supName:'Rose nere'},pm:{ranged:'folder',sp:'special',rName:'Mossa a distanza',sName:'Mossa speciale',uName:'Montante'},stefano:{ranged:'codice',sp:'arringa',rName:'Lancio del Codice',sName:'Arringa infinita',uName:'Montante del lunedì'},marouges:{ranged:'kiss',sp:'hipcombo',rName:'Bacio volante',sName:'Combo di culate',uName:'Pugnetto al cielo',supName:'Blasfemia',rage:1,temper:1,traitor:1}};
+const MOVESET={marico:{ranged:'arepa',sp:'padella',rName:'Spara-arepas',sName:'Padellata',uName:'Montante da marine',supName:'Grigliata mista',grill:1,armor:1},laura:{ranged:'flash',sp:'nuoto',rName:'Flash selfie',sName:'Scatto',uName:'Traguardo',supName:'Diretta'},cugi:{ranged:'ovale',sp:'posa',rName:'Rimessa in touche',sName:'Fotomodello',uName:'Placcaggio',supName:'Meta in tuffo'},frisbee:{ranged:'frisbee',sp:'piroetta',rName:'Frisbee boomerang',sName:'Piroetta',uName:'Grand jeté',supName:'Onda perfetta',surf:1},max:{ranged:'cactus',sp:'nuoto',rName:'Lancio del cactus',sName:'Bracciata',uName:'Montante fumantino',supName:'Carica rossa',hot:1},jj:{ranged:'gelo',sp:'sbuff',rName:'Rose nere',sName:'Sbuffo',uName:'Montante annoiato',supName:'Lettura dei tarocchi'},pm:{ranged:'folder',sp:'special',rName:'Mossa a distanza',sName:'Mossa speciale',uName:'Montante'},stefano:{ranged:'codice',sp:'arringa',rName:'Lancio del Codice',sName:'Arringa infinita',uName:'Montante del lunedì'},marouges:{ranged:'kiss',sp:'hipcombo',rName:'Bacio volante',sName:'Combo di culate',uName:'Pugnetto al cielo',supName:'Blasfemia',rage:1,temper:1,traitor:1}};
 const STATS={marico:{forza:7,resistenza:8,velocita:7,agilita:2},laura:{forza:4,resistenza:5,velocita:9,agilita:6},cugi:{forza:8,resistenza:8,velocita:4,agilita:4},frisbee:{forza:4,resistenza:5,velocita:7,agilita:8},max:{forza:6,resistenza:6,velocita:6,agilita:6},jj:{forza:8,resistenza:8,velocita:4,agilita:4},pm:{forza:6,resistenza:6,velocita:6,agilita:6},stefano:{forza:8,resistenza:8,velocita:4,agilita:4},marouges:{forza:4,resistenza:6,velocita:8,agilita:6}};
 const STATS_BASE={'Marico':'marico','LaLaura':'laura','Cugi':'cugi','CUGI':'cugi','Frisbee':'frisbee','Max':'max','JJ':'jj','SDB':'stefano','Marouges':'marouges','Il PM':'pm'};
 const STAT_LBL=[['forza','Forza'],['resistenza','Resistenza'],['velocita','Velocità'],['agilita','Agilità']];
@@ -1161,7 +1187,7 @@ function startAtk(f,type){
   if(['ranged','arringa','hipcombo','rise','special','throw','nuoto','piroetta','padella'].includes(type)) grunt(f,'sp');
   if(type==='padella'&&rnd()<0.6) quip(f,['Attento, scotta.','A tavola!','Padella di ghisa. Originale.','Questa è la cottura giusta.']);
   if(type==='rise'){ try{ auraStart(f); }catch(e){} }
-  if(type==='sup'){ try{ gattiStep(f); evocaStep(f); if(f.def.spriteKey==='biscio') f.gp='esodo_carica'; grillStep(f); if(f.def.spriteKey==='yoghi') f.gp='cric_trasf'; metaStep(f); direttaStep(f); ondaStep(f); }catch(e){} } // EVOCA1: posa subito, anche durante il fermo immagine
+  if(type==='sup'){ try{ gattiStep(f); evocaStep(f); if(f.def.spriteKey==='biscio') f.gp='esodo_carica'; grillStep(f); if(f.def.spriteKey==='yoghi') f.gp='cric_trasf'; metaStep(f); direttaStep(f); ondaStep(f); if(f.def.spriteKey==='jj'&&trOk(SPRITES.jj.jj_stesa)) f.gp='jj_stesa'; }catch(e){} } // EVOCA1: posa subito, anche durante il fermo immagine
   if(type==='sup'&&f.def.hot){ f.burn=Math.max(f.burn||0,240); }
   if(type==='throw'&&f.def.spriteKey==='morex') quip(f,['Quanta polvere!','Questo tappeto lo sbatto io.','Pulizie di primavera!']);
   if(type==='throw'&&f.def.spriteKey==='carolluz') quip(f,["Ma l'hai letto il regolamento?",'Allora, ti spiego.','Non si fa così.']);
@@ -1214,7 +1240,7 @@ function updFighter(f,o,inp){
     else if(a.landed&&a.type==='punch'&&!a.next&&a.f>=m.s+m.a&&(a.chain||1)<3&&(((a.chain||1)===1&&(f.lastP||-99)>a.t0&&f.t-f.lastP<=12)||(a.chain===2&&(f.lastK||-99)>a.t0&&f.t-f.lastK<=12))){ // combo: pugno, pugno, calcio a segno, sempre più veloce
       const n=(a.chain||1)+1; a.next=1; startAtk(f,n===3?'kick':'punch'); const b=f.atk; b.chain=n; b.m.s=Math.max(2,b.m.s-(n===3?2:1)); b.m.r=Math.max(4,b.m.r-3); if(n===3){ b.m.dmg*=1.35; b.m.kb+=4; b.m.stun+=8; } G.comboT=100; }
     else if(a.hit&&['punch','kick','cpunch'].includes(a.type)&&a.f>m.s+m.a&&(wantSp||wantR||wantU)&&!projOf(f)){ f.dirs=[]; startAtk(f,wantU?'rise':wantR?'ranged':f.def.spType); }
-    else if((a.type==='special'||a.type==='ranged')&&a.f===m.s){ if(a.type==='ranged'&&f.def.traitor&&rnd()<0.5) quip(f,['Smack!','Per te, amore.','Un bacino...']); if(a.type==='ranged'&&f.def.rangedKind==='cat'){ spawnCat(f,(f.catN=(f.catN||0)+1)%2); } else spawnProj(f); }
+    else if((a.type==='special'||a.type==='ranged')&&a.f===m.s){ if(a.type==='ranged'&&f.def.traitor&&rnd()<0.5) quip(f,['Smack!','Per te, amore.','Un bacino...']); if(a.type==='ranged'&&f.def.rangedKind==='cat'){ spawnCat(f,(f.catN=(f.catN||0)+1)%2); } else if(a.type==='ranged'&&f.def.spriteKey==='jj'&&typeof jjRoseRanged==='function') jjRoseRanged(f); else spawnProj(f); }
     else if(a.type==='arringa'&&a.f>m.s&&(a.f-m.s)%7===1&&a.n<6){ spawnBla(f,a.n++); }
     else if(a.type==='criceto'&&a.f===m.s&&f.def.spriteKey!=='yoghi'){ cricetoMannaro(f,o); }
     else if(a.type==='sup'&&f.def.spriteKey==='chooby'&&a.f===m.s){ callHusky(f,o); }
@@ -1240,7 +1266,7 @@ function updFighter(f,o,inp){
           else { m.a=1; floatText('Ma dove scappi?',f.x,f.y-250,f.def.accent,14,40,'balloon'); } }
         if(a.caught&&a.f===m.s+22) floatText('Ninna nanna...',f.x,f.y-250,f.def.accent,15,50,'balloon');
         if(a.caught&&a.f===m.s+50){ o.wrapT=0; o.stun=0; o.x=Math.max(60,Math.min(W-60,f.x+f.facing*70)); hit(f,o,16,13,40,{sup:true,heavy:true,launch:true,low:true,air:true,dirx:f.facing,y:o.y-100}); floatText('NANNA!',o.x,o.y-220,'#ffc21a',28,70); G.shake=Math.max(G.shake,10); } }
-      else if(a.type==='sup'&&f.def.spriteKey==='jj'){ f.vx=0; if(a.f===m.s) spawnRose(f); }
+      else if(a.type==='sup'&&f.def.spriteKey==='jj'){ f.vx=0; if(a.f===m.s&&!(typeof tarStart==='function')) spawnRose(f); }
       else if(a.type==='sup'&&f.def.spriteKey==='socciaman'){ f.vx=0; if(a.f===m.s+1){ floatText('SOCC\'MEL!',f.x,f.y-275,'#ffc21a',26,70); G.excite=1; } }
       else if(a.type==='cascata'){ cascataStep(f,o,a,m,fwd); }
       else if(a.type==='sup'&&f.def.superCats){ f.vx=0; if(a.f===2) floatText(f.def.spriteKey==='stefano'?'Boogie! Mocambo!':'Gatti!',f.x,f.y-250,f.def.accent,17,46,'balloon'); if(a.f===m.s){ spawnCatFan(f,o,0,0); spawnCatFan(f,o,3,10); } }
@@ -1662,7 +1688,7 @@ function step(){
   updFighter(G.f1,G.f2,i1); updFighter(G.f2,G.f1,i2);
   try{ zetaDive(G.f1,G.f2); zetaDive(G.f2,G.f1); }catch(e){}
   try{ maxCometa(G.f1,G.f2); maxCometa(G.f2,G.f1); biscioEsodo(G.f1,G.f2); biscioEsodo(G.f2,G.f1); }catch(e){}
-  try{ gattiStep(G.f1); gattiStep(G.f2); evocaStep(G.f1); evocaStep(G.f2); grillStep(G.f1); grillStep(G.f2); beneStep(G.f1,G.f2); beneStep(G.f2,G.f1); fagoStep(G.f1); fagoStep(G.f2); metaStep(G.f1); metaStep(G.f2); direttaStep(G.f1); direttaStep(G.f2); ondaStep(G.f1); ondaStep(G.f2); }catch(e){}
+  try{ gattiStep(G.f1); gattiStep(G.f2); evocaStep(G.f1); evocaStep(G.f2); grillStep(G.f1); grillStep(G.f2); beneStep(G.f1,G.f2); beneStep(G.f2,G.f1); fagoStep(G.f1); fagoStep(G.f2); metaStep(G.f1); metaStep(G.f2); direttaStep(G.f1); direttaStep(G.f2); ondaStep(G.f1); ondaStep(G.f2); tarStep(G.f1); tarStep(G.f2); }catch(e){}
   separate(G.f1,G.f2); checkHits(G.f1,G.f2); checkHits(G.f2,G.f1); updProj();
   for(const f of [G.f1,G.f2]) if(f.dhp>f.hp) f.dhp=Math.max(f.hp,f.dhp-0.6);
   if(G.phase==='fight'){
@@ -2578,7 +2604,7 @@ function render(){
   try{ drawCodiceBoom(); drawRoseFront(); }catch(e){}
   try{ ondaFajaCheck(); drawOndaFaja(); }catch(e){}
   try{ drawBlasGPT(false); }catch(e){}
-  try{ drawZetaBoom(); drawSpermaBoom(); drawMaxBoom(); drawFagoFront(); drawMetaBoom(); drawDiretta(); drawOndaFront(); drawCactusBoom(); drawMortBoom(); }catch(e){}
+  try{ drawZetaBoom(); drawSpermaBoom(); drawMaxBoom(); drawFagoFront(); drawMetaBoom(); drawDiretta(); drawOndaFront(); drawCactusBoom(); drawMortBoom(); drawTarot(); }catch(e){}
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
   try{ drawMariaScia(); }catch(e){} if(G.f1) drawMaria(G.f1); if(G.f2) drawMaria(G.f2); if(G.f1) drawHoop(G.f1); if(G.f2) drawHoop(G.f2);
   if(G.f1) drawHusky(G.f1); if(G.f2) drawHusky(G.f2);
