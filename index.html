@@ -3197,7 +3197,7 @@ document.addEventListener('dblclick',function(e){if(inGame())e.preventDefault();
 #lsAmb,.lsz{display:none}
 body.coarse.sc-fight #lsAmb,body.coarse.sc-title #lsAmb{display:block;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:19;pointer-events:none;background:#0e0b1c;image-rendering:auto}
 body.coarse.sc-fight #scrFight,body.coarse.sc-title #scrTitle{background:transparent}
-body.coarse.sc-fight #scrFight .stage,body.coarse.sc-title #scrTitle .stage{width:min(calc(100vw - 2*max(env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))),177.78vh,177.78dvh);box-shadow:0 0 26px 8px rgba(8,6,18,.6)}
+body.coarse.sc-fight #scrFight .stage,body.coarse.sc-title #scrTitle .stage{width:min(calc(100vw - 2*max(env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))),177.78vh,177.78dvh);height:auto;aspect-ratio:16/9;box-shadow:0 0 26px 8px rgba(8,6,18,.6)}
 body.coarse.sc-fight #pad{position:fixed;inset:0;--b:clamp(68px,22vh,94px);--sl:max(12px,calc(env(safe-area-inset-left,0px) + 4px));--sr:max(12px,calc(env(safe-area-inset-right,0px) + 4px));--sb:max(8px,calc(env(safe-area-inset-bottom,0px) + 2px))}
 body.coarse.sc-fight #pad #stick{left:var(--sl);bottom:var(--sb);width:clamp(120px,40vh,170px);max-width:none;pointer-events:none}
 body.coarse.sc-fight #pad .dpad{width:92%;height:92%;margin:4%}
