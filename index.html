@@ -377,7 +377,7 @@ COUPLE.socciaman=COUPLE.socciaman||{}; if(!COUPLE.socciaman.stefano) COUPLE.socc
 COUPLE.stefano=COUPLE.stefano||{}; if(!COUPLE.stefano.socciaman) COUPLE.stefano.socciaman={intro:["Nicola, la pipa qui non si fuma.","Ti difendo gratis. Dopo cena."],win:["Sentenza: i tortellini li porti tu.","Obiezione accolta. Soccmel."],lose:["Ricorro in Cassazione. A Bologna.","Mi arrendo. Ma solo al ragù."]};
 if(SPRITES.socciaman){ const S=SPRITES.socciaman; S.entrata=S.ingresso; S.lancio=S.caricatortellino; S.lancio2=S.lanciotortellino; S.provocazione=S.pranzo; S.stordita=S.stordito; S.aterra=S.ko; }
 /* Socciaman: cascata di tortellini in brodo (effetto scenico) e Araldo */
-const SOC={cr:[30,250],d1:5,d2:9,dog:[5,5,5,10]};
+const SOC={cr:[30,225],d1:3.7,d2:6.6,dog:[5,5,5,10]};
 function cascataStep(f,o,a,m,fwd){ f.vx=0;
   if(a.f===m.s){ f.casc={t:0,fwd}; G.excite=1; SFX.swing&&SFX.swing(); }
   if(a.f>m.s&&a.f%2===0) for(let k=0;k<3;k++) FX.push({x:f.x+fwd*(70+rnd()*150),y:f.y-120+rnd()*110,vx:fwd*(1+rnd()*3),vy:-1-rnd()*3,life:22,c:rnd()<.5?'#ffd25a':'#fff1b0'});
@@ -896,7 +896,7 @@ if(!PRESETS.some(p=>p.spriteKey==='biscio')) PRESETS.push({base:'Biscio',kind:'s
 function statsOf(r){ const k=r.spriteKey||STATS_BASE[r.base]; return STATS[k]||{forza:6,resistenza:6,velocita:6,agilita:6}; }
 let uid=0; const newId=()=>'f'+Date.now().toString(36)+(uid++);
 const rot=hex=>{ const c=hex.replace('#',''); return '#'+c.slice(4,6)+c.slice(0,2)+c.slice(2,4); };
-/*TARATURA1*/const TARA={"yoghi": 1.02, "frisbee": 1.028, "marouges": 1.07, "max": 1.02, "stefano": 0.975, "laura": 0.99, "cugi": 0.95, "morex": 0.943, "carolluz": 0.935, "marico": 1.03, "jj": 1.015}; /* taratura del danno, equilibrio a 11 */
+/*TARATURA1*/const TARA={"yoghi": 1.1, "frisbee": 1.05, "marouges": 1.07, "max": 1.07, "stefano": 0.89, "laura": 1.06, "cugi": 0.95, "morex": 1.02, "carolluz": 1.02, "marico": 0.95, "jj": 0.955, "socciaman": 0.84, "faja": 0.86, "biscio": 0.96, "zeta": 1.07, "chooby": 1.12}; /* taratura del danno, equilibrio a 16 (BILANCIO1, 15.11.2026: simulazione 40 incontri per coppia, tutti fra 47% e 53%) */
 function finalize(r){ r.size=parseFloat(r.size)||1; const st=statsOf(r); r.stats=st; r.speed=3.45+0.14*st.velocita; r.dmgMul=1+0.06*(st.forza-6); r.defMul=1-0.06*(st.resistenza-6); r.dmgMul*=(TARA[r.spriteKey]||1); r.jumpV=-15.5-(st.agilita-6)*0.4; r.quick=(st.agilita-6)/2; /* scala 1-10, totale 24 */ const p=PROJ[r.proj]||PROJ.scroll; r.projSpeed=p.v; r.projDmg=p.d; const ms=MOVESET[r.spriteKey]; r.rangedKind=ms?ms.ranged:r.proj; r.spType=ms?ms.sp:'special'; r.rangedName=ms?ms.rName:r.special; r.spName=ms?ms.sName:r.special; r.upName=ms?ms.uName:'Montante'; if(ms&&ms.supName) r.superName=ms.supName; r.superRage=!!(ms&&ms.rage); r.temper=!!(ms&&ms.temper); r.traitor=!!(ms&&ms.traitor); r.hot=!!(ms&&ms.hot); r.surf=!!(ms&&ms.surf); r.grill=!!(ms&&ms.grill); r.armor=!!(ms&&ms.armor); r.alt=rot(r.suit); r.lips=!!r.lashes; if(!r.name) r.name=r.base; }
 function fromPreset(p,name){ const r=Object.assign({},BASE,p); r.id=newId(); r.name=name||p.base; r.photo=null; r.img=null; finalize(r); return r; }
 let ROSTER=[];
