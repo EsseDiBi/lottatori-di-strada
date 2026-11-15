@@ -3193,4 +3193,62 @@ b.addEventListener('click',function(e){e.stopPropagation();if(dp){dp.prompt();dp
 document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
 document.addEventListener('touchend',function(e){var n=Date.now(),d=n-last;last=n;if(d<350&&inGame()&&!(e.target.closest&&e.target.closest('button,a,label,input,select'))&&e.cancelable)e.preventDefault();},{passive:false});
 document.addEventListener('dblclick',function(e){if(inGame())e.preventDefault();});})();</script>
+<style>/*TOCCO1*/
+#lsAmb,.lsz{display:none}
+body.coarse.sc-fight #lsAmb,body.coarse.sc-title #lsAmb{display:block;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:19;pointer-events:none;background:#0e0b1c;image-rendering:auto}
+body.coarse.sc-fight #scrFight,body.coarse.sc-title #scrTitle{background:transparent}
+body.coarse.sc-fight #scrFight .stage,body.coarse.sc-title #scrTitle .stage{width:min(calc(100vw - 2*max(env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))),177.78vh,177.78dvh);box-shadow:0 0 26px 8px rgba(8,6,18,.6)}
+body.coarse.sc-fight #pad{position:fixed;inset:0;--b:clamp(68px,22vh,94px);--sl:max(12px,calc(env(safe-area-inset-left,0px) + 4px));--sr:max(12px,calc(env(safe-area-inset-right,0px) + 4px));--sb:max(8px,calc(env(safe-area-inset-bottom,0px) + 2px))}
+body.coarse.sc-fight #pad #stick{left:var(--sl);bottom:var(--sb);width:clamp(120px,40vh,170px);max-width:none;pointer-events:none}
+body.coarse.sc-fight #pad .dpad{width:92%;height:92%;margin:4%}
+body.coarse.sc-fight #pad .acts{right:var(--sr);bottom:var(--sb);width:calc(var(--b)*2 + 6px);height:calc(var(--b)*1.42);max-width:none;aspect-ratio:auto}
+body.coarse.sc-fight #pad .acts button{pointer-events:none;width:var(--b);height:var(--b);aspect-ratio:auto}
+body.coarse.sc-fight #pad .acts .bp{left:0;bottom:0;font-size:calc(var(--b)*.4);background:rgba(63,214,255,.38)}
+body.coarse.sc-fight #pad .acts .bk{right:0;bottom:calc(var(--b)*.42);font-size:calc(var(--b)*.4);background:rgba(236,58,82,.4)}
+body.coarse.sc-fight #pad .acts .bx{left:calc(var(--b)*.08);top:auto;bottom:calc(var(--b)*1.14);width:calc(var(--b)*.84);height:calc(var(--b)*.84);font-size:calc(var(--b)*.17)}
+body.coarse.sc-fight #pad .lsz{display:block;position:absolute;bottom:0;pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent}
+body.coarse.sc-fight #pad #lszStick{left:0;width:50%;height:50%}
+body.coarse.sc-fight #pad #lszActs{right:0;width:50%;height:80%}
+body.coarse.sc-fight .ov:not([hidden]) ~ #pad .lsz{pointer-events:none}
+body.coarse.sc-fight #pad .mpause{bottom:max(6px,calc(env(safe-area-inset-bottom,0px) + 2px));width:48px;height:32px}
+</style><script>/*TOCCO1 - telefono: tocco largo su tasti e croce, riflesso dell'arena ai lati */
+(function(){ try{
+  var pad=document.getElementById('pad'), st=document.getElementById('stick'); if(!pad||!st||!window.PointerEvent) return;
+  function mk(id){ var d=document.createElement('div'); d.id=id; d.className='lsz'; pad.insertBefore(d,pad.firstChild); return d; }
+  var zA=mk('lszActs'), zS=mk('lszStick'), pass={};
+  function fire(el,type,id,x,y){ el.dispatchEvent(new PointerEvent(type,{pointerId:id,pointerType:'touch',bubbles:true,cancelable:true,clientX:x,clientY:y})); }
+  /* se sotto il dito c'è un tasto di un riquadro (pausa, fine incontro, altro), il tocco va a lui */
+  function under(x,y){ var l=document.elementsFromPoint(x,y); for(var i=0;i<l.length;i++){ var e=l[i]; if(pad.contains(e)) continue; if(e.tagName==='CANVAS') break; var c=e.closest&&e.closest('button,a,label,input,select,summary'); if(c) return c; } return null; }
+  function passDown(e){ var u=under(e.clientX,e.clientY); if(u){ pass[e.pointerId]=u; return true; } return false; }
+  function passEnd(e){ var u=pass[e.pointerId]; if(!u) return false; delete pass[e.pointerId]; if(e.type==='pointerup') u.click(); return true; }
+  /* croce: vale tutto il quarto in basso a sinistra, la direzione si misura dal centro della croce; K=2 dimezza la zona morta */
+  var sid=null, FS=7001, K=2;
+  function sxy(e){ var c=(st.querySelector('.dpad')||st).getBoundingClientRect(), b=st.getBoundingClientRect();
+    return [b.left+b.width/2+(e.clientX-(c.left+c.width/2))*K, b.top+b.height/2+(e.clientY-(c.top+c.height/2))*K]; }
+  zS.addEventListener('pointerdown',function(e){ if(passDown(e)) return; e.preventDefault(); if(sid!==null) fire(st,'pointerup',FS,0,0); sid=e.pointerId; try{zS.setPointerCapture(sid)}catch(_){} var p=sxy(e); fire(st,'pointerdown',FS,p[0],p[1]); });
+  zS.addEventListener('pointermove',function(e){ if(e.pointerId!==sid) return; e.preventDefault(); var p=sxy(e); fire(st,'pointermove',FS,p[0],p[1]); });
+  function sEnd(e){ if(passEnd(e)) return; if(e.pointerId!==sid) return; sid=null; fire(st,'pointerup',FS,0,0); }
+  ['pointerup','pointercancel','lostpointercapture'].forEach(function(t){ zS.addEventListener(t,sEnd); });
+  zS.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+  /* tasti: il tocco va al tasto più vicino, fino a quasi mezzo tasto fuori dal disegno */
+  var btns=[].slice.call(pad.querySelectorAll('.acts button')), own={};
+  function dist(b,x,y){ var r=b.getBoundingClientRect(); if(!r.width) return 1e9; return Math.hypot(x-(r.left+r.width/2),y-(r.top+r.height/2))-r.width/2; }
+  function near(x,y){ var best=null,bd=1e9; btns.forEach(function(b){ var d=dist(b,x,y); if(d<bd){ bd=d; best=b; } }); return best&&bd<=best.getBoundingClientRect().width*0.45?best:null; }
+  function dn(b,e){ b.__n=(b.__n||0)+1; if(b.__n===1) fire(b,'pointerdown',7100+btns.indexOf(b),e.clientX,e.clientY); }
+  function up(b,e){ b.__n=Math.max(0,(b.__n||0)-1); if(!b.__n) fire(b,'pointerup',7100+btns.indexOf(b),e.clientX,e.clientY); }
+  zA.addEventListener('pointerdown',function(e){ if(passDown(e)) return; var b=near(e.clientX,e.clientY); if(!b) return; e.preventDefault(); try{zA.setPointerCapture(e.pointerId)}catch(_){} own[e.pointerId]=b; dn(b,e); });
+  zA.addEventListener('pointermove',function(e){ var cur=own[e.pointerId]; if(!cur) return; e.preventDefault(); if(dist(cur,e.clientX,e.clientY)<=0) return;
+    for(var i=0;i<btns.length;i++){ var b=btns[i]; if(b!==cur&&dist(b,e.clientX,e.clientY)<=0){ up(cur,e); own[e.pointerId]=b; dn(b,e); break; } } });
+  function aEnd(e){ if(passEnd(e)) return; var cur=own[e.pointerId]; if(!cur) return; delete own[e.pointerId]; up(cur,e); }
+  ['pointerup','pointercancel','lostpointercapture'].forEach(function(t){ zA.addEventListener(t,aEnd); });
+  zA.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+  /* ai lati, al posto delle bande nere, il riflesso sfumato di quello che succede in campo */
+  if(window.matchMedia&&matchMedia('(pointer: coarse)').matches){
+    var amb=document.createElement('canvas'); amb.id='lsAmb'; amb.width=256; amb.height=144; amb.setAttribute('aria-hidden','true'); document.body.appendChild(amb);
+    var acc=document.createElement('canvas'); acc.width=32; acc.height=18; var ga=acc.getContext('2d'), g=amb.getContext('2d'), n=0, first=true; g.imageSmoothingEnabled=true; try{ g.imageSmoothingQuality='high'; }catch(_){}
+    (function lp(){ requestAnimationFrame(lp); if(n++%3) return; var c=document.body.classList, src=c.contains('sc-fight')?document.getElementById('game'):c.contains('sc-title')?document.getElementById('tcv'):null;
+      if(!src||innerWidth<=innerHeight*1.79){ first=true; return; }
+      try{ ga.globalAlpha=first?1:0.3; ga.drawImage(src,0,0,32,18); first=false; g.globalAlpha=1; g.drawImage(acc,0,0,256,144); g.fillStyle='rgba(10,8,22,.45)'; g.fillRect(0,0,256,144); }catch(_){} })();
+  }
+}catch(_){} })();</script>
 </body></html>
