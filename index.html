@@ -1,4 +1,20 @@
-<!doctype html><html><head><!--/*SCRITTEPOP1*/--><script src="img/scritte.js"></script><!--/*MAXBIONDO1*/--><script src="img/maxbiondo.js"></script><!--/*ORIO1*/--><!--/*RUBEN1*/--><script src="img/ruben.js"></script><!--/*FAJA1*/--><!--/*SOCCIAMAN1*/--><!--/*ESULTANZACENTRO1*/--><!--/*COPERTAJJ1*/--><!--/*TRANSIZIONE1*/--><!--/*YOGHIALTO1*/--><!--/*VITTORIE1*/--><!--/*FIXCOMMENTO1*/--><!--/*SCELTAVITTORIA1*/--><!--/*RITRATTIUGUALI1*/--><!--/*OCCHIPOSE1*/--><!--/*OCCHIKO1*/--><!--/*OCCHIMAX1*/--><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><!--/*IPHONE1*/--><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"></head><body>
+<!doctype html><html><head><!--/*SCRITTEPOP1*/--><script src="img/scritte.js"></script><!--/*MAXBIONDO1*/--><script src="img/maxbiondo.js"></script><!--/*ORIO1*/--><!--/*RUBEN1*/--><script src="img/ruben.js"></script><!--/*FAJA1*/--><!--/*SOCCIAMAN1*/--><!--/*ESULTANZACENTRO1*/--><!--/*COPERTAJJ1*/--><!--/*TRANSIZIONE1*/--><!--/*YOGHIALTO1*/--><!--/*VITTORIE1*/--><!--/*FIXCOMMENTO1*/--><!--/*SCELTAVITTORIA1*/--><!--/*RITRATTIUGUALI1*/--><!--/*OCCHIPOSE1*/--><!--/*OCCHIKO1*/--><!--/*OCCHIMAX1*/--><!--/*GRIGLIA1*/--><!--/*MENU1*/--><!--/*NOVITA1*/--><!--/*EQUILIBRIO4*/--><!--/*EQUILIBRIO3*/--><meta charset=utf8><!--/*IPHONE1*/--><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e0b1c"><link rel="icon" href="icona-192.png"><link rel="apple-touch-icon" href="icona-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lottatori"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><style>/*MOBILE2*/
+#roster.pgrid{grid-template-columns:repeat(var(--pc,4),var(--ps))}
+#arenas.arenas{grid-template-columns:repeat(var(--ac,5),minmax(0,1fr))}
+#scrSelect .vsel{grid-template-rows:minmax(0,1fr);align-items:stretch}
+#scrSelect .vsel > #roster{align-self:center}
+#scrSelect .vsel .bigsel{height:100%;max-height:100%}
+@media (max-height:520px){
+ #scrSelect #roster.pgrid{--ps:clamp(36px,min(calc((100dvh - 128px)/var(--pr,3) - 6px),calc((54vw - 20px)/var(--pc,6) - 4px)),84px);gap:4px}
+ .pcard{border-width:2px}
+ .pcard .cname{display:none}
+ .pcard.s1{box-shadow:0 0 0 2px var(--cyan)} .pcard.s2{box-shadow:0 0 0 2px var(--red)}
+ #arenas.arenas{gap:5px}
+ .arena{border-width:2px}
+ .arena span{font-size:9px;padding:2px 4px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .arena.rand i{font-size:28px}
+}
+</style></head><body>
 <title>Lottatori di Strada</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2951,6 +2967,15 @@ function buildArenas(){ const root=$('#arenas'); root.innerHTML='';
   Object.entries(STAGES).forEach(([k,v])=>mk(k,v)); mk('casuale','Casuale');
 }
 buildArenas();
+
+/*MOBILE2 - griglie che si adattano al numero di lottatori e di arene: sul telefono più colonne e meno righe */
+function lsGrid(){ try{ const ph=innerHeight<=520; const r=$('#roster'), n=r?r.children.length:0;
+    if(r&&n){ const pc=n>9?Math.min(8,Math.max(4,Math.ceil(n/3))):3; r.style.setProperty('--pc',pc); r.style.setProperty('--pr',Math.ceil(n/pc)); }
+    const a=$('#arenas'), m=a?a.children.length:0; if(a&&m){ const ac=ph?Math.min(8,Math.max(5,Math.ceil(m/3))):Math.min(7,Math.max(4,Math.ceil(Math.sqrt(m*1.7)))); a.style.setProperty('--ac',ac); }
+  }catch(e){} }
+{ const _bcM=buildCards; buildCards=function(){ const r=_bcM.apply(this,arguments); lsGrid(); return r; }; }
+{ const _baM=buildArenas; buildArenas=function(){ const r=_baM.apply(this,arguments); lsGrid(); return r; }; }
+addEventListener('resize',lsGrid); lsGrid();
 /* menu a passi: modalità, lottatori, arena */
 let mstep=0;
 function setStep(n){ mstep=Math.max(0,Math.min(2,n));
