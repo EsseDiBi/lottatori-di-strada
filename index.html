@@ -695,6 +695,20 @@ function ruotaGPT(f,t,life,cx,c,l,sz){ if(!agOk('cono')||!agOk('anello')) return
   const C=AUX.cono, h=GROUND+30, w=C.width*h/C.height*(0.8+0.3*(1-life))*sz; agDraw('cono',c,cx,GROUND+16,w,h,0.7*life,false,'lighter');
   if(t<20){ const R=AUX.anello, k=0.5+t/16; agDraw('anello',l,f._ruo.x,GROUND+R.height*k*0.55,R.width*k,R.height*k,1-t/20); }
   if(f._ruo.hit&&!f._ruo.agb){ f._ruo.agb=1; agBoom(cx+f.facing*50,f.y-140*sz,c); } drawAgBoom(); return true; }
+/*MAXPIANTE1 - oggetti di Max rifatti con ChatGPT (15.11.2026, richiesta dell'Avvocato delle 02:41): lancio del cactus nel vaso, a colpi alterni un seme che germoglia, vaso che si rompe all'impatto, innaffiatoio e fiore che cresce nel gesto di vittoria. Meccanica invariata. */
+const MPX={}; ['cactus','seme','cactus_boom','annaffiatoio','germoglio','bocciolo','fiore'].forEach(k=>{ const im=new Image(); im.src='img/max/max_'+k+'.png'; MPX[k]=im; }); const MPB=[]; let MPN=0;
+function mpOk(k){ const im=MPX[k]; return im&&im.complete&&im.width; }
+function cactusGPT(p){ if(p._mpv==null) p._mpv=(MPN++)%2; const k=p._mpv?'seme':'cactus'; if(!mpOk(k)) return false; const im=MPX[k], s=0.62, w=im.width*s, h=im.height*s;
+  ctx.save(); ctx.imageSmoothingEnabled=false; ctx.rotate(k==='seme'?p.r*0.6:p.r*1.4); ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); return true; }
+function cactusBoom(x,y){ MPB.push({x,y,t:0}); }
+function drawCactusBoom(){ for(let i=MPB.length-1;i>=0;i--){ const b=MPB[i]; if(++b.t>22){ MPB.splice(i,1); continue; } if(!mpOk('cactus_boom')) continue; const im=MPX.cactus_boom, k=0.55+Math.min(1,b.t/5)*0.45, w=im.width*k, h=im.height*k;
+    ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=b.t<15?1:(22-b.t)/7; ctx.drawImage(im,b.x-w/2,b.y-h/2,w,h); ctx.restore(); } }
+function maxGestoGPT(g,a,hx,hy){ if(!mpOk('annaffiatoio')||!mpOk('fiore')||!mpOk('germoglio')||!mpOk('bocciolo')) return false;
+  const cx=hx+g.dir*4, cy=hy+4, tilt=Math.min(1,a/14)*0.3;
+  if(a<110){ const im=MPX.annaffiatoio; ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(cx,cy); ctx.scale(g.dir,1); ctx.rotate(tilt); ctx.drawImage(im,-22,-30,im.width,im.height); ctx.restore(); }
+  if(a>40){ const st=a<62?'germoglio':a<84?'bocciolo':'fiore', im=MPX[st], fx=g.l.x-g.dir*((g.lay?58:44)), fy=GROUND+4, k=st==='germoglio'?0.7+Math.min(1,(a-40)/10)*0.3:1;
+    ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(fx,fy); ctx.scale(g.dir*k,k); ctx.drawImage(im,-im.width/2,-im.height,im.width,im.height); ctx.restore(); }
+  return true; }
 function drawHoop(f){ const h=f.hoop; if(!h) return; h.t++; if(h.t>100){ f.hoop=null; return; } // canestro che scende nella Schiacciata di Zeta
   const k=Math.min(1,h.t/16), up=h.t>80?(h.t-80)/20:0, x=h.x, y=Math.round(-130+260*k-300*up), sh=(h.t>30&&h.t<70)?Math.round(Math.sin(h.t*1.9)*3):0;
   { const HI=hoopImgs(), two=h.t>28&&h.t<72&&((h.t>>2)&1), im=two?HI[1]:HI[0]; if(im&&im.complete&&im.width){ ctx.save(); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,Math.round(x+sh-(two?83.5:70.5)),y-90); ctx.restore(); return; } }
@@ -1408,7 +1422,7 @@ function updProj(){
       if(p.kind==='flashfoto'&&opp.state==='hit'){ floatText('CLICK!',opp.x,opp.y-205,'#ffc21a',22); }
       if((p.kind==='arepa'||p.kind==='salsiccia')&&opp.state==='hit'){ if(p.last){ floatText('AL SANGUE!',opp.x,opp.y-215,'#ff3b3b',26,70); opp.vy=-8; opp.onGround=false; opp.knock=true; } else floatText(p.kind==='arepa'?'SPLAT!':'SFRIGOLA!',opp.x,opp.y-200,'#ffc933',p.sky?18:22); for(let k=0;k<7;k++) FX.push({x:p.x,y:p.y,vx:(rnd()-.5)*8,vy:-rnd()*6,life:18,c:k%2?'#f2e2b0':'#b8692f'}); }
       if(p.kind==='ovale'&&opp.state==='hit'){ floatText('OVALE!',opp.x,opp.y-205,'#ffc21a',20); }
-      if(p.kind==='cactus'&&opp.state==='hit'){ floatText('AHIA!',opp.x,opp.y-205,'#7ad15a',22); for(let k=0;k<8;k++) FX.push({x:p.x,y:p.y,vx:(rnd()-.5)*8,vy:-rnd()*6,life:22,c:k%2?'#b5562c':'#3f8f3a'}); }
+      if(p.kind==='cactus'&&opp.state==='hit'){ try{ cactusBoom(p.x,p.y); }catch(e){} floatText('AHIA!',opp.x,opp.y-205,'#7ad15a',22); for(let k=0;k<8;k++) FX.push({x:p.x,y:p.y,vx:(rnd()-.5)*8,vy:-rnd()*6,life:22,c:k%2?'#b5562c':'#3f8f3a'}); }
       if(p.kind==='frisbee'&&opp.state==='hit') floatText('ZIIING!',opp.x,opp.y-205,'#ff6fa8',22);
       if(p.kind==='flash'&&opp.state==='hit') floatText('CLICK!',opp.x,opp.y-205,'#ffffff',22);
       if(p.kind==='gelo'&&opp.state==='hit') floatText('BRRR!',opp.x,opp.y-205,'#9fe7ff',22);
@@ -1592,6 +1606,7 @@ function drawGesto(){ const g=G.gs; if(!g||g.at<0||g.D.away) return; const w=g.w
     const x=hx+(T[0]-hx)*e, y=hy-26+(T[1]-14-(hy-26))*e-Math.sin(k*Math.PI)*24, s=(k<1?0.7:0.9+Math.sin(a*0.25)*0.12);
     ctx.translate(x,y); ctx.scale(s,s); ctx.fillStyle='#ff5a8a'; ctx.strokeStyle='#120d22'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,14); ctx.bezierCurveTo(-30,-6,-14,-28,0,-11); ctx.bezierCurveTo(14,-28,30,-6,0,14); ctx.closePath(); ctx.stroke(); ctx.fill();
     ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.ellipse(-8,-10,4,2.5,-0.6,0,7); ctx.fill(); }
+  else if(key==='max'&&maxGestoGPT(g,a,hx,hy)){}
   else if(key==='max'){ // annaffiatoio: piove sullo sconfitto e spunta un fiore
     const cx=hx+g.dir*8, cy=hy-26, tilt=Math.min(1,a/14)*0.55*g.dir;
     if(a<110){ ctx.save(); ctx.translate(cx,cy); ctx.rotate(tilt); ctx.scale(g.dir,1); ctx.lineWidth=3; ctx.strokeStyle='#120d22';
@@ -1999,6 +2014,7 @@ function drawProj(p){
     ctx.strokeStyle='#ffffff'; ctx.lineWidth=2; const fr=p.r*1.5; for(let k=0;k<3;k++){ const a2=fr+k*1.05; ctx.beginPath(); ctx.moveTo(-14+Math.cos(a2)*7,Math.sin(a2)*7); ctx.lineTo(-14-Math.cos(a2)*7,-Math.sin(a2)*7); ctx.stroke(); } }
   else if(p.kind==='ovale'){ ctx.rotate(p.r*0.9); ctx.fillStyle='#8a4b22'; ctx.beginPath(); ctx.ellipse(0,0,22,13,0,0,7); ctx.fill(); ctx.stroke(); ctx.fillStyle='#b8692f'; ctx.beginPath(); ctx.ellipse(-4,-4,12,5,0,0,7); ctx.fill(); ctx.strokeStyle='#f4f1ea'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-8,0); ctx.lineTo(8,0); ctx.stroke(); for(let k=-6;k<=6;k+=4){ ctx.beginPath(); ctx.moveTo(k,-3); ctx.lineTo(k,3); ctx.stroke(); } }
   else if(p.kind==='flashfoto'){ const k3=1+(30-(p.life||0))*0.03; ctx.scale(k3,k3); ctx.globalAlpha=Math.max(.3,(p.life||0)/30); ctx.fillStyle='#fffbe0'; ctx.beginPath(); for(let k=0;k<16;k++){ const rr=k%2?12:30, an=k*Math.PI/8+p.r; k?ctx.lineTo(Math.cos(an)*rr,Math.sin(an)*rr):ctx.moveTo(Math.cos(an)*rr,Math.sin(an)*rr); } ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(0,0,9,0,7); ctx.fill(); ctx.globalAlpha=1; }
+  else if(p.kind==='cactus'&&cactusGPT(p)){}
   else if(p.kind==='cactus'){ ctx.rotate(p.r*1.4); ctx.lineWidth=2.5; ctx.strokeStyle='#120d22';
     ctx.fillStyle='#3f8f3a'; ctx.beginPath(); ctx.ellipse(0,-14,8,15,0,0,7); ctx.fill(); ctx.stroke();
     ctx.beginPath(); ctx.ellipse(-11,-14,5,8,0,0,7); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.ellipse(11,-20,5,7,0,0,7); ctx.fill(); ctx.stroke();
@@ -2549,7 +2565,7 @@ function render(){
   try{ drawCodiceBoom(); drawRoseFront(); }catch(e){}
   try{ ondaFajaCheck(); drawOndaFaja(); }catch(e){}
   try{ drawBlasGPT(false); }catch(e){}
-  try{ drawZetaBoom(); drawSpermaBoom(); drawMaxBoom(); drawFagoFront(); drawMetaBoom(); drawDiretta(); drawOndaFront(); }catch(e){}
+  try{ drawZetaBoom(); drawSpermaBoom(); drawMaxBoom(); drawFagoFront(); drawMetaBoom(); drawDiretta(); drawOndaFront(); drawCactusBoom(); }catch(e){}
   { const ri=SPRITES.faja&&SPRITES.faja.remora; if(ri&&ri.complete&&ri.width) for(const F of [G.f1,G.f2]) if(F&&F.remT>0&&F.state!=='ko'){ ctx.save(); ctx.translate(F.x-F.facing*10,F.y-115*(F.def.size||1)); ctx.scale(-F.facing,1); ctx.rotate(0.5+Math.sin(F.t*0.3)*0.1); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=Math.min(1,F.remT/20); const w=46,h=ri.height*w/ri.width; ctx.drawImage(ri,-w/2,-h/2,w,h); ctx.restore(); } } // remora attaccata
   try{ drawMariaScia(); }catch(e){} if(G.f1) drawMaria(G.f1); if(G.f2) drawMaria(G.f2); if(G.f1) drawHoop(G.f1); if(G.f2) drawHoop(G.f2);
   if(G.f1) drawHusky(G.f1); if(G.f2) drawHusky(G.f2);
