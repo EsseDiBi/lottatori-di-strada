@@ -335,6 +335,46 @@ ANCHOR.nicozago={"guardia": 0.478, "guardia2": 0.426, "camminata1": 0.547, "camm
 ANCHOR.bdb={"guardia": 0.474, "guardia2": 0.509, "camminata1": 0.638, "camminata2": 0.514, "pugno": 0.529, "rovescio": 0.551, "calcio": 0.702, "salto": 0.566, "parata": 0.339, "vittoria": 0.432, "sconfitta": 0.685, "colpito": 0.239, "stordita": 0.555, "ko": 0.5, "accovacciato": 0.588, "aterra": 0.5, "rialzo": 0.731, "sgambetto": 0.256, "provocazione": 0.495, "lancio": 0.662, "caricatrapano": 0.293, "trapano": 0.475, "presa": 0.432, "caricapugno": 0.545, "montante": 0.579, "esulta1": 0.416, "selfie": 0.405, "super1": 0.469, "entrata": 0.396, "tifo": 0.49, "esulta2": 0.451, "mascherina": 0.536, "paratabassa": 0.584, "marrao_seduta": 0.679, "marrao_muso": 0.5, "marrao_corsa": 0.766, "marrao_salto": 0.679, "marrao_salto2": 0.652, "marrao_graffio1": 0.313, "marrao_graffio2": 0.302, "marrao_tifo": 0.549, "marrao_distesa": 0.5, "dentiera": 0.5, "ritratto": 0.5};
 ANCHOR.divino={"guardia": 0.527, "guardia2": 0.528, "camminata1": 0.568, "camminata2": 0.535, "pugno": 0.418, "rovescio": 0.415, "pugno3": 0.329, "calcio": 0.317, "salto": 0.526, "parata": 0.488, "vittoria": 0.482, "sconfitta": 0.659, "colpito": 0.258, "stordito": 0.265, "ko": 0.5, "rialzo": 0.756, "accovacciato": 0.587, "aterra": 0.5, "provocazione": 0.509, "lancio": 0.429, "lancio2": 0.475, "bicipite": 0.516, "hummus": 0.5, "caricatrapano": 0.384, "trapano": 0.485, "presa": 0.543, "caricapugno": 0.411, "montante": 0.383, "super1": 0.615, "entrata": 0.484, "tifo": 0.583, "paratabassa": 0.584, "sgambetto": 0.5, "esulta1": 0.468, "esulta2": 0.479, "leti_sgommata": 0.5, "leti_salto": 0.5, "leti_clacson": 0.5, "leti_occhiolino": 0.5, "leti_ciao": 0.5, "ritratto": 0.5};
 for(const k in ANCHOR) for(const p in ANCHOR[k]) if(SPRITES[k]&&SPRITES[k][p]) SPRITES[k][p].ax=ANCHOR[k][p];
+/*ROSA1*/ /* Capelli rosa chiaro dopo la prima Blasfemia: capelli isolati per tonalità (rosso-arancio scuro), per vicinato (la pelle chiara vince) e per zona (macchie staccate e chiare = pelle) */
+const ROSAKEYS=['marouges','marlav']; const ROSAPAR={marouges:{hv:0.60,sv:0.86,hq:9,sq:9,hs:0,ss:0,fill:0},marlav:{hv:0.90,sv:0.95,hq:0.26,sq:0.30,hs:0.78,ss:0.70,fill:3}};
+function rosaImg(im,P){ const w=im.width, h=im.height, c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); g.drawImage(im,0,0);
+  let ID; try{ ID=g.getImageData(0,0,w,h); }catch(e){ return null; } const D=ID.data, N=w*h;
+  const cand=new Uint8Array(N), Hh=new Uint8Array(N), Ss=new Uint8Array(N), V=new Float32Array(N); let hair=new Uint8Array(N);
+  for(let i=0;i<N;i++){ const r=D[i*4], gg=D[i*4+1], b=D[i*4+2], al=D[i*4+3], mx=Math.max(r,gg,b), mn=Math.min(r,gg,b), v=mx/255, s=mx>0?(mx-mn)/Math.max(mx,1):0; V[i]=v;
+    if(al>128&&r>=gg&&gg>=b-6&&s>=0.55&&v>0.2&&(gg-b)<(r-b)*0.62){ cand[i]=1; const q=(gg-b)/Math.max(r-b,1); if(v<P.hv&&q<=P.hq&&s>=P.hs) Hh[i]=1; else if(v>=P.sv||q>=P.sq||s<P.ss) Ss[i]=1; } }
+  const box=(src,rad)=>{ const t=new Uint16Array(N), o=new Uint16Array(N);
+    for(let y=0;y<h;y++){ let acc=0; for(let x=-rad;x<w+rad;x++){ if(x+rad<w&&x+rad>=0) acc+=src[y*w+x+rad]; if(x-rad-1>=0&&x-rad-1<w) acc-=src[y*w+x-rad-1]; if(x>=0&&x<w) t[y*w+x]=acc; } }
+    for(let x=0;x<w;x++){ let acc=0; for(let y=-rad;y<h+rad;y++){ if(y+rad<h&&y+rad>=0) acc+=t[(y+rad)*w+x]; if(y-rad-1>=0&&y-rad-1<h) acc-=t[(y-rad-1)*w+x]; if(y>=0&&y<h) o[y*w+x]=acc; } }
+    return o; };
+  const nh=box(Hh,4), ns=box(Ss,4), ns5=box(Ss,2);
+  for(let i=0;i<N;i++){ if(Hh[i]) hair[i]=nh[i]>ns[i]*0.9?1:0; else if(cand[i]&&!Ss[i]) hair[i]=(nh[i]>ns[i]*3&&ns[i]<6)?1:0; }
+  const oth=new Uint8Array(N);
+  for(let k=0;k<2;k++){ for(let i=0;i<N;i++) oth[i]=cand[i]&&!hair[i]?1:0; const a5=box(hair,2), o5=box(oth,2), nx=new Uint8Array(N);
+    for(let i=0;i<N;i++) nx[i]=((hair[i]&&a5[i]>=o5[i])||(cand[i]&&!Ss[i]&&a5[i]>=19&&ns5[i]===0))?1:0; hair=nx; }
+  // zone: macchie collegate (capelli allargati di 1 pixel a croce); resta la più grande, più quelle scure e lontane dalla pelle
+  const dil=new Uint8Array(N); for(let y=0;y<h;y++) for(let x=0;x<w;x++){ const i=y*w+x; if(hair[i]||(x>0&&hair[i-1])||(x<w-1&&hair[i+1])||(y>0&&hair[i-w])||(y<h-1&&hair[i+w])) dil[i]=1; }
+  const lab=new Int32Array(N), comps=[]; let nl=0;
+  for(let i0=0;i0<N;i0++){ if(!dil[i0]||lab[i0]) continue; nl++; const q=[i0]; lab[i0]=nl; let sz=0, hf=0;
+    for(let qi=0;qi<q.length;qi++){ const i=q[qi], x=i%w, y=(i/w)|0; if(hair[i]){ sz++; if(Hh[i]) hf++; }
+      if(x>0&&dil[i-1]&&!lab[i-1]){ lab[i-1]=nl; q.push(i-1); } if(x<w-1&&dil[i+1]&&!lab[i+1]){ lab[i+1]=nl; q.push(i+1); }
+      if(y>0&&dil[i-w]&&!lab[i-w]){ lab[i-w]=nl; q.push(i-w); } if(y<h-1&&dil[i+w]&&!lab[i+w]){ lab[i+w]=nl; q.push(i+w); } }
+    comps.push({id:nl,q,sz,hf}); }
+  if(comps.length){ let big=comps[0]; for(const cp of comps) if(cp.sz>big.sz) big=cp; const keep=new Uint8Array(nl+1); keep[big.id]=1; const seen=new Int32Array(N);
+    for(const cp of comps){ if(cp===big||cp.sz<20) continue; let adj=0;
+      for(const i of cp.q){ const x=i%w, y=(i/w)|0; for(let dy=-3;dy<=3;dy++) for(let dx=-3+Math.abs(dy);dx<=3-Math.abs(dy);dx++){ const xx=x+dx, yy=y+dy; if(xx<0||yy<0||xx>=w||yy>=h) continue; const j=yy*w+xx; if(seen[j]===cp.id) continue; seen[j]=cp.id; if(cand[j]&&!hair[j]) adj++; } }
+      if(adj<0.3*cp.sz&&cp.hf/cp.sz>=0.75) keep[cp.id]=1; }
+    for(let i=0;i<N;i++) if(hair[i]&&!keep[lab[i]]) hair[i]=0; }
+  { const a5=box(hair,2), a9=box(hair,4); for(let i=0;i<N;i++) if(cand[i]&&(a5[i]>=19||a9[i]>=58)) hair[i]=1; }
+  for(let k=0;k<(P.fill||0);k++){ const sk=new Uint8Array(N); for(let i=0;i<N;i++) sk[i]=cand[i]&&!hair[i]?1:0; const a5=box(hair,2), s5=box(sk,2); for(let i=0;i<N;i++) if(cand[i]&&a5[i]>=11&&s5[i]<=6) hair[i]=1; }
+  for(let i=0;i<N;i++){ if(!hair[i]) continue; const t=Math.max(0,Math.min(1,(V[i]-0.22)/0.58)); D[i*4]=186+69*t; D[i*4+1]=84+132*t; D[i*4+2]=128+104*t; }
+  g.putImageData(ID,0,0); for(const k of Object.keys(im)) c[k]=im[k]; c.ax=im.ax; c.complete=true; return c; }
+function rosaBuild(key){ const SP=SPRITES[key]; if(!SP||SPRITES[key+'_rosa']) return; const ims=Object.keys(SP).filter(p=>SP[p]&&typeof SP[p]==='object'&&('width' in SP[p]));
+  if(ims.some(p=>!SP[p].complete||!SP[p].width)){ setTimeout(()=>rosaBuild(key),300); return; }
+  try{ if(KOFIX[key]&&!SP.__kofix&&SP.ko) fixKo(SP,key); }catch(e){}
+  const R={__kofix:1}, done=new Map(); for(const p of ims){ const im=SP[p]; if(!done.has(im)) done.set(im,(p.indexOf('bounty')===0||p.indexOf('mini')===0)?im:(rosaImg(im,ROSAPAR[key])||im)); R[p]=done.get(im); } SPRITES[key+'_rosa']=R; }
+addEventListener('load',()=>setTimeout(()=>ROSAKEYS.forEach(rosaBuild),200));
+function rosaSP(F){ const d=F.def; return (G&&G.rosa&&G.rosa.has(d)&&(F===G.f1||F===G.f2)&&SPRITES[d.spriteKey+'_rosa'])||SPRITES[d.spriteKey]; }
+
 // capelli infuocati in pixel art: i capelli diventano fuoco e ne escono lingue di fiamma che tremolano a scatti
 const HFM=26, HFPAL=['#3a0b08','#92080e','#b71715','#d81e1a','#cf542a','#e97940','#f9a561'];
 function hairMask(im,hd){ const key=hd.join(','); im._hm=im._hm||{}; if(im._hm[key]) return im._hm[key];
@@ -1555,7 +1595,7 @@ function updFighter(f,o,inp){
       else if(a.type==='sup'&&f.def.superCats){ f.vx=0; if(a.f===2) floatText(f.def.spriteKey==='stefano'?'Boogie! Mocambo!':'Gatti!',f.x,f.y-250,f.def.accent,17,46,'balloon'); if(a.f===m.s){ spawnCatFan(f,o,0,0); spawnCatFan(f,o,3,10); } }
       else if(a.type==='sup'&&f.def.superRage){ f.vx=0; // si arrabbia, chiude gli occhi e urla: escono simboli al posto delle parolacce
         
-        if(a.f===m.s+1){ G.shake=Math.max(G.shake,16); G.excite=1; SFX.rage(); }
+        if(a.f===m.s+1){ G.shake=Math.max(G.shake,16); G.excite=1; SFX.rage(); if(SPRITES[f.def.spriteKey+'_rosa']) (G.rosa||(G.rosa=new Set())).add(f.def); }
         if(a.f>m.s&&a.f<=m.s+m.a&&(a.f-m.s)%7===1&&a.n<6){ spawnCuss(f,a.n++); G.shake=Math.max(G.shake,6); } }
       else if(a.type==='sup'&&f.def.spriteKey==='ruben'){ f.vx=0; if(a.f===2) floatText('VOGLIA ZERO!',f.x,f.y-250,'#ffc21a',22,60); if(a.f===m.s+1){ rubenWave(f,false); G.shake=Math.max(G.shake,8); G.excite=1; } if(a.f===m.s+16) rubenWave(f,true); }
       else if(a.type==='sup'&&f.def.spriteKey==='orio'){ f.vx=0; }
@@ -2364,7 +2404,7 @@ function drawSprite(g,F,ox,oy,sc,SP){
 function drawFighter(g,F,ox,oy,sc){
   if(F.squashT>0&&!F._sq){ const r=F.squashT/46, sy=r>0.55?0.38:1-0.62*(r/0.55)*Math.abs(Math.cos((0.55-r)*28)), sx=1+(1-sy)*0.8; F._sq=1; g.save(); g.translate(ox,oy); g.scale(sx,sy); g.translate(-ox,-oy); try{ drawFighter(g,F,ox,oy,sc); }finally{ g.restore(); F._sq=0; } return; }
   if(F.wrapT>0){ const fg=SPRITES.carolluz&&SPRITES.carolluz.fagotto; if(F.wrapT>50&&fg&&fg.complete&&fg.width){ const h=100*sc, w=fg.width*h/fg.height; g.save(); g.translate(ox,oy); g.rotate(Math.sin(F.t*0.6)*0.12); g.imageSmoothingEnabled=false; g.drawImage(fg,-w/2,-h,w,h); g.restore(); } return; }
-  const SP=SPRITES[F.def.spriteKey]; if(SP&&SP.guardia&&drawSprite(g,F,ox,oy,sc,SP)) return;
+  const SP=rosaSP(F); if(SP&&SP.guardia&&drawSprite(g,F,ox,oy,sc,SP)) return;
   const d=F.def, Pp=pose(F);
   g.save(); g.translate(ox,oy); g.scale(sc*(d.size||1),sc*(d.size||1));
   if(F.state==='ko'){ const k=Math.min(1,F.koT/16); g.translate(0,-12*k); g.rotate(-k*1.5*F.facing); }
@@ -2855,7 +2895,7 @@ function drawHUD(){
   const n1=G.f1.def.name.toUpperCase(), n2=G.f2.def.name.toUpperCase()+(G.mode==='cpu'?' (CPU)':'');
   ctx.textAlign='left'; ctx.strokeText(n1,50,y+44); ctx.fillText(n1,50,y+44);
   ctx.textAlign='right'; ctx.strokeText(n2,W-50,y+44); ctx.fillText(n2,W-50,y+44);
-  for(const [f,px] of [[G.f1,6],[G.f2,W-46]]){ const SP=SPRITES[f.def.spriteKey]; if(SP&&SP.ritratto&&SP.ritratto.complete){ ctx.fillStyle='#ffc933'; ctx.fillRect(px-2,y-4,44,44); ctx.imageSmoothingEnabled=false; ctx.drawImage(SP.ritratto,px,y-2,40,40); ctx.imageSmoothingEnabled=true; } }
+  for(const [f,px] of [[G.f1,6],[G.f2,W-46]]){ const SP=rosaSP(f); if(SP&&SP.ritratto&&SP.ritratto.complete){ ctx.fillStyle='#ffc933'; ctx.fillRect(px-2,y-4,44,44); ctx.imageSmoothingEnabled=false; ctx.drawImage(SP.ritratto,px,y-2,40,40); ctx.imageSmoothingEnabled=true; } }
   for(let i=0;i<2;i++){ for(const [side,bx] of [[0,50+bw-14-i*22],[1,W-50-bw+14+i*22]]){ ctx.beginPath(); ctx.arc(bx,y+40,7,0,7); ctx.fillStyle=G.wins[side]>i?'#ffc933':'#2a2045'; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#120d22'; ctx.stroke(); } }
   for(const [f,x,rev] of [[G.f1,50,false],[G.f2,W-50-220,true]]){
     const yy=H-34, full=f.meter>=100;
