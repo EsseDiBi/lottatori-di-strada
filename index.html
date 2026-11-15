@@ -1906,7 +1906,7 @@ function drawSprite(g,F,ox,oy,sc,SP){
   else if(a&&a.type==='sfonda') im=(early?SP.caricapugno:SP.sfondamento)||im;
   else if(a&&a.type==='padella') im=(early?SP.padella1:SP.padella2)||SP.pugno||im;
   else if(a&&a.type==='ranged'&&d.rangedKind==='sperma') im=(early?SP.onda1:SP.onda2)||SP.pugno||im;
-  else if(a&&a.type==='ranged'&&d.spriteKey==='zeta') im=(early?SP.tiro:(SP.tiro2||SP.tiro))||im;
+  else if(a&&a.type==='ranged'&&d.spriteKey==='zeta') im=(a.f<a.m.s?SP.tiro:(SP.tiro2||SP.tiro))||im; /*TIROZETA1: pallone in mano solo prima del lancio*/
   else if(a&&a.type==='ranged'&&d.rangedKind==='arepa') im=SP.spara||SP.pugno||im;
   else if(a&&a.type==='sup'&&d.grill) im=(early?(SP.assaggia||SP.provocazione):SP.grigliata)||SP.pugno||im;
   else if(a&&a.type==='posa'){ im=(early?(SP.fotomodello2||SP.fotomodello):(((a.f/12)|0)%2&&SP.fotomodello2?SP.fotomodello2:SP.fotomodello))||SP.vittoria||im; }
