@@ -398,8 +398,8 @@ const FORME_RC={ruben:[{smax:0.32,vmin:0.5,h:46,s:0.9,vk:1.08}],laura:[{h0:185,h
 const FORME_AK={ruben:0.85,laura:0.7,carolluz:0.7,orio:0.85,nicozago:0.85}, FORME_AC={jj:'#b44cff',stefano:'#4aa8ff',cugi:'#ff4a3a',zeta:'#ff4040',chooby:'#8fd8ff',frisbee:'#3fe0ff',marico:'#ffd040',morex:'#b8e04a',socciaman:'#ff9a3a',bdb:'#38c8ff',divino:'#ffc61a',orio:'#ffd040',ruben:'#ffc933',laura:'#ff5fa8',biscio:'#ffa630',carolluz:'#3aa0ff',nicozago:'#ff7a1a'}, FORME_CUORI={laura:1};
 const FORME_NO=['evilsdb','maxbiondo','poseidone','criceto','marlav','mecha'];
 const FORME_MUL={2:[1.10,0.92,1.05],3:[1.22,0.85,1.10]};
-const FORME_LOCK={maxbiondo:'lds-maxbiondo',poseidone:'lds-poseidone',criceto:'lds-criceto'}; // la forma vera serve sbloccata; altrimenti livello 3 con la sola correzione colore
-const FORME_GRIGLIA=['maxbiondo','poseidone','criceto']; // gli sbloccabili diventano forme: fuori dalla griglia
+const FORME_LOCK={}; /*SOLOFORME1: le forme vere non vanno sbloccate*/ // la forma vera serve sbloccata; altrimenti livello 3 con la sola correzione colore
+const FORME_GRIGLIA=['maxbiondo','poseidone','criceto','marlav','mecha']; // gli sbloccabili diventano forme: fuori dalla griglia
 function formeGriglia(){ try{ const n=ROSTER.length; ROSTER=ROSTER.filter(r=>!(r&&(FORME_GRIGLIA.includes(r.spriteKey)||r.dio))); if(ROSTER.length!==n){ try{ save(); }catch(e){} if(sel&&sel.picks&&sel.picks.some(i=>i>=ROSTER.length)) sel.picks=[0,1]; } }catch(e){} }
 function formeCan(f){ if(!f||!f.def||f.def.dark||f.atk||!f.onGround) return false; const b=(f._fd&&f._fd[0])||f.def; if(FORME_NO.includes(b.spriteKey)) return false; return (f._fd?f._fd.length:1)<FORME_MAX; }
 function formeCol(d){ const R=(typeof RUOTA!=='undefined'&&RUOTA[d.spriteKey]); return (R&&R[0])||d.accent||'#ffc933'; }
@@ -2092,7 +2092,7 @@ function updFighter(f,o,inp){
       else if(a.type==='sup'&&f.def.superCats){ f.vx=0; if(a.f===2) floatText(f.def.spriteKey==='stefano'?'Boogie! Mocambo!':'Gatti!',f.x,f.y-250,f.def.accent,17,46,'balloon'); if(a.f===m.s){ spawnCatFan(f,o,0,0); spawnCatFan(f,o,3,10); } }
       else if(a.type==='sup'&&f.def.superRage){ f.vx=0; // si arrabbia, chiude gli occhi e urla: escono simboli al posto delle parolacce
         
-        if(a.f===m.s+1){ G.shake=Math.max(G.shake,16); G.excite=1; SFX.rage(); if(f.def.spriteKey==='marlav'&&o){ BTY.push({f,o,x:Math.max(120,Math.min(W-120,o.x)),t:0,hit:true,big:true,life:m.a+24}); floatText('BOUNTYYYY!',f.x,f.y-260,'#ff8fc8',28,60); } if(SPRITES[f.def.spriteKey+'_rosa']) (G.rosa||(G.rosa=new Set())).add(f.def); }
+        if(a.f===m.s+1){ G.shake=Math.max(G.shake,16); G.excite=1; SFX.rage(); if(f.def.spriteKey==='marlav'&&o){ BTY.push({f,o,x:Math.max(120,Math.min(W-120,o.x)),t:0,hit:true,big:true,life:m.a+24}); floatText('BOUNTYYYY!',f.x,f.y-260,'#ff8fc8',28,60); } /*SOLOFORME1: rosa solo con la trasformazione*/ }
         if(a.f>m.s&&a.f<=m.s+m.a&&(a.f-m.s)%7===1&&a.n<6){ spawnCuss(f,a.n++); G.shake=Math.max(G.shake,6); } }
       else if(a.type==='sup'&&f.def.spriteKey==='ruben'){ f.vx=0; if(a.f===2) floatText('VOGLIA ZERO!',f.x,f.y-250,'#ffc21a',22,60); if(a.f===m.s+1){ rubenWave(f,false); G.shake=Math.max(G.shake,8); G.excite=1; } if(a.f===m.s+16) rubenWave(f,true); }
       else if(a.type==='sup'&&f.def.spriteKey==='orio'){ f.vx=0; }
@@ -3454,7 +3454,7 @@ function drawHUD(){
     ctx.fillStyle='#120d22'; ctx.fillRect(x-2,yy-2,224,16); ctx.fillStyle='#2a2045'; ctx.fillRect(x,yy,220,12);
     const mw=220*f.meter/100; ctx.fillStyle=full?((G.frame>>2)%2?'#ffffff':f.def.accent):f.def.accent; ctx.fillRect(rev?x+220-mw:x,yy,mw,12);
     ctx.font='12px '+FD; ctx.fillStyle=full?'#ffc933':'#a8a1c9'; ctx.textAlign=rev?'right':'left';
-    ctx.fillText(full?'SUPER PRONTA':'SUPER',rev?x+220:x,yy-6);
+    ctx.fillText('SUPER',rev?x+220:x,yy-6);
   }
 }
 function drawBanner(){ // scritte da sala giochi: ombra pesante, riempimento a bande, lampo che scorre
@@ -3696,6 +3696,7 @@ function pagineRoster(root){
   root.onscroll=upd; root.scrollLeft=0; upd();
 }
 function buildCards(){
+  try{ formeGriglia(); }catch(e){} /*SOLOFORME1*/
   const root=$('#roster'); root.innerHTML=''; cards=[]; root.className='pgrid'; { const nn=Math.min(PAGESZ,ROSTER.length), pc=nn>9?4:3; root.style.setProperty('--pc',pc); root.style.setProperty('--pr',Math.ceil(nn/pc)); } // con piu' di 9 lottatori: 4 colonne, tutto in una schermata
   if(!root.parentNode.classList.contains('vsel')){ const w=document.createElement('div'); w.className='vsel'; root.parentNode.insertBefore(w,root);
     const mk=s=>{ const c=document.createElement('canvas'); c.width=260*DPR; c.height=330*DPR; c.className='bigsel'; c.setAttribute('aria-hidden','true'); return c; };
