@@ -408,7 +408,7 @@ function formeUp(f){ if(!formeCan(f)) return false; f._fd=f._fd||[f.def]; const 
   if(sw&&!lock&&sw.indexOf('img:')!==0&&sw!=='rosa'){ try{ const td=TORMINI.def[sw], p=td&&td.p(); if(p){ d=fromPreset(p); swap=true; } }catch(e){} }
   const prev=f._fd[f._fd.length-1];
   if(!d){ d=Object.create(base); if(sw&&sw.indexOf('img:')===0) d.lvSP=sw.slice(4); else if(sw&&sw.indexOf('rc:')===0) d.lvRC=sw.slice(3); else if(prev.lvSP) d.lvSP=prev.lvSP; }
-  const m=FORME_MUL[top?3:lv], spd=swap?(d.speed||4):(base.speed||4)*m[2]; d=Object.create(d); d.dmgMul=(base.dmgMul||1)*m[0]; d.defMul=(base.defMul||1)*m[1]; d.speed=spd; d.lv=lv; d.lvSwap=swap; d.lvTint=!swap&&!d.lvSP&&!d.lvRC?(top?3:lv):0; d.lvTop=top; d.lvCol=FORME_AC[k]||formeCol(base);
+  const m=FORME_MUL[top?3:lv], spd=swap?(d.speed||4):(base.speed||4)*m[2]; d=Object.create(d); d.dmgMul=(base.dmgMul||1)*m[0]; d.defMul=(base.defMul||1)*m[1]; d.speed=spd; d.lv=lv; d.lvSwap=swap; d.lvTint=!swap&&!d.lvSP&&!d.lvRC&&sw!=='rosa'?(top?3:lv):0; /*ROSAPELLE1*/ d.lvTop=top; d.lvCol=FORME_AC[k]||formeCol(base);
   if(swap) d.name=d.base; else d.name=base.name;
   if(sw==='rosa'||(prev&&G&&G.rosa&&G.rosa.has(prev))){ try{ (G.rosa||(G.rosa=new Set())).add(d); }catch(e){} }
   d.lvVite=3; f._fdCad=0; f._fd.push(d); f.def=d; f.meter=0; f._evoT=G.frame; f.vx=0; f.state='idle'; f.gp=null;
