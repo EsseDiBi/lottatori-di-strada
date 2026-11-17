@@ -1605,7 +1605,7 @@ STATS.zeta={forza:5,resistenza:5,velocita:6,agilita:8}; STATS_BASE['Zeta']='zeta
 PROJ.pallone={l:'Pallone',v:9,d:9}; PROJLBL.pallone=PROJ.pallone.l;
 PROJ.faldoni={l:'Faldoni',v:9,d:8}; PROJLBL.faldoni=PROJ.faldoni.l;
 MOVESET.monica={ranged:'faldoni',sp:'aspira',rName:'Faldoni',sName:'Sussurro',uName:'Fascicolo al mento',supName:'Martello del Foro'};
-STATS.monica={forza:6,resistenza:5,velocita:6,agilita:7}; STATS_BASE['THE PRATICANT']='monica';
+STATS.monica={forza:6,resistenza:5,velocita:6,agilita:7}; STATS_BASE['The Praticant']='monica';
 
 PROJ.semi={l:'Semi di girasole',v:11,d:3.4}; PROJLBL.semi=PROJ.semi.l;
 MOVESET.criceto={ranged:'semi',sp:'nuoto',rName:'Semi di girasole',sName:'Ruota del criceto',uName:'Balzo mannaro',supName:'Luna di formaggio'};
@@ -1704,7 +1704,7 @@ if(!PRESETS.some(p=>p.spriteKey==='divino')) PRESETS.push({base:'Il Divino',kind
 const CRICP={base:'CRICETO MANNARO',kind:'suit',suit:'#1f2c5c',legs:'#d8c49a',accent:'#ff3b2f',tie:'#2f8f3a',top:'#16131a',shoes:'#e8a86a',skin:'#e8a86a',hair:'#b9b9b9',special:'Ruota del criceto',superName:'Luna di formaggio',proj:'semi',size:1.5,spriteKey:'criceto',
    bio:'Yoghi quando ride troppo. Nobile svizzero, ora criceto gigante. Sputa semi, rotola nella ruota, morde alla luna piena.'};
 if(!PRESETS.some(p=>p.spriteKey==='criceto')&&(()=>{ try{ return localStorage.getItem('lds-criceto')==='1'; }catch(e){ return false; } })()) PRESETS.push(CRICP);
-if(!PRESETS.some(p=>p.spriteKey==='monica')) PRESETS.push({base:'THE PRATICANT',kind:'hoodie',suit:'#5d5a22',legs:'#5d5a22',accent:'#d8b23a',tie:'#d8b23a',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#e0a050',longHair:true,special:'Sussurro',superName:'Martello del Foro',proj:'faldoni',size:1.02,spriteKey:'monica',
+if(!PRESETS.some(p=>p.spriteKey==='monica')) PRESETS.push({base:'The Praticant',kind:'hoodie',suit:'#5d5a22',legs:'#5d5a22',accent:'#d8b23a',tie:'#d8b23a',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#e0a050',longHair:true,special:'Sussurro',superName:'Martello del Foro',proj:'faldoni',size:1.02,spriteKey:'monica',
    bio:'Praticante di SDB. Timida, studia tutto due volte. Il suo dogo Blu e il martello del Foro parlano per lei.'});
 if(!PRESETS.some(p=>p.spriteKey==='yoghi')) PRESETS.push({base:'Yoghi',kind:'suit',suit:'#1f2c5c',legs:'#d8c49a',accent:'#ffc21a',tie:'#2f8f3a',top:'#16131a',shoes:'#e8b48e',skin:'#e8b48e',hair:'#b9b9b9',special:'Drive',superName:'Beneficenza',proj:'golf',size:1.18,spriteKey:'yoghi',
    bio:'Nobile svizzero che adora i poveri. Golf, rugby con SDB e CUGI, camicia hawaiana e piedi nudi. Quando ride diventa il criceto mannaro.'});
@@ -1743,7 +1743,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='zeta')){ const zp=PRESETS.find(p=>p.spriteKey==='zeta'); if(zp){ ROSTER.push(fromPreset(zp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='zeta') r.size=1.16; });
   if(!ROSTER.some(r=>r.spriteKey==='monica')){ const mp=PRESETS.find(p=>p.spriteKey==='monica'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='monica'){ r.size=1.02; if(!r.dark){ r.name='THE PRATICANT'; r.base='THE PRATICANT'; } } });
+  ROSTER.forEach(r=>{ if(r.spriteKey==='monica'){ r.size=1.02; if(!r.dark){ r.name='The Praticant'; r.base='The Praticant'; } } });
   if(!ROSTER.some(r=>r.spriteKey==='criceto')){ const cp=PRESETS.find(p=>p.spriteKey==='criceto'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='criceto') r.size=1.5; });
   if(!ROSTER.some(r=>r.spriteKey==='divino')){ const dp=PRESETS.find(p=>p.spriteKey==='divino'); if(dp){ ROSTER.push(fromPreset(dp)); try{ save(); }catch(e){} } }
