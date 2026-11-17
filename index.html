@@ -384,7 +384,7 @@ function rosaBuild(key){ const SP=SPRITES[key]; if(!SP||SPRITES[key+'_rosa']) re
   try{ if(KOFIX[key]&&!SP.__kofix&&SP.ko) fixKo(SP,key); }catch(e){}
   const R={__kofix:1}, done=new Map(); for(const p of ims){ const im=SP[p]; if(!done.has(im)) done.set(im,(p.indexOf('bounty')===0||p.indexOf('mini')===0)?im:(rosaImg(im,ROSAPAR[key])||im)); R[p]=done.get(im); } SPRITES[key+'_rosa']=R; }
 addEventListener('load',()=>setTimeout(()=>ROSAKEYS.forEach(rosaBuild),200));
-function rosaSP(F){ try{ const _fs=formeSP(F); if(_fs) return _fs; }catch(e){} const d=F.def; return (G&&G.rosa&&G.rosa.has(d)&&(F===G.f1||F===G.f2)&&SPRITES[d.spriteKey+'_rosa'])||SPRITES[d.spriteKey]; }
+function rosaSP(F){ const _dd=F.def; if(_dd&&_dd.dark&&SPRITES[_dd.spriteKey+'_dark']) return SPRITES[_dd.spriteKey+'_dark']; try{ const _fs=formeSP(F); if(_fs) return _fs; }catch(e){} const d=F.def; return (G&&G.rosa&&G.rosa.has(d)&&(F===G.f1||F===G.f2)&&SPRITES[d.spriteKey+'_rosa'])||SPRITES[d.spriteKey]; }
 
 /*FORME1 - evoluzione durante l'incontro (17.11.2026). Barra super piena + giù + super: si sale di un livello (massimo 3) invece di lanciare la super. A terra si scende di un livello. A ogni round si riparte dal livello 1.
    Livello 2 e 3: correzione colore sulle pose del lottatore (calcolata all'avvio della forma, come i capelli rosa), più forza, resistenza e velocità; aura al momento della trasformazione, aura fissa al livello 3.
@@ -455,6 +455,23 @@ function formeAura(g,F,ox,oy,sc){ const d=F.def; if(!d||!d.lv||F.state==='ko'||F
 addEventListener('load',()=>setTimeout(()=>{ try{ for(const n in (window.FORME_IMG||{})){ const k=n.split('_')[0]; formePack(n,k); } }catch(e){} },500));
 window.__formeOnLoad=function(n){ try{ fmIm(); formePack(n,n.split('_')[0]); }catch(e){} };
 try{ if(location.hash==='#debug') window.__forme={formeSP,formeAura,formePack,formeAuraImg}; }catch(e){}
+
+
+/*DARK3 - Evil dei lottatori di base: nel gioco ma spenti. Si accendono solo con localStorage 'lds-dark3'='1', che il gioco non scrive mai. */
+const DARK3KEYS=['marico','carolluz','jj','chooby','morex','laura','cugi','biscio','zeta','ruben','frisbee','nicozago','criceto','maxbiondo','poseidone'];
+function dark3On(){ try{ return localStorage.getItem('lds-dark3')==='1'; }catch(e){ return false; } }
+function dark3Build(key){ const SP=SPRITES[key], PK=(window.EVIL2_IMG||{})[key]; if(!SP||!PK) return false; if(SPRITES[key+'_dark']) return true;
+  if(!SP.guardia||!SP.guardia.complete||!SP.guardia.width) return false;
+  if(!PK.__im){ const M={}; for(const q in PK){ const im=new Image(); im.src=PK[q]; M[q]=im; } Object.defineProperty(PK,'__im',{value:M}); }
+  if(Object.values(PK.__im).some(im=>!im.complete||!im.width)) return false;
+  const R={__dark:1,__kofix:1}; for(const q of Object.keys(SP)) R[q]=SP[q];
+  for(const q in PK.__im){ if(!(q in SP)) continue; const im=PK.__im[q], o=SP[q]; if(o&&typeof o==='object'){ for(const k of Object.keys(o)){ try{ im[k]=o[k]; }catch(e){} } im.ax=o.ax; } R[q]=im; }
+  SPRITES[key+'_dark']=R; return true; }
+function dark3All(n){ let miss=0; DARK3KEYS.forEach(k=>{ if(SPRITES[k]&&!dark3Build(k)) miss++; });
+  if(miss&&(n||0)<120) setTimeout(()=>dark3All((n||0)+1),500);
+  else { try{ for(const k in PORTC) if(k.indexOf('_dark')>0) delete PORTC[k]; buildCards(); }catch(e){} } }
+function dark3Roster(){ DARK3KEYS.forEach(k=>{ const b=ROSTER.find(r=>r.spriteKey===k&&!r.dark); if(b&&!ROSTER.some(r=>r.dark&&r.spriteKey===k)){ const d=Object.create(b); d.dark=true; d.id=b.id+'_dk'; d.name='Evil '+b.name; d.base='Evil '+(b.base||b.name); ROSTER.push(d); } }); }
+if(dark3On()){ try{ const sc=document.createElement('script'); sc.src='img/dark3.js'; sc.onload=()=>dark3All(0); document.head.appendChild(sc); }catch(e){} }
 
 // capelli infuocati in pixel art: i capelli diventano fuoco e ne escono lingue di fiamma che tremolano a scatti
 const HFM=26, HFPAL=['#3a0b08','#92080e','#b71715','#d81e1a','#cf542a','#e97940','#f9a561'];
@@ -1668,7 +1685,7 @@ const TOR_SBL=window.TOR_SBL, TOR_SDBFIN=window.TOR_SDBFIN;
 const TOR={home:{"stefano": "aula", "marouges": "spiaggia", "jj": "padana", "max": "serra", "marico": "costarica", "cugi": "rugby", "laura": "duomo", "frisbee": "ospedale", "carolluz": "aeroporto", "morex": "casa", "biscio": "sardegna", "faja": "grecia", "chooby": "ibiza", "socciaman": "bologna", "yoghi": "golf", "zeta": "basket"},riv:{"stefano": "marouges", "marouges": "stefano", "jj": "marouges", "max": "marico", "marico": "max", "cugi": "yoghi", "laura": "cugi", "frisbee": "carolluz", "carolluz": "marouges", "morex": "marico", "biscio": "max", "faja": "biscio", "chooby": "zeta", "socciaman": "stefano", "yoghi": "cugi", "zeta": "chooby"},st:window.TOR_ST,xy:{"duomo": [514, 158], "aeroporto": [512, 156.5], "basket": [516, 160], "casa": [515, 162], "bergamo": [518, 156], "ospedale": [519, 158.5], "sagra": [521, 156.5], "aula": [523, 158], "rugby": [523, 160.5], "padana": [520, 162.5], "serra": [526, 156.5], "garda": [527, 158.8], "bologna": [529, 166], "golf": [506, 149], "sardegna": [507, 175], "ibiza": [493, 172], "grecia": [561, 182], "cappadocia": [592, 178], "spiaggia": [766, 256], "costarica": [214, 250], "spettrale": [520, 512]}};/**/
 const KEY='rissa-in-aula-v10';
 function setPhoto(r,url,persist){ r.photo=url||null; if(!url){ r.img=null; if(persist) save(); return; } const im=new Image(); im.onload=()=>{r.img=im}; im.src=url; if(persist) save(); }
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify(ROSTER.map(r=>{ const o={}; FIELDS.forEach(k=>o[k]=r[k]===undefined?null:r[k]); return o; }))); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(ROSTER.filter(r=>!r.dark).map(r=>{ const o={}; FIELDS.forEach(k=>o[k]=r[k]===undefined?null:r[k]); return o; }))); }catch(e){} }
 function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
   if(Array.isArray(arr)&&arr.length>=2){ ROSTER=arr.map(o=>{ const r=Object.assign({},BASE,o); r.img=null; if(!r.id) r.id=newId(); finalize(r); const ph=r.photo||EMBEDDED[r.id]; if(ph) setPhoto(r,ph,false); return r; }); }
   else ROSTER=[fromPreset(PRESETS[0]),fromPreset(PRESETS[1])];
@@ -1716,6 +1733,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
 }
 load();
 try{ /*DIODOPPIO1*/ let dn=0; ROSTER=ROSTER.map(r=>(r&&(r.dio||r.mk==='poseidone'||r.spriteKey==='poseidone'))?fromPreset(DIOP):r).filter(r=>!(r&&r.dio)||!(dn++)); if(localStorage.getItem('lds-poseidone')==='1'&&!ROSTER.some(r=>r.dio)) ROSTER.push(fromPreset(DIOP)); if(dn>1){ try{ save(); }catch(_){} } }catch(_){}
+/*DARK3*/ try{ if(dark3On()) dark3Roster(); }catch(_){}
 /*EVPLAY1*/ try{ if(localStorage.getItem('lds-evil')==='1'&&!ROSTER.some(r=>r.spriteKey==='evilsdb')) ROSTER.push(fromPreset(EVILP)); }catch(_){}
 
 /* ---------- Audio ---------- */
@@ -2442,7 +2460,7 @@ let sel={picks:[0,1],turn:0,mode:'cpu',diff:'normal',stage:'casuale'};
 /*ARCADE1 - modalità Arcade: il giocatore sceglie un lottatore e affronta 7 sfidanti a sorpresa, difficoltà crescente (15.11.2026) */
 const ARC={list:[],i:0,cont:0,next:'',im:{}};
 function arcDiff(i){ const hard=sel.diff==='hard'; return i<3?(hard?'hard':'normal'):(hard?'vhard':'hard'); }/**/
-function arcStart(){ const me=sel.picks[0], pool=ROSTER.map((r,i)=>i).filter(i=>i!==me&&ROSTER[i].spriteKey&&ROSTER[i].spriteKey!=='pm'&&ROSTER[i].spriteKey!=='evilsdb'&&!TORMINI.all.includes(ROSTER[i].mk||ROSTER[i].spriteKey));/**/
+function arcStart(){ const me=sel.picks[0], pool=ROSTER.map((r,i)=>i).filter(i=>i!==me&&!ROSTER[i].dark&&ROSTER[i].spriteKey&&ROSTER[i].spriteKey!=='pm'&&ROSTER[i].spriteKey!=='evilsdb'&&!TORMINI.all.includes(ROSTER[i].mk||ROSTER[i].spriteKey));/**/
   for(let i=pool.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [pool[i],pool[j]]=[pool[j],pool[i]]; }
   ARC.list=pool.slice(0,Math.min(7,pool.length)); { const me=ROSTER[sel.picks[0]]&&ROSTER[sel.picks[0]].spriteKey, rk=TOR.riv[me], ri=ROSTER.findIndex(r=>r.spriteKey===rk); if(ri>=0&&ri!==sel.picks[0]){ const at=ARC.list.indexOf(ri); if(at>=0) ARC.list.splice(at,1); ARC.list.splice(Math.min(3,ARC.list.length),0,ri); ARC.list=ARC.list.slice(0,7); } } torScaletta(); ARC.i=0;/**/ ARC.riv=0; ARC.cont=0; ARC.next=''; startMatch(); }
 function provaFinale(){ try{ ac(); }catch(e){} sel.mode='arcade'; if(sel.diff==='easy') sel.diff='normal'; try{ goFull(); }catch(e){} arcStart(); ARC.i=ARC.list.length; ARC.next=''; ARC.cont=0; startMatch(); showScreen('fight'); }
@@ -3703,7 +3721,7 @@ function buildCards(){
     SELC[0]=mk(0); SELC[1]=mk(1); w.appendChild(SELC[0]); w.appendChild(root); w.appendChild(SELC[1]); }
   ROSTER.forEach((r,i)=>{
     const el=document.createElement('button'); el.type='button'; el.className='pcard'; el.setAttribute('aria-label',r.name);
-    const SP=SPRITES[r.spriteKey]||{}, R=(r.dio&&dioRitr())||portraitOf(r.spriteKey)||(SP.ritratto&&SP.ritratto.src)||(SP.guardia&&SP.guardia.src)||'';
+    const SP=SPRITES[r.spriteKey]||{}, R=(r.dio&&dioRitr())||(r.dark&&SPRITES[r.spriteKey+'_dark']&&portraitOf(r.spriteKey+'_dark'))||portraitOf(r.spriteKey)||(SP.ritratto&&SP.ritratto.src)||(SP.guardia&&SP.guardia.src)||'';
     el.innerHTML='<div class="badges"></div>'+(R?'<img alt="" src="'+R+'">':'<i></i>')+'<span class="cname">'+esc(r.name)+'</span>';
     el.addEventListener('click',()=>{ ac(); SFX.select(); choose(i); });
     cards.push({el});
