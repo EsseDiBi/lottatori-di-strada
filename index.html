@@ -1713,7 +1713,7 @@ const CRICP={base:'CRICETO MANNARO',kind:'suit',suit:'#1f2c5c',legs:'#d8c49a',ac
 if(!PRESETS.some(p=>p.spriteKey==='criceto')&&(()=>{ try{ return localStorage.getItem('lds-criceto')==='1'; }catch(e){ return false; } })()) PRESETS.push(CRICP);
 if(!PRESETS.some(p=>p.spriteKey==='monica')) PRESETS.push({base:'The Praticant',kind:'hoodie',suit:'#5d5a22',legs:'#5d5a22',accent:'#d8b23a',tie:'#d8b23a',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#e0a050',longHair:true,special:'Sussurro',superName:'Martello del Foro',proj:'faldoni',size:1.02,spriteKey:'monica',
    bio:'Praticante di SDB, timida e introversa: non parla quasi mai. Vuole diventare avvocato e sopravvivere alla giornata col suo capo. Volenterosa, ma appena può fa un pisolino con Blu.'});
-if(!PRESETS.some(p=>p.spriteKey==='albi')) PRESETS.push({base:'Albizzescion',kind:'hoodie',suit:'#1a1a1a',legs:'#1a1a1a',accent:'#c8a2ff',tie:'#c8a2ff',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#f0c060',longHair:true,special:'Sussurro',superName:'Dexter',proj:'fascicolo_albi',size:0.86,spriteKey:'albi',
+if(!PRESETS.some(p=>p.spriteKey==='albi')) PRESETS.push({base:'Albizzescion',kind:'hoodie',suit:'#1a1a1a',legs:'#1a1a1a',accent:'#c8a2ff',tie:'#c8a2ff',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#f0c060',longHair:true,special:'Sussurro',superName:'Dexter',proj:'fascicolo_albi',size:0.94,spriteKey:'albi',
    bio:'Penalista. Nevrile. Obiettivo: sopravvivere alla giornata, far condannare più gente possibile con un sorriso a 34 denti e tornare a casa da Dexter.'});
 if(!PRESETS.some(p=>p.spriteKey==='yoghi')) PRESETS.push({base:'Yoghi',kind:'suit',suit:'#1f2c5c',legs:'#d8c49a',accent:'#ffc21a',tie:'#2f8f3a',top:'#16131a',shoes:'#e8b48e',skin:'#e8b48e',hair:'#b9b9b9',special:'Drive',superName:'Beneficenza',proj:'golf',size:1.18,spriteKey:'yoghi',
    bio:'Nobile svizzero che adora i poveri. Golf, rugby con SDB e CUGI, camicia hawaiana e piedi nudi. Quando ride diventa il criceto mannaro.'});
@@ -1752,7 +1752,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='zeta')){ const zp=PRESETS.find(p=>p.spriteKey==='zeta'); if(zp){ ROSTER.push(fromPreset(zp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='zeta') r.size=1.16; });
   if(!ROSTER.some(r=>r.spriteKey==='albi')){ const ap=PRESETS.find(p=>p.spriteKey==='albi'); if(ap){ ROSTER.push(fromPreset(ap)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='albi'){ r.size=0.86; if(!r.dark){ r.name='Albizzescion'; r.base='Albizzescion'; } } });
+  ROSTER.forEach(r=>{ if(r.spriteKey==='albi'){ r.size=0.94; if(!r.dark){ r.name='Albizzescion'; r.base='Albizzescion'; } } });
   if(!ROSTER.some(r=>r.spriteKey==='monica')){ const mp=PRESETS.find(p=>p.spriteKey==='monica'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='monica'){ r.size=1.02; if(!r.dark){ r.name='The Praticant'; r.base='The Praticant'; } } });
   if(!ROSTER.some(r=>r.spriteKey==='criceto')){ const cp=PRESETS.find(p=>p.spriteKey==='criceto'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
