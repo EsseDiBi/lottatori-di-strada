@@ -411,11 +411,14 @@ function formeUp(f){ if(!formeCan(f)) return false; f._fd=f._fd||[f.def]; const 
   const m=FORME_MUL[top?3:lv], spd=swap?(d.speed||4):(base.speed||4)*m[2]; d=Object.create(d); d.dmgMul=(base.dmgMul||1)*m[0]; d.defMul=(base.defMul||1)*m[1]; d.speed=spd; d.lv=lv; d.lvSwap=swap; d.lvTint=!swap&&!d.lvSP&&!d.lvRC?(top?3:lv):0; d.lvTop=top; d.lvCol=FORME_AC[k]||formeCol(base);
   if(swap) d.name=d.base; else d.name=base.name;
   if(sw==='rosa'||(prev&&G&&G.rosa&&G.rosa.has(prev))){ try{ (G.rosa||(G.rosa=new Set())).add(d); }catch(e){} }
-  f._fd.push(d); f.def=d; f.meter=0; f._evoT=G.frame; f.vx=0; f.state='idle'; f.gp=null;
+  d.lvVite=3; f._fdCad=0; f._fd.push(d); f.def=d; f.meter=0; f._evoT=G.frame; f.vx=0; f.state='idle'; f.gp=null;
   G.hitstop=Math.max(G.hitstop||0,26); G.shake=Math.max(G.shake||0,16);
-  /* nessuna scritta: ordine dell'Avvocato del 17.11.2026, 03:58 */ try{ SFX.sup(); }catch(e){} return true; }
-function formeDown(f){ if(!f._fd||f._fd.length<2) return; const old=f._fd.pop(); f.def=f._fd[f._fd.length-1]; f.gp=null; }
-function formeStep(f){ if(!f||!f.def) return; if(!f._fdReq){ f._fdReq=1; try{ const b0=(f._fd&&f._fd[0])||f.def, t0=FORME_T[b0.spriteKey]; if(t0&&t0.indexOf('img:')===0&&window.FORME_LOAD) FORME_LOAD(t0.slice(4)); }catch(e){} } const dn=f.state==='down'||f.state==='ko'; if(dn&&!f._fdDown&&f.state==='down') formeDown(f); f._fdDown=dn;
+  /* nessuna scritta: ordine dell'Avvocato del 17.11.2026, 03:58 */ formeSuono(1); return true; }
+function formeSuono(su){ try{ if(su){ tone('sawtooth',160,960,.5,.11); tone('square',320,1280,.55,.06,0.06); tone('sine',640,1920,.7,.09,0.16); tone('p25',1046,1046,.18,.07,0.42); tone('p25',1568,1568,.35,.07,0.52); noise(.6,.28,2400,0.05,0.8); } else { tone('sawtooth',880,110,.55,.12); tone('square',440,80,.5,.05,0.05); noise(.4,.3,500,0,0.8); } }catch(e){} } /*PERDITA1*/
+function formeDown(f){ if(!f._fd||f._fd.length<2) return; const old=f._fd.pop(); f.def=f._fd[f._fd.length-1]; f.gp=null; f._fdCad=0; formeSuono(0); try{ G.shake=Math.max(G.shake||0,8); }catch(e){} }
+function formePerdi(f){ while(f._fd&&f._fd.length>1) formeDown(f); } /*PERDITA1*/
+function formeStep(f){ if(!f||!f.def) return; if(!f._fdReq){ f._fdReq=1; try{ const b0=(f._fd&&f._fd[0])||f.def, t0=FORME_T[b0.spriteKey]; if(t0&&t0.indexOf('img:')===0&&window.FORME_LOAD) FORME_LOAD(t0.slice(4)); }catch(e){} } const dn=f.state==='down'||f.state==='ko'; if(dn&&!f._fdDown&&f.state==='down'&&f._fd&&f._fd.length>1){ f._fdCad=(f._fdCad||0)+1; if(f._fdCad>=(f.def.lvVite||3)){ f._fdCad=0; formeDown(f); } } /*TRECADUTE1*/ f._fdDown=dn;
+  try{ const o=G&&(f===G.f1?G.f2:G.f1); if(o){ if(o.atk&&o.atk.type==='sup') f._supFin=G.frame+120; const cb=o.combo||0, colpito=f._hpP!=null&&f.hp<f._hpP; if(f._fd&&f._fd.length>1&&colpito&&f.hp>0&&((cb>=3&&cb>(f._cbP||0))||(f._supFin&&G.frame<=f._supFin))) formePerdi(f); f._cbP=cb; } f._hpP=f.hp; }catch(e){} /*PERDITA1: combo da 3 o super a segno*/
   if(f.cpu&&G&&G.phase==='fight'&&f.meter>=100&&!f.atk&&(f.state==='idle'||f.state==='walk')&&formeCan(f)&&rnd()<0.05) formeUp(f); } // CPUFORME1: il computer si trasforma quasi sempre prima di usare la super
 // pose della forma: pacco ChatGPT (FORME_IMG) o correzione colore delle pose del lottatore
 function formeTint(im,lv){ const c=document.createElement('canvas'); c.width=im.width; c.height=im.height; const g=c.getContext('2d'); g.drawImage(im,0,0); let ID; try{ ID=g.getImageData(0,0,c.width,c.height); }catch(e){ return null; } const D=ID.data, sat=lv===3?1.5:1.28, con=lv===3?1.16:1.08, br=lv===3?10:6;
@@ -3473,6 +3476,7 @@ function drawHUD(){
     const mw=220*f.meter/100; ctx.fillStyle=full?((G.frame>>2)%2?'#ffffff':f.def.accent):f.def.accent; ctx.fillRect(rev?x+220-mw:x,yy,mw,12);
     ctx.font='12px '+FD; ctx.fillStyle=full?'#ffc933':'#a8a1c9'; ctx.textAlign=rev?'right':'left';
     ctx.fillText('SUPER',rev?x+220:x,yy-6);
+    if(f.def&&f.def.lv>1){ const nv=f.def.lvVite||3, vv=nv-(f._fdCad||0); for(let i=0;i<nv;i++){ const px=rev?x+8+i*15:x+212-i*15, py=yy-9; ctx.beginPath(); ctx.moveTo(px,py-6); ctx.lineTo(px+5,py); ctx.lineTo(px,py+6); ctx.lineTo(px-5,py); ctx.closePath(); ctx.fillStyle=i<vv?(f.def.lvCol||'#ffc933'):'#2a2045'; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#120d22'; ctx.stroke(); } } /*TRECADUTE1*/
   }
 }
 function drawBanner(){ // scritte da sala giochi: ombra pesante, riempimento a bande, lampo che scorre
