@@ -3476,7 +3476,7 @@ function drawHUD(){
     const mw=220*f.meter/100; ctx.fillStyle=full?((G.frame>>2)%2?'#ffffff':f.def.accent):f.def.accent; ctx.fillRect(rev?x+220-mw:x,yy,mw,12);
     ctx.font='12px '+FD; ctx.fillStyle=full?'#ffc933':'#a8a1c9'; ctx.textAlign=rev?'right':'left';
     ctx.fillText('SUPER',rev?x+220:x,yy-6);
-    if(f.def&&f.def.lv>1){ const nv=f.def.lvVite||3, vv=nv-(f._fdCad||0); for(let i=0;i<nv;i++){ const px=rev?x+8+i*15:x+212-i*15, py=yy-9; ctx.beginPath(); ctx.moveTo(px,py-6); ctx.lineTo(px+5,py); ctx.lineTo(px,py+6); ctx.lineTo(px-5,py); ctx.closePath(); ctx.fillStyle=i<vv?(f.def.lvCol||'#ffc933'):'#2a2045'; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#120d22'; ctx.stroke(); } } /*TRECADUTE1*/
+    if(f.def&&f.def.lv>1){ const nv=f.def.lvVite||3, vv=nv-(f._fdCad||0); for(let i=0;i<nv;i++){ const px=rev?x+8+i*15:x+212-i*15, py=yy-9; ctx.beginPath(); ctx.moveTo(px,py-6); ctx.lineTo(px+5,py); ctx.lineTo(px,py+6); ctx.lineTo(px-5,py); ctx.closePath(); ctx.fillStyle=i<vv?(f.def.lvCol||'#ffc933'):'#2a2045'; ctx.lineWidth=5; ctx.strokeStyle='#fff3c4'; ctx.stroke(); ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#120d22'; ctx.stroke(); } } /*TRECADUTE1 ROMBI2*/
   }
 }
 function drawBanner(){ // scritte da sala giochi: ombra pesante, riempimento a bande, lampo che scorre
