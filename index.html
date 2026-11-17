@@ -409,7 +409,7 @@ function formeUp(f){ if(!formeCan(f)) return false; f._fd=f._fd||[f.def]; const 
   const prev=f._fd[f._fd.length-1];
   if(!d){ d=Object.create(base); if(sw&&sw.indexOf('img:')===0) d.lvSP=sw.slice(4); else if(sw&&sw.indexOf('rc:')===0) d.lvRC=sw.slice(3); else if(prev.lvSP) d.lvSP=prev.lvSP; }
   const m=FORME_MUL[top?3:lv], spd=swap?(d.speed||4):(base.speed||4)*m[2]; d=Object.create(d); d.dmgMul=(base.dmgMul||1)*m[0]; d.defMul=(base.defMul||1)*m[1]; d.speed=spd; d.lv=lv; d.lvSwap=swap; d.lvTint=!swap&&!d.lvSP&&!d.lvRC&&sw!=='rosa'?(top?3:lv):0; /*ROSAPELLE1*/ d.lvTop=top; d.lvCol=FORME_AC[k]||formeCol(base);
-  if(swap) d.name=d.base; else d.name=base.name;
+  d.name=base.name; /*NOMEFISSO1*/
   if(sw==='rosa'||(prev&&G&&G.rosa&&G.rosa.has(prev))){ try{ (G.rosa||(G.rosa=new Set())).add(d); }catch(e){} }
   d.lvVite=3; f._fdCad=0; f._fd.push(d); f.def=d; f.meter=0; f._evoT=G.frame; f.vx=0; f.state='idle'; f.gp=null;
   G.hitstop=Math.max(G.hitstop||0,26); G.shake=Math.max(G.shake||0,16);
@@ -3468,7 +3468,7 @@ function drawHUD(){
   const n1=G.f1.def.name.toUpperCase(), n2=G.f2.def.name.toUpperCase()+(G.mode==='cpu'?' (CPU)':'');
   ctx.textAlign='left'; ctx.strokeText(n1,50,y+44); ctx.fillText(n1,50,y+44);
   ctx.textAlign='right'; ctx.strokeText(n2,W-50,y+44); ctx.fillText(n2,W-50,y+44);
-  for(const [f,px] of [[G.f1,6],[G.f2,W-46]]){ const SP=dioSP(f,(f._fd&&f._fd.length>1&&!f.def.lvSwap)?(SPRITES[f._fd[0].spriteKey]||rosaSP(f)):rosaSP(f)); /*RITRBASE1: il ritratto cambia solo per MAX BIONDO, Dio del Mare, Criceto*/ if(SP&&SP.ritratto&&SP.ritratto.complete){ ctx.fillStyle='#ffc933'; ctx.fillRect(px-2,y-4,44,44); ctx.imageSmoothingEnabled=false; ctx.drawImage(SP.ritratto,px,y-2,40,40); ctx.imageSmoothingEnabled=true; } }
+  for(const [f,px] of [[G.f1,6],[G.f2,W-46]]){ const SP=(f._fd&&f._fd.length>1)?(SPRITES[f._fd[0].spriteKey]||rosaSP(f)):dioSP(f,rosaSP(f)); /*RITRBASE1 NOMEFISSO1: in alto sempre il lottatore di base*/ if(SP&&SP.ritratto&&SP.ritratto.complete){ ctx.fillStyle='#ffc933'; ctx.fillRect(px-2,y-4,44,44); ctx.imageSmoothingEnabled=false; ctx.drawImage(SP.ritratto,px,y-2,40,40); ctx.imageSmoothingEnabled=true; } }
   for(let i=0;i<2;i++){ for(const [side,bx] of [[0,50+bw-14-i*22],[1,W-50-bw+14+i*22]]){ ctx.beginPath(); ctx.arc(bx,y+40,7,0,7); ctx.fillStyle=G.wins[side]>i?'#ffc933':'#2a2045'; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle='#120d22'; ctx.stroke(); } }
   for(const [f,x,rev] of [[G.f1,50,false],[G.f2,W-50-220,true]]){
     const yy=H-34, full=f.meter>=100;
