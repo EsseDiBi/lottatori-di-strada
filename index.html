@@ -417,7 +417,7 @@ function formeUp(f){ if(!formeCan(f)) return false; f._fd=f._fd||[f.def]; const 
   if(sw==='rosa'||(prev&&G&&G.rosa&&G.rosa.has(prev))){ try{ (G.rosa||(G.rosa=new Set())).add(d); }catch(e){} }
   d.lvVite=3; f._fdCad=0; f._fd.push(d); f.def=d; f.meter=0; f._evoT=G.frame; f.vx=0; f.state='idle'; f.gp=null;
   G.hitstop=Math.max(G.hitstop||0,26); G.shake=Math.max(G.shake||0,16);
-  /* nessuna scritta: ordine dell'Avvocato del 17.11.2026, 03:58 */ if(k==='albi') floatText('CHIUAUA!',f.x,f.y-250,'#c8a2ff',34,90); /*ALBICHIU1: unica eccezione, chiesta il 17.11.2026*/ formeSuono(1); return true; }
+  /* nessuna scritta: ordine dell'Avvocato del 17.11.2026, 03:58 */ if(k==='albi') floatText('CHIHUAHUA!',f.x,f.y-250,'#c8a2ff',34,90); /*ALBICHIU1: unica eccezione, chiesta il 17.11.2026*/ formeSuono(1); return true; }
 function formeSuono(su){ try{ if(su){ tone('sawtooth',160,960,.5,.11); tone('square',320,1280,.55,.06,0.06); tone('sine',640,1920,.7,.09,0.16); tone('p25',1046,1046,.18,.07,0.42); tone('p25',1568,1568,.35,.07,0.52); noise(.6,.28,2400,0.05,0.8); } else { tone('sawtooth',880,110,.55,.12); tone('square',440,80,.5,.05,0.05); noise(.4,.3,500,0,0.8); } }catch(e){} } /*PERDITA1*/
 function formeDown(f){ if(!f._fd||f._fd.length<2) return; const old=f._fd.pop(); f.def=f._fd[f._fd.length-1]; f.gp=null; f._fdCad=0; formeSuono(0); try{ G.shake=Math.max(G.shake||0,8); }catch(e){} }
 function formePerdi(f){ while(f._fd&&f._fd.length>1) formeDown(f); } /*PERDITA1*/
@@ -2519,7 +2519,7 @@ COUPLE.albi.stefano={intro:["Collega! Sorrida, è per la condanna."],win:["Mi sc
 COUPLE.stefano=COUPLE.stefano||{}; COUPLE.stefano.albi={intro:["Collega, ancora quel sorriso?"],win:["Dexter, consolala tu."],lose:["Trentaquattro denti. Li ho contati tutti."]};
 COUPLE.albi.monica={intro:["Praticante! Il tuo dogo contro il mio Dexter."],win:["Studia, studia."],lose:["Brava. Blu batte Dexter."]};
 if(SPRITES.albi){ const N=SPRITES.albi; N.lancio2=N.lancio; N.caricacalcio=N.caricapugno; N.stordito=N.stordita; N.sguardo=N.provocazione; N.turbo=N.calcio; N.super1=N.fischio; N.super2=N.fischio; N.esulta1=N.vittoria; N.esulta2=N.vittoria; N.esulta3=N.vittoria; N.tifo=N.vittoria; N.volo=N.ko; N.svenuto0=N.aterra; N.dogo_salto=N.dogo_corsa1; N.martello_alza=N.fischio; N.martello_cala=N.fischio; }
-try{ const AS=window.ALBI_SCR||{}; for(const k in AS){ const im=new Image(); im.src=AS[k]; SCR[k]=im; } Object.assign(SCR_KEY,{'CHIUAUA!':'CHIUAUA','DEXTER!':'DEXTER','CONDANNATO!':'CONDANNATO','34 DENTI!':'34_DENTI','SORRIDA!':'SORRIDA'}); }catch(e){}
+try{ const AS=window.ALBI_SCR||{}; for(const k in AS){ const im=new Image(); im.src=AS[k]; SCR[k]=im; } Object.assign(SCR_KEY,{'CHIHUAHUA!':'CHIHUAHUA','DEXTER!':'DEXTER','CONDANNATO!':'CONDANNATO','34 DENTI!':'34_DENTI','SORRIDA!':'SORRIDA'}); }catch(e){}
 /* ALBI1 - fascicoli neri, Sussurro, super con Dexter (base) o col martello nero (toga) */
 function drawAlbiProj(p){ const N=SPRITES.albi, im=N&&((G.frame>>2)%2?N.fascicolo1:N.fascicolo0); if(!im||!im.complete||!im.width) return false;
   ctx.save(); ctx.translate(p.x,p.y); ctx.scale(p.vx<0?-1:1,1); ctx.rotate(((G.frame%16)/16)*Math.PI*2*0.25); ctx.imageSmoothingEnabled=false; const s=1.25; ctx.drawImage(im,-im.width*s/2,-im.height*s/2,im.width*s,im.height*s); ctx.restore(); return true; }
