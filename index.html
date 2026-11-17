@@ -2218,6 +2218,7 @@ function updFighter(f,o,inp){
         if(a.f>m.s&&a.f<=m.s+m.a&&(a.f-m.s)%7===1&&a.n<6){ spawnCuss(f,a.n++); G.shake=Math.max(G.shake,6); } }
       else if(a.type==='sup'&&f.def.spriteKey==='ruben'){ f.vx=0; if(a.f===2) floatText('VOGLIA ZERO!',f.x,f.y-250,'#ffc21a',22,60); if(a.f===m.s+1){ rubenWave(f,false); G.shake=Math.max(G.shake,8); G.excite=1; } if(a.f===m.s+16) rubenWave(f,true); }
       else if(a.type==='sup'&&f.def.spriteKey==='orio'){ f.vx=0; }
+      else if(a.type==='sup'&&f.def.spriteKey==='monica'){ f.vx=0; } /*MONICAFERMA1: chiama Blu o il martello e resta dov'è*/
       else if(f.def.spriteKey==='mecha'&&(a.type==='sup'||a.type==='raggio'||a.type==='razzo')){ f.vx=0; mechaMove(f,a); }
       else if(a.type==='sup'&&f.def.spriteKey==='maxbiondo'){ f.vx=(a.f>m.s&&a.f<=m.s+m.a)?2.2*fwd:0; if(a.f===m.s+1){ G.shake=Math.max(G.shake,16); G.excite=1; } if(a.f>m.s&&a.f%4===0) FX.push({x:f.x+fwd*(80+rnd()*120),y:f.y-80-rnd()*120,vx:fwd*(2+rnd()*3),vy:-1-rnd()*2,life:26,c:rnd()<0.5?'#9fbf6a':'#cfd9a8'}); }
       else if(a.type==='sismico'){ f.vx=0; if(a.f===a.m.s) mbWave(f); }
