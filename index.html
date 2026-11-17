@@ -550,28 +550,29 @@ if(SPRITES.monica){ const N=SPRITES.monica; N.lancio2=N.lancio; N.caricacalcio=N
 /* MONICA1 - faldoni volanti, Sussurro (aspira) e super "Martello del Foro" col dogo */
 function drawMonicaProj(p){ const N=SPRITES.monica, im=N&&((G.frame>>2)%2?N.fascicolo1:N.fascicolo0); if(!im||!im.complete||!im.width) return false;
   ctx.save(); ctx.translate(p.x,p.y); ctx.scale(p.vx<0?-1:1,1); ctx.rotate(((G.frame%16)/16)*Math.PI*2*0.25); ctx.imageSmoothingEnabled=false; const s=1.25; ctx.drawImage(im,-im.width*s/2,-im.height*s/2,im.width*s,im.height*s); ctx.restore(); return true; }
-const MSU={run:14,d1:6,d2:16,rng:110};
-function callMonica(f,o){ const d=f.facing||1; f.msup={t:0,mode:'run',dir:d,x:d>0?-80:W+80,tgt:o,hx:null,hit2:false}; floatText('Blu! Vai!',f.x,f.y-250,f.def.accent,16,50,'balloon'); }
+const MSU={run:14,dog:18,ham:18,rng:110};
+function monToga(f){ return !!(f&&f.def&&f.def.lvSP==='monica_toga'); }
+function callMonica(f,o){ const d=f.facing||1;
+  if(monToga(f)){ f.msup={t:0,mode:'ham',dir:d,x:f.x,tgt:o,hx:o?o.x:f.x+d*200,ft:0}; floatText('SENTENZA!',f.x,f.y-250,f.def.accent,16,50,'balloon'); return; }
+  f.msup={t:0,mode:'run',dir:d,x:d>0?-80:W+80,tgt:o}; floatText('Blu! Vai!',f.x,f.y-250,f.def.accent,16,50,'balloon'); }
 function stepMonica(f,o){ const M=f.msup; if(!M) return; M.t++; const t=o||M.tgt;
-  if(M.mode==='run'){ M.x+=M.dir*MSU.run; if(t&&(t.x-M.x)*M.dir<60){ M.mode='hit'; M.ht=0; if(!['ko','down'].includes(t.state)){ hit(f,t,MSU.d1,4,40,{sup:true,low:true,heavy:true,dirx:M.dir,y:t.y-80}); if(t.state==='hit') floatText('WOOF!',t.x,t.y-210,'#ffc21a',24,50); } M.hx=t.x; }
-    if(M.t>90){ M.mode='back'; M.hx=t?t.x:M.x; } }
-  else if(M.mode==='hit'){ M.ht++; if(M.ht>8) M.mode='back'; }
+  if(M.mode==='ham'){ M.ft++; if(t&&M.ft<16) M.hx+=Math.max(-6,Math.min(6,t.x-M.hx));
+    if(M.ft===28){ G.shake=Math.max(G.shake,16); M.crT=0; if(t&&Math.abs(t.x-M.hx)<MSU.rng&&!['ko'].includes(t.state)){ hit(f,t,MSU.ham,14,46,{sup:true,low:true,air:true,heavy:true,launch:true,dirx:t.x>=M.hx?1:-1,y:t.y-60}); if(t.state==='hit') floatText('COLPEVOLE!',t.x,t.y-220,'#ffd84a',30,60); } else floatText('Ops...',f.x,f.y-250,f.def.accent,15,40,'balloon'); }
+    if(M.crT!=null){ M.crT++; if(M.crT>40) f.msup=null; } return; }
+  if(M.mode==='run'){ M.x+=M.dir*MSU.run; if(t&&(t.x-M.x)*M.dir<60){ M.mode='hit'; M.ht=0; if(!['ko','down'].includes(t.state)){ hit(f,t,MSU.dog,12,44,{sup:true,low:true,air:true,heavy:true,launch:true,dirx:M.dir,y:t.y-80}); if(t.state==='hit') floatText('WOOF!',t.x,t.y-210,'#ffc21a',28,50); G.shake=Math.max(G.shake,10); } }
+    if(M.t>90) M.mode='back'; }
+  else if(M.mode==='hit'){ M.ht++; if(M.ht>10) M.mode='back'; }
   else if(M.mode==='back'){ const tx=f.x-f.facing*80; M.dir=tx>M.x?1:-1; M.x+=M.dir*10; if(Math.abs(tx-M.x)<12){ M.x=tx; M.mode='sit'; M.st=0; } }
-  else if(M.mode==='sit'){ M.st++; M.x=Math.max(30,Math.min(W-30,f.x-f.facing*80)); M.dir=f.facing; }
-  if(M.hx!=null&&M.ft==null) M.ft=0;
-  if(M.ft!=null){ M.ft++; if(t&&M.ft<16) M.hx+=Math.max(-6,Math.min(6,t.x-M.hx));
-    if(M.ft===28){ G.shake=Math.max(G.shake,16); M.crT=0; if(t&&Math.abs(t.x-M.hx)<MSU.rng&&!['ko'].includes(t.state)){ hit(f,t,MSU.d2,14,46,{sup:true,low:true,air:true,heavy:true,launch:true,dirx:t.x>=M.hx?1:-1,y:t.y-60}); if(t.state==='hit') floatText('SENTENZA!',t.x,t.y-220,'#ffd84a',30,60); } else floatText('Ops...',f.x,f.y-250,f.def.accent,15,40,'balloon'); }
-    if(M.crT!=null) M.crT++; }
-  if(M.mode==='sit'&&M.st>60&&(M.crT||0)>40) f.msup=null; }
-function drawMonica(F){ if(!F||!F.def||F.def.spriteKey!=='monica') return; const SP=SPRITES.monica; if(!SP||!SP.guardia||!SP.guardia.height) return; const S=(196/128)*(F.def.size||1), M=F.msup;
-  if(M){ const t=M.t; let im;
-    if(M.mode==='run') im=((t>>2)&1)?SP.dogo_corsa1:SP.dogo_corsa2; else if(M.mode==='hit') im=SP.dogo_carica; else if(M.mode==='back') im=((t>>2)&1)?SP.dogo_corsa1:SP.dogo_corsa2; else im=SP.dogo_felice;
-    if(im&&im.complete&&im.width) drawImgAt(im,M.x,GROUND,S,M.dir);
+  else if(M.mode==='sit'){ M.st++; M.x=Math.max(30,Math.min(W-30,f.x-f.facing*80)); M.dir=f.facing; if(M.st>60) f.msup=null; } }
+function drawMonica(F){ if(!F||!F.def||F.def.spriteKey!=='monica') return; const SP=SPRITES.monica; if(!SP||!SP.guardia||!SP.guardia.height) return; const S=(196/128)*(F.def.size||1), M=F.msup; if(!M) return; const t=M.t;
+  if(M.mode==='ham'){
     if(M.crT!=null&&M.crT<40){ const c=SP.cratere; if(c&&c.width){ ctx.save(); ctx.globalAlpha=Math.min(1,(40-M.crT)/14); ctx.imageSmoothingEnabled=false; const s=S*0.9; ctx.drawImage(c,M.hx-c.width*s/2,GROUND-c.height*s*0.75,c.width*s,c.height*s); ctx.restore(); } }
-    if(M.ft!=null&&M.ft<=34){ const mt=SP.martello_giu; if(mt&&mt.width){ const k=Math.min(1,M.ft/28), y=-260+(GROUND-40+260)*k*k, s=S*1.15;
+    if(M.ft<=34){ const mt=SP.martello_giu; if(mt&&mt.width){ const k=Math.min(1,M.ft/28), y=-260+(GROUND-40+260)*k*k, s=S*1.15;
       if(M.ft<28){ ctx.save(); ctx.globalAlpha=0.35*k; ctx.fillStyle='#000'; ctx.beginPath(); ctx.ellipse(M.hx,GROUND-4,60*k+10,9,0,0,7); ctx.fill(); ctx.restore(); }
-      ctx.save(); ctx.imageSmoothingEnabled=false; if(M.ft>28) ctx.globalAlpha=Math.max(0,1-(M.ft-28)/6); ctx.drawImage(mt,M.hx-mt.width*s/2,y-mt.height*s,mt.width*s,mt.height*s); ctx.restore(); } } }
-}
+      ctx.save(); ctx.imageSmoothingEnabled=false; if(M.ft>28) ctx.globalAlpha=Math.max(0,1-(M.ft-28)/6); ctx.drawImage(mt,M.hx-mt.width*s/2,y-mt.height*s,mt.width*s,mt.height*s); ctx.restore(); } }
+    return; }
+  let im; if(M.mode==='run'||M.mode==='back') im=((t>>2)&1)?SP.dogo_corsa1:SP.dogo_corsa2; else if(M.mode==='hit') im=SP.dogo_carica; else im=SP.dogo_felice;
+  if(im&&im.complete&&im.width) drawImgAt(im,M.x,GROUND,S,M.dir); }
 
 /* CRICETO1 - il CRICETO MANNARO: Yoghi che ride troppo. Grafica del criceto mannaro esistente. */
 if(SPRITES.criceto){ const C=SPRITES.criceto; C.entrata=C.entrata||C.trasf; C.provocazione=C.provocazione||C.trasf; C.sgambetto=C.guance||C.sgambetto; C.stordita=C.stordito; if(!C.vittoria) C.vittoria=C.trasf; if(!C.sputo) C.sputo=C.guardia2; if(!C.guance) C.guance=C.guardia; if(!C.sgambetto) C.sgambetto=C.guance; }
@@ -1542,7 +1543,7 @@ function drawMaria(F){ const M=F.maria; if(!M) return; if(G.phase!=='fight'&&M.t
   ctx.save(); ctx.translate(M.x,y); ctx.rotate(sw); const dir=M.tgt&&M.tgt.x<M.x?-1:1; ctx.scale(dir,1); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,-im.width*S/2,-im.height*S,im.width*S,im.height*S); ctx.restore(); }
 function aspira(f,o,a,m,fwd){ const on=a.f>m.s&&a.f<m.s+34; f.vx=0;
   if(on&&o&&!['ko','down'].includes(o.state)&&!o.wrapT){ const dist=(o.x-f.x)*fwd; if(dist>40&&dist<300&&o.onGround){ o.x-=fwd*(o.state==='crouch'||o.state==='cblock'?MX.pc:MX.p); if(dist<MX.trap&&!o.atk) o.stun=Math.max(o.stun||0,2); } }
-  if(on&&a.f%3===0) FX.push({x:f.x+fwd*(130+rnd()*120),y:f.y-20-rnd()*40-(f.def.spriteKey==='monica'?100:0),vx:-fwd*(5+rnd()*3),vy:(rnd()-.5)*1.5,life:18,c:f.def.spriteKey==='monica'?(rnd()<.5?'#fff6d0':'#ffd84a'):(rnd()<.5?'#d8c49a':'#b9b0a2')}); if(f.def.spriteKey==='monica'&&a.f===m.s+3) floatText('psst... venga qui...',f.x,f.y-250,f.def.accent,14,40,'balloon');
+  if(on&&a.f%3===0) FX.push({x:f.x+fwd*(130+rnd()*120),y:f.y-20-rnd()*40-(f.def.spriteKey==='monica'?100:0),vx:-fwd*(5+rnd()*3),vy:(rnd()-.5)*1.5,life:18,c:f.def.spriteKey==='monica'?(rnd()<.5?'#fff6d0':'#ffd84a'):(rnd()<.5?'#d8c49a':'#b9b0a2')}); if(f.def.spriteKey==='monica'&&a.f===m.s+3) floatText(f.def.lvSP==='monica_toga'?'Venga qui. Subito.':'psst... venga qui...',f.x,f.y-250,f.def.accent,14,40,'balloon');
   if(a.f===m.s+1) SFX.swing&&SFX.swing();
   if(a.f===m.s+34&&o){ const dist=(o.x-f.x)*fwd; if(dist>0&&dist<MX.fin){ hit(f,o,MX.da,12,34,{low:true,heavy:true,launch:true,dirx:fwd,y:o.y-40}); if(o.state==='hit') floatText(f.def.spriteKey==='monica'?'OBIEZIONE!':'VRRRUM!',o.x,o.y-210,f.def.spriteKey==='monica'?'#ffd84a':'#b07ae8',f.def.spriteKey==='monica'?28:24,50); } } }
 function dropCacca(f){ const mine=P.filter(p=>p.o===f&&p.kind==='cacca'); if(mine.length>=3){ const i=P.indexOf(mine[0]); if(i>=0) P.splice(i,1); }
@@ -2966,13 +2967,13 @@ function drawSprite(g,F,ox,oy,sc,SP){
   else if(a&&a.type==='aspira') im=(early?SP.aspirapolvere1:SP.aspirapolvere2)||im;
   else if(a&&a.type==='sup'&&(d.spriteKey==='morex'||d.spriteKey==='chooby')) im=SP.fischio||im;
   else if(a&&a.type==='punch'&&a.chain===2&&SP.rovescio) im=SP.rovescio;
-  else if(st==='win'&&d.spriteKey==='monica'&&SP.vittoria_dogo1&&!F.sel){ const k=(F.t/14|0)%4; im=[SP.vittoria_dogo1,SP.vittoria_dogo2,SP.vittoria_dogo3,SP.vittoria_dogo2][k]; bob=0; }
+  else if(st==='win'&&d.spriteKey==='monica'&&SP.vittoria_dogo1&&!F.sel&&d.lvSP!=='monica_toga'){ const k=(F.t/14|0)%4; im=[SP.vittoria_dogo1,SP.vittoria_dogo2,SP.vittoria_dogo3,SP.vittoria_dogo2][k]; bob=0; }
   else if(st==='win'&&d.spriteKey==='morex'&&SP.esulta1){ const k=(F.t/12|0)%4; im=[SP.esulta1,SP.esulta2,SP.esulta1,SP.esulta3][k]; bob=k===1?-60:k===3?0:-34; if(F.sel){ im=((F.t/14|0)%2)?SP.esulta2:SP.esulta1; bob=0; } } /*MOREXSCELTA1*/ // salta in alto, Maria esulta sulle spalle
   else if(a&&a.type==='campo') im=SP.campominato||im;
   else if(a&&a.type==='sup'&&d.spriteKey==='carolluz'){ im=((!a.caught||a.f<a.m.s+22)?SP.copertina:(a.f<a.m.s+48?SP.dondolo:SP.lancio2))||im; if(a.caught&&a.f>=a.m.s+22&&a.f<a.m.s+48) rot=Math.sin(a.f*0.25)*0.08; }
   else if(a&&a.type==='ranged'&&d.spriteKey==='nicozago') im=(early?SP.caricalancio:SP.lancio)||im;
   else if(a&&a.type==='ranged'&&d.spriteKey==='monica') im=(early?SP.caricapugno:SP.lancio)||im;
-  else if(a&&a.type==='sup'&&d.spriteKey==='monica') im=(a.f<a.m.s?SP.fischio:(F.msup&&F.msup.ft!=null&&F.msup.ft>=22?SP.martello_cala:SP.martello_alza))||im;
+  else if(a&&a.type==='sup'&&d.spriteKey==='monica') im=(d.lvSP==='monica_toga'?((F.msup&&F.msup.ft>=22)?SP.martello_cala:SP.martello_alza):SP.fischio)||im;
   else if(a&&a.type==='ranged'&&d.spriteKey==='bdb') im=(early?SP.caricapugno:SP.lancio)||im;
   else if(a&&a.type==='ranged'&&d.spriteKey==='divino') im=(early?SP.caricapugno:SP.lancio)||im;
   else if(a&&a.type==='ranged'){ im=((d.rangedKind==='codice'||d.rangedKind==='remora'||d.rangedKind==='valigia'||d.rangedKind==='ciabatta'||d.rangedKind==='vinile'||d.rangedKind==='tortellino'||d.rangedKind==='cat'||d.rangedKind==='ovale'||d.rangedKind==='cactus'||d.rangedKind==='frisbee'||d.rangedKind==='flash')?SP.lancio:(SP.sguardo||SP.bacio))||SP.pugno||im; if(im===SP.lancio&&SP.lancio2){ if(a.f>=a.m.s) im=SP.lancio2; else if(d.rangedKind==='codice'&&SP.lanciocodice) im=SP.lanciocodice; else if(SP.lancio3&&d.rangedKind==='cat'&&((F.catN||0)+1)%2) im=SP.lancio3; } } // il gatto parte dalle mani: niente doppione
