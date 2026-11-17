@@ -3680,7 +3680,7 @@ function dioSP(f,SP){ if(!f||!f.def||!f.def.dio||!SP) return SP; dioRitr(); if(!
   if(!DIORIT.px||DIORIT.base!==SP){ DIORIT.px=Object.create(SP); DIORIT.px.ritratto=DIORIT.im; DIORIT.base=SP; } return DIORIT.px; }
 addEventListener('load',()=>{ let n=0; const t=setInterval(()=>{ n++; try{ if(dioRitr()){ clearInterval(t); if(ROSTER.some(r=>r.dio)) buildCards(); } }catch(e){} if(n>40) clearInterval(t); },250); });
 /*PAGINE1 - due schermate: prima i 16 lottatori creati per primi, poi gli altri; gli sbloccabili sempre in fondo */
-const PAGESZ=16, SBLOCCABILI=['maxbiondo','marougesost','marlav','mecha','evilsdb','evil','poseidone','criceto'];
+const PAGESZ=18 /*PIENA1: 6 colonne per 3 righe, tutte piene*/, SBLOCCABILI=['maxbiondo','marougesost','marlav','mecha','evilsdb','evil','poseidone','criceto'];
 function pagineRoster(root){
   const all=ROSTER.map((r,i)=>i), base=all.filter(i=>!SBLOCCABILI.includes(ROSTER[i].spriteKey)), lock=all.filter(i=>SBLOCCABILI.includes(ROSTER[i].spriteKey)), order=base.concat(lock);
   let wrap=root.parentNode.classList.contains('rwrap')?root.parentNode:null;
