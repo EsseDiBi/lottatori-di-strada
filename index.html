@@ -2810,7 +2810,7 @@ function drawLadder(t){ const A=G.arc, n=A.n, sz=34, gap=8, tw=n*sz+(n-1)*gap, x
     if(cur){ ctx.strokeStyle=(t>>3)&1?'#ffc933':'#fff6d0'; ctx.lineWidth=3; ctx.strokeRect(x-1.5,y0-1.5,sz+3,sz+3); } }
   ctx.restore(); }
 function makeDef(i,clone){ const b=ROSTER[i]; if(!clone) return b; const d=Object.create(b); d.suit=b.alt; if(b.kind!=='coat') d.legs=rot(b.legs); return d; }
-function startMatch(){ try{ padHint(); }catch(_){}
+function startMatch(){ try{ padHint(); }catch(_){} try{ if(cpuStesso()) sel.picks[1]=cpuAltro(sel.picks[0]); }catch(_){} /*DIVERSI1*/
   const arc=sel.mode==='arcade', boss=arc&&ARC.i>=ARC.list.length, sub=arc&&!boss&&typeof ARC.list[ARC.i]==='string'; if(arc&&!boss&&!sub) sel.picks[1]=ARC.list[ARC.i];/**/
   let d1=makeDef(sel.picks[0],false), d2=boss?evilBoss():sub?torSub(ARC.list[ARC.i]):makeDef(sel.picks[1],sel.picks[0]===sel.picks[1]);
   if(arc){ /*CURVA1*/ const B=(sel.diff==='hard'?0.30:0.20)*Math.min(1,ARC.i/Math.max(1,ARC.list.length)), q=Math.sqrt(1+B), o=d2; d2=Object.create(o); d2.dmgMul=(o.dmgMul||1)*q; d2.defMul=(o.defMul||1)/q; d2.torB=B; }
@@ -4064,7 +4064,9 @@ function processFile(file,r){
   fr.onload=()=>{ const im=new Image(); im.onload=()=>{ const S=240,c=document.createElement('canvas'); c.width=c.height=S; const g=c.getContext('2d'); const s=Math.min(im.width,im.height); g.drawImage(im,(im.width-s)/2,Math.max(0,(im.height-s)*0.3),s,s,0,0,S,S); setPhoto(r,c.toDataURL('image/jpeg',0.85),true); }; im.src=fr.result; };
   fr.readAsDataURL(file);
 }
-function choose(i){ if(sel.mode==='arcade'){ sel.picks[0]=i; sel.turn=0; refreshPicks(); return; } sel.picks[sel.turn]=i; sel.turn=1-sel.turn; refreshPicks(); }
+/*DIVERSI1: contro il computer mai lo stesso lottatore (18.11.2026)*/function cpuAltro(me){ const k=r=>r&&(r.mk||r.spriteKey), km=k(ROSTER[me]); const ok=ROSTER.map((r,i)=>i).filter(i=>i!==me&&ROSTER[i]&&ROSTER[i].spriteKey&&ROSTER[i].spriteKey!=='pm'&&!ROSTER[i].dark&&k(ROSTER[i])!==km&&(!cards||!cards[i]||!cards[i].el||cards[i].el.style.display!=='none')); return ok.length?ok[(Math.random()*ok.length)|0]:(me===0?1:0); }
+function cpuStesso(){ const k=r=>r&&(r.mk||r.spriteKey); const b=ROSTER[sel.picks[1]]; if(b&&!Object.prototype.hasOwnProperty.call(b,'spriteKey')) return false; return sel.mode==='cpu'&&(sel.picks[0]===sel.picks[1]||k(ROSTER[sel.picks[0]])===k(ROSTER[sel.picks[1]])); }
+function choose(i){ if(sel.mode==='arcade'){ sel.picks[0]=i; sel.turn=0; refreshPicks(); return; } if(sel.mode==='cpu'&&sel.turn===1&&(i===sel.picks[0]||(ROSTER[i]&&ROSTER[sel.picks[0]]&&(ROSTER[i].mk||ROSTER[i].spriteKey)===(ROSTER[sel.picks[0]].mk||ROSTER[sel.picks[0]].spriteKey)))){ try{ $('#pickHint').textContent='Il computer deve usare un altro lottatore'; }catch(e){} return; } sel.picks[sel.turn]=i; if(cpuStesso()) sel.picks[1]=cpuAltro(sel.picks[0]); sel.turn=1-sel.turn; refreshPicks(); }
 function refreshPicks(){
   const lbl2=sel.mode==='cpu'?'CPU':'G2';
   cards.forEach((c,i)=>{ c.el.classList.toggle('s1',sel.picks[0]===i); c.el.classList.toggle('s2',sel.picks[1]===i);
