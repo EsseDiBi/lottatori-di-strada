@@ -36,6 +36,14 @@ jobs:
           cp -r index.html img icona-192.png icona-512.png manifest.webmanifest build/www/
           # dentro l'app il tasto "Installa" non serve
           python3 -c "p='build/www/index.html';s=open(p).read();s=s.replace('</body>','<style>#ldsInstall{display:none!important}</style></body>',1);open(p,'w').write(s)"
+          # AUTOAGG1: se c'e' rete, la copia interna passa subito al sito (sempre l'ultima versione)
+          python3 - <<'PY'
+          p='build/www/index.html'; s=open(p,encoding='utf-8').read()
+          J="<script>/*AUTOAGG1*/(function(){if(location.hostname.indexOf('github.io')>=0)return;var u='https://essedibi.github.io/lottatori-di-strada/';var c=window.AbortController?new AbortController():null;var t=setTimeout(function(){if(c)c.abort();},3000);fetch(u+'sw.js?v='+Date.now(),{mode:'no-cors',cache:'no-store',signal:c?c.signal:undefined}).then(function(){clearTimeout(t);location.replace(u);}).catch(function(){});})();</script>"
+          assert s.count('<head>')==1
+          s=s.replace('<head>','<head>'+J,1); open(p,'w',encoding='utf-8').write(s)
+          PY
+          grep -c AUTOAGG1 build/www/index.html
 
       - name: Crea il progetto Android
         working-directory: build
@@ -43,6 +51,19 @@ jobs:
           npm init -y >/dev/null
           npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7
           npx cap init "Lottatori di Strada" it.essedibi.lottatori --web-dir www
+          # AUTOAGG1: con la rete l'app passa al gioco del sito (aggiornamenti automatici, senza scaricare nulla);
+          # senza rete resta sulla copia interna. LottatoriApp nel nome del browser nasconde "Scarica l'app".
+          rm -f capacitor.config.ts capacitor.config.js
+          cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "it.essedibi.lottatori",
+            "appName": "Lottatori di Strada",
+            "webDir": "www",
+            "appendUserAgent": "LottatoriApp",
+            "server": { "allowNavigation": ["essedibi.github.io"] }
+          }
+          JSON
+          cat capacitor.config.json
           npx cap add android
           npx cap sync android
 

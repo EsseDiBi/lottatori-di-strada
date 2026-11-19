@@ -4292,7 +4292,7 @@ requestAnimationFrame(loop);
 <script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}</script>
 <style>#ldsInstall{display:none;position:fixed;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));z-index:60;padding:8px 14px;border:0;border-radius:10px;background:#ffc933;color:#120d22;font:700 14px system-ui,sans-serif;box-shadow:0 3px 0 #b8860b;cursor:pointer}body.sc-title #ldsInstall.on{display:block}</style>
 <button id="ldsInstall" type="button" aria-label="Scarica l'app">Scarica l'app</button>
-<script>(function(){var b=document.getElementById('ldsInstall'),dp=null,st=(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))||navigator.standalone;if(st)return;
+<script>(function(){var b=document.getElementById('ldsInstall'),dp=null,st=(window.matchMedia&&(matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches))||navigator.standalone||/LottatoriApp/.test(navigator.userAgent);if(st)return;
 var ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);if(ios||/Android/.test(navigator.userAgent))b.classList.add('on');
 addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;b.classList.add('on');});addEventListener('appinstalled',function(){b.classList.remove('on');});
 ['pointerdown','touchstart','mousedown','keydown'].forEach(function(t){b.addEventListener(t,function(e){e.stopPropagation();},{passive:true});});
