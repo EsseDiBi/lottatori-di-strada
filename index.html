@@ -3228,10 +3228,11 @@ const GESTO={
   frisbee:{dist:110,pose:'vittoria',q:['Respira. È finita.','Brava, hai spinto.','Tutto regolare. Prossimo!']},
   max:{dist:96,pose:'lancio',q:['Un po\' d\'acqua e ricresci.','Annaffiare sempre i più deboli.','Cresci, compagno.']}
 };
+function gestoQ(w,D){ try{ const b=(w._fd&&w._fd[0])||w.def; if(b.spriteKey==='allibrator'&&w.def.lv) return 'STIRATO!'; }catch(e){} return pick(D.q); } /*STIRATO1: PARTBOY vincitore dice STIRATO!*/
 function startGesto(){ if(G&&G.f1) G.f1.maria=null; if(G&&G.f2) G.f2.maria=null; [G&&G.f1,G&&G.f2].forEach(x=>{ if(x){ x.araldo=null; x.casc=null; if(x.gp==='tifo') x.gp=null; } }); const wi=G.wins[0]>=2?0:1, w=wi?G.f2:G.f1, l=wi?G.f1:G.f2, D=GESTO[w.def.spriteKey]; if(!D||!SPRITES[w.def.spriteKey]) return false;
   const dir=l.x>=w.x?1:-1; G.phase='gesto'; G.phaseT=0; G.winner=wi; TX.length=0; P.length=0;
   w.atk=null; w.stun=0; w.vx=0; w.vy=0; w.y=GROUND; w.onGround=true; w.state='walk'; w.gp=null;
-  G.gs={w,l,D,dir,at:-1,tx:D.away?(dir>0?-140:W+140):l.x-dir*D.dist, lay:l.state==='ko'}; w.facing=D.away?-dir:dir; if(D.away) quip2(w,pick(D.q));
+  G.gs={w,l,D,dir,at:-1,tx:D.away?(dir>0?-140:W+140):l.x-dir*D.dist, lay:l.state==='ko'}; w.facing=D.away?-dir:dir; if(D.away) quip2(w,gestoQ(w,D));
   return true; }
 function quip2(f,text){ ctx.font='700 21px '+FU; const hw=ctx.measureText(text).width/2+24; floatText(text,Math.max(hw,Math.min(W-hw,f.x)),f.y-200*(f.def.size||1)-18,f.def.accent,17,120,'balloon'); }
 function gestoTarget(g){ const l=g.l; return g.lay?[l.x,GROUND-34]:[l.x,l.y-150*(l.def.size||1)]; }
@@ -3242,7 +3243,7 @@ function toCenter(w,l){ const cx=W/2, dx=cx-w.x, ld=l.x-cx;
   w.x=cx; return Math.abs(l.x-cx)>=186||l.x<=41||l.x>=W-41; }
 function stepGesto(){ const g=G.gs, w=g.w, l=g.l, D=g.D, t=G.phaseT; w.t++; l.t++;
   const sk=BTN.some(b=>press[0][b]||press[1][b]); press=[{},{}];
-  if(g.at<0){ const dx=g.tx-w.x, sp=D.away?4.6:Math.max(4,Math.abs(g.tx-w.x)/40+3); if(Math.abs(dx)<=sp||t>(D.away?125:150)){ if(!D.away) w.x=g.tx; g.at=t; if(!D.away){ w.state='idle'; w.gp=D.pose; quip2(w,pick(D.q)); if(w.def.spriteKey==='marouges') SFX.kiss(); else SFX.swing(); } } else w.x+=Math.sign(dx)*sp; }
+  if(g.at<0){ const dx=g.tx-w.x, sp=D.away?4.6:Math.max(4,Math.abs(g.tx-w.x)/40+3); if(Math.abs(dx)<=sp||t>(D.away?125:150)){ if(!D.away) w.x=g.tx; g.at=t; if(!D.away){ w.state='idle'; w.gp=D.pose; quip2(w,gestoQ(w,D)); if(w.def.spriteKey==='marouges') SFX.kiss(); else SFX.swing(); } } else w.x+=Math.sign(dx)*sp; }
   else { const a=t-g.at; if(!D.away){ if(a===34){ SFX.select(); spark(...gestoTarget(g),w.def.accent,8); } if(a>=110&&w.state!=='win'){ w.gp=null; if(toCenter(w,l)){ w.state='win'; w.t=0; w.facing=Math.sign(l.x-w.x)||w.facing; } } } }
   const end=g.at>=0&&t-g.at>=(D.away?20:150)&&(D.away||(w.state==='win'&&w.t>=70)||t-g.at>=330);
   if(end||(sk&&t>30)){ w.gp=null; showResult(); } }
