@@ -1286,7 +1286,7 @@ function evilBoost(f){ if(!isEvil(f)||!G) return; const o=f===G.f1?G.f2:G.f1; co
   if(on&&!f._evB0){ const b=f.def, m=(typeof FORME_MUL!=='undefined'&&FORME_MUL[3])||[1.22,0.85,1.10], d=Object.create(b); d.dmgMul=(b.dmgMul||1)*m[0]; d.defMul=(b.defMul||1)*m[1]; d.speed=(b.speed||4)*m[2]; d.evBoost=1; f._evB0=b; f.def=d; }
   else if(!on&&f._evB0){ f.def=f._evB0; f._evB0=null; } }
 /*EVILAURA1 (19.11.2026): Evil SDB non evolve; al posto dell'evoluzione ha sempre un'aura grande con fulmini continui. Grafica: fiamma (FORME_AURA) e colonna di fulmini (aura_fulmine) di ChatGPT gia' nel gioco, tinte. */
-function evilAura(g,F,ox,oy,sc,front){ if(!isEvil(F)||F.state==='ko'||F.wrapT>0) return; const t=F.t||((G&&G.frame)||0), z=sc*(F.def.size||1);
+function evilAura(g,F,ox,oy,sc,front){ if(!isEvil(F)||!F._evB0||F.state==='ko'||F.wrapT>0) return; /*EVILAURA2: solo durante la sua evoluzione*/ const t=F.t||((G&&G.frame)||0), z=sc*(F.def.size||1);
   if(!front){ const im=(typeof formeAuraImg==='function')?formeAuraImg('#7a1cff'):null, im2=(typeof formeAuraImg==='function')?formeAuraImg('#ff2a4a'):null;
     if(im&&im2){ const k=((t/6)|0)%2, pul=0.95+0.05*Math.sin(t*0.19);
       const h1=330*z*pul, w1=im.width*h1/im.height*1.5; g.save(); g.imageSmoothingEnabled=false; g.globalAlpha=0.6; g.translate(ox,oy+10*sc); g.scale(k?-1:1,1); g.drawImage(im,-w1/2,-h1,w1,h1); g.restore();
