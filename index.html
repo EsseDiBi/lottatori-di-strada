@@ -2024,7 +2024,7 @@ if(!PRESETS.some(p=>p.spriteKey==='ciarli')) PRESETS.push({base:'IL CIARLI',kind
    bio:'Terza generazione di imprenditori. Piedi nudi, gilet da tiratore e fucile di sughero sottobraccio. Di giorno tiro al piattello, di notte Coco Beach. Al suo fianco NILLA, la corgi. Quando si trasforma diventa un lama.'});
 if(!PRESETS.some(p=>p.spriteKey==='maurino')) PRESETS.push({base:'MAURINO',kind:'suit',suit:'#d62828',legs:'#3a5a8c',accent:'#1a1a1a',tie:'#1f2f5a',top:'#d62828',shoes:'#f0f0f0',skin:'#e8b48a',hair:'#3a2418',special:'Tunnel',superName:'Pallone gigante',proj:'palloneM',size:1.13,spriteKey:'maurino',
    bio:'Dinoccolato, cappellino sempre in testa, tifoso rossonero fino al midollo. Intelligente, tranquillo, provocatorio: alza i palmi e chiede "eh?!" mentre ti fa tunnel. Da sempre innamorato di BDB. Quando si trasforma diventa un fuoriclasse brasiliano a piedi nudi.'});
-if(!PRESETS.some(p=>p.spriteKey==='hispanico')) PRESETS.push({base:'HISPANICO',kind:'suit',suit:'#1a1a1a',legs:'#3a5a8c',accent:'#ff3b30',tie:'#1a1a1a',top:'#1a1a1a',shoes:'#f2f2f2',skin:'#e8b48a',hair:'#3a2418',special:'Verónica',superName:'Toro!',proj:'banderilla',size:1.13,spriteKey:'hispanico',
+if(!PRESETS.some(p=>p.spriteKey==='hispanico')) PRESETS.push({base:'HISPANICO',kind:'suit',suit:'#1a1a1a',legs:'#3a5a8c',accent:'#ff3b30',tie:'#1a1a1a',top:'#1a1a1a',shoes:'#f2f2f2',skin:'#e8b48a',hair:'#3a2418',special:'Verónica',superName:'Toro!',proj:'banderilla',size:1.00,spriteKey:'hispanico',
    bio:'Designer spagnolo, premiato e lo sa. Dolcevita nero, occhiali spessi, scarpe bianche immacolate. Quando si trasforma diventa un torero: banderillas, mantello rosso e un toro che non sbaglia mai bersaglio. OLÈ!'});
 if(!PRESETS.some(p=>p.spriteKey==='allibrator')) PRESETS.push({base:'THE ALLIBRATOR',kind:'suit',suit:'#1f2a5a',legs:'#1f2a5a',accent:'#ffe14a',tie:'#a6e05a',top:'#f2f2f2',shoes:'#141414',skin:'#f0b890',hair:'#7a4a2a',special:'Raddoppio',superName:'Tutto sul rosso',proj:'schedina',size:1.08,spriteKey:'allibrator',
    bio:'Business man milanese. Scommette su tutto, anche su di sé. Gira con una spider rossa anni Ottanta. Quando la festa parte diventa PARTBOY: cravatta in testa e scarpe chissà dove.'});
@@ -2087,7 +2087,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='maurino')){ const mp=PRESETS.find(p=>p.spriteKey==='maurino'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='maurino'){ r.size=1.13; r.proj='palloneM'; r.rangedKind='palloneM'; } }); /*MAURINO2*/
   if(!ROSTER.some(r=>r.spriteKey==='hispanico')){ const cp=PRESETS.find(p=>p.spriteKey==='hispanico'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='hispanico'){ r.size=1.13; r.proj='banderilla'; r.rangedKind='banderilla'; } }); /*HISP2*/
+  ROSTER.forEach(r=>{ if(r.spriteKey==='hispanico'){ r.size=1.00; r.proj='banderilla'; r.rangedKind='banderilla'; } }); /*HISP2*/
   if(!ROSTER.some(r=>r.spriteKey==='allibrator')){ const ap=PRESETS.find(p=>p.spriteKey==='allibrator'); if(ap){ ROSTER.push(fromPreset(ap)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='allibrator'){ r.size=1.08; r.proj='schedina'; r.rangedKind='schedina'; } }); /*ALLIB4*/
   if(!ROSTER.some(r=>r.spriteKey==='criceto')){ const cp=PRESETS.find(p=>p.spriteKey==='criceto'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
