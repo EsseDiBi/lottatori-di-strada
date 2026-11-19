@@ -269,7 +269,7 @@ body.coarse .acts .bx{width:44%}
   </div>
   <div class="legend">
     <div><h3>Giocatore 1</h3><p><kbd>A</kbd> <kbd>D</kbd> muovi, <kbd>W</kbd> salta, <kbd>S</kbd> abbassati. <kbd>F</kbd> pugno, <kbd>G</kbd> calcio, <kbd>R</kbd> super, <kbd>E</kbd> speciale, <kbd>Q</kbd> a distanza. Contro il computer valgono anche le frecce.</p></div>
-    <div><h3>Giocatore 2</h3><p>Frecce per muovere. <kbd>K</kbd> pugno, <kbd>L</kbd> calcio, <kbd>P</kbd> super.</p></div>
+    <div><h3>Controller</h3><p>Levetta o croce per muovere. <kbd>A</kbd> pugno, <kbd>B</kbd> calcio, <kbd>X</kbd> speciale, <kbd>Y</kbd> a distanza, dorsali super, <kbd>Start</kbd> pausa. Nei menu: croce per scegliere, <kbd>A</kbd> conferma, <kbd>B</kbd> indietro. Con due controller in Due giocatori, il secondo muove il Giocatore 2.</p></div><div><h3>Giocatore 2</h3><p>Frecce per muovere. <kbd>K</kbd> pugno, <kbd>L</kbd> calcio, <kbd>P</kbd> super.</p></div>
     <div><h3>Tecnica</h3><p>Combo: pugno, pugno, calcio, tutti a segno. Giù poi avanti + P: a distanza. Giù poi indietro + C: speciale. Giù + P: montante. Giù + C: sgambetto, fa cadere. Avanti + P attaccati: presa. Super col tasto Super a barra piena. Indietro para in piedi, giù-indietro para bassi: lo sgambetto si para solo bassi. La parata annulla gli attacchi a distanza. <kbd>Esc</kbd> pausa.</p></div>
   </div>
 </section>
@@ -2458,6 +2458,59 @@ addEventListener('keyup',e=>{ const t=target(e.code); if(t) held[t[0]][t[1]]=fal
 addEventListener('blur',()=>held.forEach(h=>BTN.forEach(b=>h[b]=false)));
 function readInput(i){ const h=held[i],p=press[i]; press[i]={}; return {left:!!h.left,right:!!h.right,up:!!h.up,down:!!h.down,pP:!!p.p,pK:!!p.k,pS:!!p.s,pX:!!p.x,pZ:!!p.z}; }
 const EMPTY=()=>({left:false,right:false,up:false,down:false,pP:false,pK:false,pS:false,pX:false,pZ:false});
+/*PAD1*/{ /* controller collegabile, 19.11.2026: A pugno, B calcio, X speciale, Y a distanza, dorsali super, Start pausa; nei menu croce, A conferma, B indietro */
+  const PB=['left','right','up','down','p','k','s','x','z'];
+  const GP={was:[],foc:null,dir:null,hold:0,tt:null,on:false};
+  try{ const st=document.createElement('style'); st.textContent='.gpfoc{outline:4px solid #ffd84a!important;outline-offset:2px!important}#gpToast{position:fixed;left:50%;top:10px;transform:translateX(-50%);background:#ffd84a;color:#120d22;font:700 14px "Chakra Petch",sans-serif;padding:6px 14px;border:3px solid #120d22;border-radius:8px;z-index:99999;pointer-events:none;transition:opacity .4s;opacity:0}'; document.head.appendChild(st); }catch(e){}
+  const toast=m=>{ let t=document.getElementById('gpToast'); if(!t){ t=document.createElement('div'); t.id='gpToast'; document.body.appendChild(t); } t.textContent=m; t.style.opacity=1; clearTimeout(GP.tt); GP.tt=setTimeout(()=>{ t.style.opacity=0; },2500); };
+  addEventListener('gamepadconnected',e=>{ toast('Controller collegato'); GP.on=true; });
+  addEventListener('gamepaddisconnected',()=>toast('Controller scollegato'));
+  const pads=()=>{ const a=[]; try{ const l=navigator.getGamepads?navigator.getGamepads():[]; for(let i=0;i<l.length;i++){ const p=l[i]; if(p&&p.connected!==false) a.push(p); } }catch(e){} return a; };
+  const bt=(p,i)=>{ const b=p.buttons&&p.buttons[i]; return !!b&&(b.pressed||b.value>0.5); };
+  const leggi=p=>{ const ax=p.axes||[], x=ax[0]||0, y=ax[1]||0, D=0.5;
+    return {left:bt(p,14)||x<-D,right:bt(p,15)||x>D,up:bt(p,12)||y<-D,down:bt(p,13)||y>D,p:bt(p,0),k:bt(p,1),s:bt(p,2),z:bt(p,3),x:bt(p,4)||bt(p,5)||bt(p,6)||bt(p,7),start:bt(p,9),back:bt(p,8)}; };
+  const SELQ='button,label[for],a[href],[role="button"],summary,select';
+  const fuori=el=>el.closest('#pad,.topbar,#onlBar,.legend');
+  const visibile=el=>{ if(el.disabled||el.hidden) return false; const r=el.getBoundingClientRect(); if(r.width<6||r.height<6) return false; const cx=r.left+r.width/2, cy=r.top+r.height/2; if(cx<0||cy<0||cx>innerWidth||cy>innerHeight) return false; const c=document.elementFromPoint(cx,cy); return !!c&&(c===el||el.contains(c)||(c.closest&&c.closest(SELQ)===el)); };
+  const scelti=()=>Array.from(document.querySelectorAll(SELQ)).filter(el=>!fuori(el)&&visibile(el));
+  const metti=el=>{ if(GP.foc&&GP.foc!==el) GP.foc.classList.remove('gpfoc'); GP.foc=el; if(el){ el.classList.add('gpfoc'); try{ el.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(e){} } };
+  const togli=()=>{ if(GP.foc) GP.foc.classList.remove('gpfoc'); GP.foc=null; };
+  const centro=el=>{ const r=el.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2]; };
+  const muovi=(dx,dy,L)=>{ if(!GP.foc||!L.includes(GP.foc)){ const a=document.activeElement; const ck=L.find(e=>e.tagName==='LABEL'&&e.htmlFor&&document.getElementById(e.htmlFor)&&document.getElementById(e.htmlFor).checked); metti(L.includes(a)?a:(ck||L.find(e=>e.classList.contains('pcard'))||L.find(e=>e.id==='nextBtn')||L[0])); return; }
+    const [x0,y0]=centro(GP.foc); let best=null,bs=1e9;
+    L.forEach(el=>{ if(el===GP.foc) return; const [x,y]=centro(el), vx=x-x0, vy=y-y0, pr=vx*dx+vy*dy; if(pr<=4) return; const ort=Math.abs(vx*dy-vy*dx), sc=pr+ort*2.2; if(sc<bs){ bs=sc; best=el; } });
+    if(best) metti(best); else if(dy) window.scrollBy(0,dy*160); };
+  const indietro=()=>{ const ov=document.getElementById('ovPause'); if(ov&&!ov.hidden){ try{ togglePause(); }catch(e){} return; } for(const id of ['prevBtn','onlX']){ const b=document.getElementById(id); if(b&&visibile(b)){ b.click(); return; } } };
+  const avanti=L=>{ const b=document.getElementById('nextBtn'); if(b&&L.includes(b)){ b.click(); return true; } return false; };
+  const menuAttivo=()=>{ if(scr!=='fight') return true; if(!G) return true; if(G.paused||G.phase==='over') return true; return scelti().length>0; };
+  const ospite=()=>{ try{ return ONL.role==='guest'&&!!document.getElementById('onlVid'); }catch(e){ return false; } };
+  function giro(){ requestAnimationFrame(giro); const P=pads(); if(!P.length){ if(GP.was.length){ GP.was=[]; [0,1].forEach(i=>PB.forEach(b=>{ if(held[i]['gp_'+b]){ held[i][b]=false; held[i]['gp_'+b]=false; } })); } return; }
+    const S=P.map(leggi), V=GP.was; GP.was=S;
+    const giu=(j,b)=>S[j][b]&&!(V[j]&&V[j][b]);
+    if(scr==='title'){ togli(); if(S.some((s,j)=>['p','k','s','z','x','start'].some(b=>giu(j,b)))) try{ titlePress(); }catch(e){} return; }
+    const inPartita=ospite()||!menuAttivo();
+    if(inPartita){ togli();
+      const tot=[{},{}];
+      S.forEach((s,j)=>{ const i=(j>0&&G&&G.mode==='2p')?1:0; PB.forEach(b=>{ if(s[b]){ tot[i][b]=true; if(giu(j,b)) press[i][b]=true; } }); if(giu(j,'start')&&!ospite()) try{ togglePause(); }catch(e){} });
+      [0,1].forEach(i=>PB.forEach(b=>{ const k='gp_'+b; if(tot[i][b]){ held[i][b]=true; held[i][k]=true; } else if(held[i][k]){ held[i][b]=false; held[i][k]=false; } }));
+      if(S.some((s,j)=>PB.some(b=>giu(j,b)))) try{ ac(); }catch(e){}
+      return; }
+    [0,1].forEach(i=>PB.forEach(b=>{ const k='gp_'+b; if(held[i][k]){ held[i][b]=false; held[i][k]=false; } }));
+    const L=scelti(); if(!L.length){ togli(); return; }
+    if(GP.foc&&!L.includes(GP.foc)) togli();
+    const s=S.reduce((a,o)=>{ for(const k in o) a[k]=a[k]||o[k]; return a; },{});
+    const d=s.left?[-1,0]:s.right?[1,0]:s.up?[0,-1]:s.down?[0,1]:null, dk=d?d.join():null;
+    if(!d){ GP.dir=null; GP.hold=0; } else if(dk!==GP.dir){ GP.dir=dk; GP.hold=0; muovi(d[0],d[1],L); } else if(++GP.hold>20&&GP.hold%7===0) muovi(d[0],d[1],L);
+    const una=b=>S.some((o,j)=>giu(j,b));
+    if(una('p')){ if(!GP.foc) muovi(0,0,L); else { try{ ac(); }catch(e){} GP.foc.click(); } }
+    else if(una('k')) indietro();
+    else if(una('start')){ if(scr==='fight'&&G&&G.paused){ try{ togglePause(); }catch(e){} } else if(!avanti(L)&&GP.foc) GP.foc.click(); }
+  }
+  requestAnimationFrame(giro);
+  addEventListener('pointerdown',togli,true);
+  if(location.hash==='#debug') window.__pad=GP;
+}
+
 
 document.querySelectorAll('#pad .acts button').forEach(b=>{
   const k=b.dataset.k;
