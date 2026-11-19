@@ -4414,7 +4414,7 @@ function schedaShow(i,o){ o=o||{}; const r=o.r||ROSTER[i]; if(!r) return; const 
   const R=o.img||(cards[i]&&cards[i].el.querySelector('img')&&cards[i].el.querySelector('img').src)||'';
   const bar=(l,v)=>{ v=Math.max(0,Math.min(10,Math.round(v||0))); let s=''; for(let n=0;n<10;n++) s+='<i style="flex:1;height:.75em;background:'+(n<v?'#ffc933':'#3a3166')+';border:1px solid #120d22"></i>';
     return '<div style="display:flex;align-items:center;gap:.4em;margin:.12em 0"><b style="width:6.6em;font-size:.8em;color:#c9c2e6;text-transform:uppercase;letter-spacing:.02em">'+l+'</b><span style="flex:1;display:flex;gap:2px">'+s+'</span><b style="width:1.4em;text-align:right;color:#ffc933">'+v+'</b></div>'; };
-  const M=(typeof MOVESET!=='undefined'&&MOVESET[k])||{}, sp=M.sName||r.special, su=M.supName||r.superName; const mv=(sp||su)?'<div style="font-size:.82em;color:#9fe7ff;margin-top:.3em">'+(sp?'Speciale: <b>'+esc(sp)+'</b>':'')+(sp&&su?'<br>':'')+(su?'Super: <b>'+esc(su)+'</b>':'')+'</div>':'';
+  const M={}, sp=0, su=0; /*SCHEDANOMOSSE1: niente speciali nella scheda (19.11.2026)*/ const mv=(sp||su)?'<div style="font-size:.82em;color:#9fe7ff;margin-top:.3em">'+(sp?'Speciale: <b>'+esc(sp)+'</b>':'')+(sp&&su?'<br>':'')+(su?'Super: <b>'+esc(su)+'</b>':'')+'</div>':'';
   d.innerHTML='<div style="display:flex;align-items:center;gap:.6em;padding:.45em .6em;background:#1d1838;border-bottom:2px solid #3a3166">'
     +(R?'<img alt="" src="'+R+'" style="width:2.8em;height:2.8em;image-rendering:pixelated;border:2px solid #3fd6ff;border-radius:3px">':'')
     +'<b style="flex:1;font-family:Bungee,Impact,sans-serif;font-size:1.3em;color:#ffc933;text-shadow:2px 2px 0 #120d22;line-height:1.05">'+esc(r.name)+'</b>'
