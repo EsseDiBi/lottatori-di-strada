@@ -415,7 +415,7 @@ function formeUp(f){ if(!formeCan(f)) return false; f._fd=f._fd||[f.def]; const 
   if(sw&&!lock&&sw.indexOf('img:')!==0&&sw!=='rosa'){ try{ const td=TORMINI.def[sw], p=td&&td.p(); if(p){ d=fromPreset(p); swap=true; } }catch(e){} }
   const prev=f._fd[f._fd.length-1];
   if(!d){ d=Object.create(base); if(sw&&sw.indexOf('img:')===0) d.lvSP=sw.slice(4); else if(sw&&sw.indexOf('rc:')===0) d.lvRC=sw.slice(3); else if(prev.lvSP) d.lvSP=prev.lvSP; }
-  const m=FORME_MUL[top?3:lv], spd=swap?(d.speed||4):(base.speed||4)*m[2]; d=Object.create(d); d.dmgMul=(base.dmgMul||1)*m[0]; d.defMul=(base.defMul||1)*m[1]; d.speed=spd; d.lv=lv; d.lvSwap=swap; d.lvTint=!swap&&!d.lvSP&&!d.lvRC&&sw!=='rosa'?(top?3:lv):0; /*ROSAPELLE1*/ d.lvTop=top; d.lvCol=FORME_AC[k]||formeCol(base);
+  const m=FORME_MUL[top?3:lv], spd=swap?(d.speed||4):(base.speed||4)*m[2]; d=Object.create(d); d.dmgMul=(base.dmgMul||1)*m[0]; d.defMul=(base.defMul||1)*m[1]; d.speed=spd; d.lv=lv; d.lvSwap=swap; if(k==='ciuppa'&&d.lvSP==='ciuppa_febbre') d.size=1.19; /*ALTCIUPPA1: la febbre ha 2 px vuoti sopra e sotto*/ d.lvTint=!swap&&!d.lvSP&&!d.lvRC&&sw!=='rosa'?(top?3:lv):0; /*ROSAPELLE1*/ d.lvTop=top; d.lvCol=FORME_AC[k]||formeCol(base);
   d.name=base.name; /*NOMEFISSO1*/
   if(sw==='rosa'||(prev&&G&&G.rosa&&G.rosa.has(prev))){ try{ (G.rosa||(G.rosa=new Set())).add(d); }catch(e){} }
   d.lvVite=3; f._fdCad=0; f._fd.push(d); f.def=d; f.meter=0; f._evoT=G.frame; f.vx=0; f.state='idle'; f.gp=null;
@@ -2105,7 +2105,7 @@ if(!PRESETS.some(p=>p.spriteKey==='hispanico')) PRESETS.push({base:'HISPANICO',k
    bio:'Designer spagnolo, premiato e lo sa. Dolcevita nero, occhiali spessi, scarpe bianche immacolate. Quando si trasforma diventa un torero: banderillas, mantello rosso e un toro che non sbaglia mai bersaglio. OLÈ!'});
 if(!PRESETS.some(p=>p.spriteKey==='allibrator')) PRESETS.push({base:'THE ALLIBRATOR',kind:'suit',suit:'#1f2a5a',legs:'#1f2a5a',accent:'#ffe14a',tie:'#a6e05a',top:'#f2f2f2',shoes:'#141414',skin:'#f0b890',hair:'#7a4a2a',special:'Raddoppio',superName:'Tutto sul rosso',proj:'schedina',size:1.03,spriteKey:'allibrator',
    bio:'Business man milanese. Scommette su tutto, anche su di sé. Gira con una spider rossa anni Ottanta. Quando la festa parte diventa PARTBOY: cravatta in testa e scarpe chissà dove.'});
-if(!PRESETS.some(p=>p.spriteKey==='ciuppa')) PRESETS.push({base:'CIUPPA',kind:'hoodie',suit:'#2a4aa8',tie:'#ffffff',top:'#2a4aa8',legs:'#1b2450',accent:'#ff4fc8',shoes:'#141414',skin:'#e8a878',hair:'#2a1a12',special:'Placcaggio',superName:'Terzo tempo',proj:'dna',size:1.03,spriteKey:'ciuppa',
+if(!PRESETS.some(p=>p.spriteKey==='ciuppa')) PRESETS.push({base:'CIUPPA',kind:'hoodie',suit:'#2a4aa8',tie:'#ffffff',top:'#2a4aa8',legs:'#1b2450',accent:'#ff4fc8',shoes:'#141414',skin:'#e8a878',hair:'#2a1a12',special:'Placcaggio',superName:'Terzo tempo',proj:'dna',size:1.16,spriteKey:'ciuppa',
    bio:'Rugbista di fango e di cuore. Placca tutto quello che si muove, poi offre la birra. Innamorato perso di BDB. Quando parte la musica diventa la febbre del sabato sera.'});
 if(!PRESETS.some(p=>p.spriteKey==='monica')) PRESETS.push({base:'The Praticant',kind:'hoodie',suit:'#5d5a22',legs:'#5d5a22',accent:'#d8b23a',tie:'#d8b23a',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#e0a050',longHair:true,special:'Sussurro',superName:'Martello del Foro',proj:'faldoni',size:1.02,spriteKey:'monica',
    bio:'Praticante di SDB, timida e introversa: non parla quasi mai. Vuole diventare avvocato e sopravvivere alla giornata col suo capo. Volenterosa, ma appena può fa un pisolino con BLUE.'});
@@ -2170,7 +2170,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='allibrator')){ const ap=PRESETS.find(p=>p.spriteKey==='allibrator'); if(ap){ ROSTER.push(fromPreset(ap)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='allibrator'){ r.size=1.03; /*ALTEZZA1: alto come Faja, 19.11.2026*/ r.proj='schedina'; r.rangedKind='schedina'; } }); /*ALLIB4*/
   if(!ROSTER.some(r=>r.spriteKey==='ciuppa')){ const cp=PRESETS.find(p=>p.spriteKey==='ciuppa'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='ciuppa'){ r.size=1.03; r.proj='dna'; r.rangedKind='dna'; } }); /*CIUPPA4*/
+  ROSTER.forEach(r=>{ if(r.spriteKey==='ciuppa'){ r.size=1.16; /*ALTCIUPPA1: alto come Marico*/ r.proj='dna'; r.rangedKind='dna'; } }); /*CIUPPA4*/
   if(!ROSTER.some(r=>r.spriteKey==='criceto')){ const cp=PRESETS.find(p=>p.spriteKey==='criceto'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='criceto') r.size=1.5; });
   if(!ROSTER.some(r=>r.spriteKey==='divino')){ const dp=PRESETS.find(p=>p.spriteKey==='divino'); if(dp){ ROSTER.push(fromPreset(dp)); try{ save(); }catch(e){} } }
