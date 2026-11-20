@@ -768,6 +768,17 @@ COUPLE.hispanico.giovin={intro:["Giovin Signore, il tuo panciotto è troppo baro
 if(SPRITES.hispanico){ const N=SPRITES.hispanico; N.guardia2=N.guardia; N.paratabassa=N.accovacciato; N.presa=N.pugno; N.entrata=N.provocazione; N.lancio2=N.lancio; N.caricacalcio=N.caricapugno; N.sguardo=N.provocazione; N.turbo=N.pugno; N.sfondamento=N.pugno; N.stordita=N.stordito; N.super2=N.super1; N.esulta1=N.vittoria; N.esulta2=N.tifo; N.esulta3=N.vittoria; N.volo=N.ko; N.svenuto0=N.aterra; }
 try{ eval(window.ANDRE_SRC||''); }catch(e){ console.error('ANDRE1',e); } /*ANDREEVAL1*/
 try{ eval(window.GEME_SRC||''); }catch(e){ console.error('GEME1',e); } /*GEMEEVAL1*/
+/*VAPOREMAX1 (21.11.2026): Max quando evolve genera una nube di vapore (ChatGPT, chat /c/6b00dc4d-4f10-83eb-9139-c105b1a5897f) che poi si dissolve. Il codice carica e anima soltanto le tre immagini. */
+const VAPMAX=[1,2,3].map(n=>{ const i=new Image(); i.src='img/fx/max_vapore'+n+'.png'; return i; });
+{ const _dfV=drawFighter; drawFighter=function(g,F,ox,oy,sc){ const r=_dfV.apply(this,arguments); try{
+  const b=F&&F._fd&&F._fd[0]; if(!b||b.spriteKey!=='max'||!F.def||!F.def.lv||!G||F._evoT==null) return r;
+  const t=G.frame-F._evoT, DUR=104; if(t<0||t>=DUR) return r;
+  const zs=(F.def.size||b.size||1), z=(sc||1)*zs*0.95, cy=oy-80*(sc||1)*zs;
+  const fase=(im,al,k,dy)=>{ if(!im.complete||!im.width||al<=0) return; const w=im.width*z*k, h=im.height*z*k; g.save(); g.globalAlpha*=Math.min(1,al); g.imageSmoothingEnabled=false; g.drawImage(im,ox-w/2,cy-h/2-dy,w,h); g.restore(); };
+  if(t<18) fase(VAPMAX[0],1,1.3+0.3*t/18,30);
+  if(t>=12&&t<62) fase(VAPMAX[1],t<18?(t-12)/6:(t>50?(62-t)/12:1),0.95+0.25*(t-12)/50,(t-12)*0.5);
+  if(t>=50) fase(VAPMAX[2],t<62?(t-50)/12*0.9:0.9*(DUR-t)/(DUR-62),1.15+0.25*(t-50)/(DUR-50),25+(t-50)*0.9);
+ }catch(e){} return r; }; }
 /* HISP1 - banderillas (lancio), mantello OLÈ (speciale), super "Toro!": il toro carica, lui lo schiva col mantello e il toro travolge l'avversario */
 function hispImg(n){ const D=window.HISP_IMG||{}, c=SPRITES.__hImg=SPRITES.__hImg||{}; if(!D[n]) return null; if(!c[n]){ const i=new Image(); i.src=D[n]; c[n]=i; } return c[n].complete&&c[n].width?c[n]:null; }
 function drawHispProj(p){ const k=(G.frame>>2)%2; let im, s;
