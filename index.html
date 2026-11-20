@@ -4842,12 +4842,14 @@ if(typeof formeAura==='function'){ const _faA=formeAura; formeAura=function(g,F,
     const T=ARC2.tracce; G._arc2u=G._arc2u||[]; let j=(Math.random()*T.length)|0; for(let n=0;n<T.length&&(ARC._tu||[]).includes(j);n++) j=(j+1)%T.length; ARC._tu=(ARC._tu||[]).concat([j]).slice(-6); P.push({t:T[j],k:null}); return P; }; }
 // scena del furto sul podio
 const FIG={}; try{ const S=window.FIGURO_IMG||{}; for(const k in S){ const im=new Image(); im.src=S[k]; FIG[k]=im; } }catch(e){}
+const FURTO_K=[0,100,145,175,210,240,290,345,400], FURTO_N=FURTO_K.map((k,i)=>k+40*i), FURTO_FINE=FURTO_N[FURTO_N.length-1];
+function furtoT(r){ /*FURTO4 (20.11.2026): scena rallentata, +40 fotogrammi per ogni momento */ if(r<=0) return 0; for(let i=1;i<FURTO_N.length;i++) if(r<=FURTO_N[i]) return FURTO_K[i-1]+(r-FURTO_N[i-1])*(FURTO_K[i]-FURTO_K[i-1])/(FURTO_N[i]-FURTO_N[i-1]); return 400+(r-FURTO_FINE); }
 function arc2Furto(){ /*FURTO3 (20.11.2026): pose ChatGPT del figuro - arriva di corsa, prende la Mano d'Oro, la alza, posa un biglietto, scappa; poi primo piano del biglietto */
-  const t=G.phaseT, F=G.furto||{}, me=G.d1.spriteKey, nm=G.d1.name, M=window.__mon||{}, B=M.im&&M.im.podio, T=M.im&&M.im.trofeo, cl=(a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a))), ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+  const t=furtoT(G.phaseT), F=G.furto||{}, me=G.d1.spriteKey, nm=G.d1.name, M=window.__mon||{}, B=M.im&&M.im.podio, T=M.im&&M.im.trofeo, cl=(a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a))), ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
   ctx.save(); if((F.sh||0)>0.5) ctx.translate((Math.random()-.5)*F.sh,(Math.random()-.5)*F.sh);
   if(evOk(B)) ctx.drawImage(B,0,0,W,H); else { const gr=ctx.createLinearGradient(0,0,0,H); gr.addColorStop(0,'#2a2045'); gr.addColorStop(1,'#0b0816'); ctx.fillStyle=gr; ctx.fillRect(0,0,W,H); }
   if(t>=100){ ctx.fillStyle='rgba(16,4,26,'+(0.45*cl(100,135)+((t<130&&((t-100)>>2)%2===0)?0.22:0))+')'; ctx.fillRect(-30,-30,W+60,H+60); }
-  if(t<165){ if(t%2===0) for(let i=0;i<4;i++) F.conf.push({x:Math.random()*W,y:-10,vy:2+Math.random()*3,vx:(Math.random()-.5)*2,c:['#ffc933','#ff4a64','#3fc8ff','#7be36a','#f4efe6'][(Math.random()*5)|0],r:Math.random()*6}); }
+  if(t<165){ if(G.phaseT%2===0) for(let i=0;i<4;i++) F.conf.push({x:Math.random()*W,y:-10,vy:2+Math.random()*3,vx:(Math.random()-.5)*2,c:['#ffc933','#ff4a64','#3fc8ff','#7be36a','#f4efe6'][(Math.random()*5)|0],r:Math.random()*6}); }
   F.conf=F.conf.filter(p=>p.y<H+10); F.conf.forEach(p=>{ p.y+=p.vy; p.x+=p.vx+Math.sin((t+p.r)*0.1); ctx.fillStyle=p.c; ctx.fillRect(p.x,p.y,6,4); });
   const SP=SPRITES[me]||{}, pose=t<160?((t>>4)%2?'vittoria':(SP.esulta1?'esulta1':'vittoria')):(t<250?'colpito':'guardia'), im=evOk(SP[pose])?SP[pose]:SP.guardia;
   if(evOk(im)){ const sc=1.7*((G.d1.size)||1); ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(430,372); ctx.drawImage(im,-im.width*sc/2,-im.height*sc,im.width*sc,im.height*sc); ctx.restore(); }
@@ -4874,9 +4876,9 @@ function arc2Furto(){ /*FURTO3 (20.11.2026): pose ChatGPT del figuro - arriva di
   ctx.fillStyle='rgba(10,7,22,.82)'; ctx.fillRect(40,452,880,74); torText(cap,W/2,486,840,22,t>=100&&t<345?'#c9a6ff':'#ffc933');
   ctx.font='13px '+FU; ctx.textAlign='right'; ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillText('premi un tasto',W-14,H-10);
   if(t>385){ ctx.fillStyle='rgba(10,7,22,'+Math.min(1,(t-385)/15)+')'; ctx.fillRect(0,0,W,H); } }
-{ const _stA2=step; step=function(){ if(G&&G.phase==='furto'&&!G.paused){ G.frame++; G.phaseT++; const t=G.phaseT, F=G.furto||(G.furto={conf:[]}); F.sh=(F.sh||0)*0.88;
-      try{ if(t===100){ stopMusic(); F.sh=5; } if(t===150) SFX.select(); if(t===160){ SFX.heavy(); F.sh=12; } if(t===232) SFX.select(); if(t===240) SFX.heavy(); }catch(e){}
-      const sk=BTN.some(b=>press[0][b]||press[1][b]); press=[{},{}]; if(t>=400||(sk&&t>30)){ G.phase=G._afterFurto||'mappa'; G.phaseT=0; G.pageI=0; } return; } return _stA2.apply(this,arguments); }; }
+{ const _stA2=step; step=function(){ if(G&&G.phase==='furto'&&!G.paused){ G.frame++; G.phaseT++; const t=furtoT(G.phaseT), t0=furtoT(G.phaseT-1), X=k=>t0<k&&t>=k, F=G.furto||(G.furto={conf:[]}); F.sh=(F.sh||0)*0.88;
+      try{ if(X(100)){ stopMusic(); F.sh=5; } if(X(150)) SFX.select(); if(X(160)){ SFX.heavy(); F.sh=12; } if(X(232)) SFX.select(); if(X(240)) SFX.heavy(); }catch(e){}
+      const sk=BTN.some(b=>press[0][b]||press[1][b]); press=[{},{}]; if(G.phaseT>=FURTO_FINE||(sk&&G.phaseT>30)){ G.phase=G._afterFurto||'mappa'; G.phaseT=0; G.pageI=0; } return; } return _stA2.apply(this,arguments); }; }
 { const _rnA2=render; render=function(){ if(G&&G.phase==='furto'){ ctx.setTransform(DPR,0,0,DPR,0,0); arc2Furto(); return; } return _rnA2.apply(this,arguments); }; }
 // mappa con zoom: da tutta la cartina al tragitto, l'aereo vola, poi si stringe sulla tappa
 function arc2Key(i){ if(i<0) return G.d1.spriteKey; const v=ARC.list[i]; if(v===undefined) return 'evilsdb'; if(typeof v==='string') return v; const r=ROSTER[v]; return r?r.spriteKey:'stefano'; }
