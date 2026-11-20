@@ -834,23 +834,17 @@ if(SPRITES.ciuppa){ const N=SPRITES.ciuppa; N.guardia2=N.guardia2||N.guardia; N.
 function drawCiuppaProj(p){ const N=SPRITES.ciuppa; if(!N) return false; const im=N.dna; if(!im||!im.complete||!im.width) return false;
   ctx.save(); ctx.translate(p.x,p.y); ctx.scale(p.vx<0?-1:1,1); if(p.kind==='dnadisco') ctx.rotate(G.frame*0.25); else ctx.rotate(Math.sin(G.frame*0.3)*0.25); ctx.imageSmoothingEnabled=false; const s=1.25; ctx.drawImage(im,-im.width*s/2,-im.height*s/2,im.width*s,im.height*s); ctx.restore(); return true; }
 const CPS={dmg:17,rng:120,dmgD:18};
-/*DOLCETTO1 - super "Dolcetto" (base ed evoluto): grido, bocca gigante, inghiotte l'avversario, mastica e lo risputa. Pose e scritta di ChatGPT (20.11.2026) */
-const DOLAX={dol_grido:0.466,dol_bocca:0.354,dol_guance:0.484,dol_sputo:0.322};
-function dolPose(f,n){ const SP=rosaSP(f)||SPRITES.ciuppa; if(SP&&SP[n]){ if(SP[n].ax==null&&!(f.def&&f.def.lvSP)) SP[n].ax=DOLAX[n]; f.gp=n; } }
-function callCiuppa(f,o){ f.csup={dol:1,t:0,tgt:o,dir:f.facing||1,disco:f.def.lv>=2}; dolPose(f,'dol_grido');
-  floatText('DOLCETTO!',f.x,f.y-270,'#ff4fc8',24,64); try{ tone('square',330,620,.28,.07); tone('square',620,240,.32,.06,0.28); }catch(e){} }
-function stepCiuppa(f,o){ const M=f.csup; if(!M||!M.dol) return; M.t++; const t=o||M.tgt; f.vx=0;
-  if(f.state==='hit'||f.state==='ko'||(G&&G.phase!=='fight')){ if(M.eat&&t){ t.wrapT=0; t.stun=0; } f.gp=null; f.csup=null; return; }
-  if(M.t===12){ dolPose(f,'dol_bocca'); try{ tone('sawtooth',90,40,.25,.08); }catch(e){} }
-  if(M.t>=26&&M.t<=36&&!M.eat&&t&&t.state!=='ko'&&t.state!=='down'&&!t.wrapT&&t.y>GROUND-150){ const dx=(t.x-f.x)*M.dir;
-    if(dx>-20&&dx<CPS.rng+90){ M.eat=1; M.et=0; t.atk=null; t.vx=0; t.vy=0; t.y=GROUND; t.onGround=true; t.knock=false; t.state='hit'; t.stun=0; t.dizzy=false; t.wrapT=30; t.x=f.x+M.dir*60; G.shake=Math.max(G.shake,10); G.excite=1; try{ tone('square',180,60,.18,.12); }catch(e){} } }
-  if(M.eat){ M.et++; if(t&&M.et<66){ t.wrapT=30; t.x=f.x+M.dir*60; t.y=GROUND; }
-    if(M.et===8) dolPose(f,'dol_guance');
-    if(M.et>8&&M.et<66&&M.et%14===0) try{ tone('square',140+(M.et%28?40:0),90,.08,.07); }catch(e){}
-    if(M.et===66){ dolPose(f,'dol_sputo'); if(t){ t.wrapT=0; t.stun=0; t.x=Math.max(60,Math.min(W-60,f.x+M.dir*90)); hit(f,t,M.disco?CPS.dmgD:CPS.dmg,14,46,{sup:true,heavy:true,launch:true,low:true,air:true,dirx:M.dir,y:t.y-120}); } G.shake=Math.max(G.shake,16); try{ tone('sawtooth',500,120,.3,.07); }catch(e){} }
-    if(M.et>=92){ f.gp=null; f.csup=null; } return; }
-  if(M.t>=50){ floatText('BUCATA!',f.x,f.y-250,'#3fd0ff',20,50); f.gp=null; f.csup=null; } }
-function drawCiuppa(F){ if(!F||!F.def||F.def.spriteKey!=='ciuppa') return; const SP=SPRITES.ciuppa, M=F.csup; if(!SP||!M||M.dol) return; const S=(196/128)*(F.def.size||1);
+function callCiuppa(f,o){ const disco=f.def.lv>=2;
+  if(disco){ f.csup={t:0,disco:1,tgt:o,hx:o?o.x:f.x+f.facing*200}; floatText('FEBBRE!',f.x,f.y-270,'#ff4fc8',22,60); }
+  else { const dir=f.facing||1; f.csup={t:0,dir:dir,cx:f.x-dir*520,tgt:o,hit:0}; floatText('TERZO TEMPO!',f.x,f.y-270,'#ff3a2a',22,60); try{ tone('sawtooth',70,50,.6,.10); tone('square',110,200,.5,.05,0.25); }catch(e){} } }
+function stepCiuppa(f,o){ const M=f.csup; if(!M) return; M.t++; const t=o||M.tgt;
+  if(M.disco){ if(t&&M.t<20) M.hx+=Math.max(-7,Math.min(7,t.x-M.hx));
+    if(M.t===34){ G.shake=Math.max(G.shake,20); M.crT=0; if(t&&Math.abs(t.x-M.hx)<CPS.rng&&t.state!=='ko'){ hit(f,t,CPS.dmgD,14,46,{sup:true,low:true,air:true,heavy:true,launch:true,dirx:t.x>=M.hx?1:-1,y:t.y-60}); if(t.state==='hit') floatText('STIVALATA!',t.x,t.y-230,'#ff4fc8',32,60); } else floatText('BUCATA!',f.x,f.y-250,'#3fd0ff',20,50); }
+    if(M.crT!=null) M.crT++; if(M.crT!=null&&M.crT>46) f.csup=null; return; }
+  if(M.t<14) return; M.cx+=M.dir*22;
+  if(t&&!M.hit&&t.state!=='ko'&&Math.abs(t.x-M.cx)<70){ M.hit=1; if(t.y>GROUND-45){ G.shake=Math.max(G.shake,16); hit(f,t,CPS.dmg,14,46,{sup:true,low:true,heavy:true,launch:true,dirx:M.dir,y:t.y-60}); if(t.state==='hit') floatText('META!',t.x,t.y-230,'#ff3a2a',30,60); } else M.salto=1; }
+  if(M.cx*M.dir>(M.dir>0?W+400:400)){ if(!M.hit||M.salto) floatText('BUCATA!',f.x,f.y-250,'#3fd0ff',20,50); f.csup=null; } }
+function drawCiuppa(F){ if(!F||!F.def||F.def.spriteKey!=='ciuppa') return; const SP=SPRITES.ciuppa, M=F.csup; if(!SP||!M) return; const S=(196/128)*(F.def.size||1);
   if(!M.disco){ const b=SP.botte; if(M.t<14||!b||!b.width) return; const s=S*1.1, w=b.width*s, h=b.height*s, bob=Math.abs(Math.sin(M.t*0.5))*6;
     ctx.save(); ctx.translate(M.cx,GROUND+6-bob); ctx.scale(M.dir,1); ctx.rotate(Math.sin(M.t*0.6)*0.08); ctx.imageSmoothingEnabled=false; ctx.drawImage(b,-w/2,-h,w,h); ctx.restore(); return; }
   const LV=SPRITES.livio||{};
@@ -2111,7 +2105,7 @@ if(!PRESETS.some(p=>p.spriteKey==='hispanico')) PRESETS.push({base:'HISPANICO',k
    bio:'Designer spagnolo, premiato e lo sa. Dolcevita nero, occhiali spessi, scarpe bianche immacolate. Quando si trasforma diventa un torero: banderillas, mantello rosso e un toro che non sbaglia mai bersaglio. OLÈ!'});
 if(!PRESETS.some(p=>p.spriteKey==='allibrator')) PRESETS.push({base:'THE ALLIBRATOR',kind:'suit',suit:'#1f2a5a',legs:'#1f2a5a',accent:'#ffe14a',tie:'#a6e05a',top:'#f2f2f2',shoes:'#141414',skin:'#f0b890',hair:'#7a4a2a',special:'Raddoppio',superName:'Tutto sul rosso',proj:'schedina',size:1.03,spriteKey:'allibrator',
    bio:'Business man milanese. Scommette su tutto, anche su di sé. Gira con una spider rossa anni Ottanta. Quando la festa parte diventa PARTBOY: cravatta in testa e scarpe chissà dove.'});
-if(!PRESETS.some(p=>p.spriteKey==='ciuppa')) PRESETS.push({base:'CIUPPA',kind:'hoodie',suit:'#2a4aa8',tie:'#ffffff',top:'#2a4aa8',legs:'#1b2450',accent:'#ff4fc8',shoes:'#141414',skin:'#e8a878',hair:'#2a1a12',special:'Placcaggio',superName:'Dolcetto',proj:'dna',size:1.16,spriteKey:'ciuppa',
+if(!PRESETS.some(p=>p.spriteKey==='ciuppa')) PRESETS.push({base:'CIUPPA',kind:'hoodie',suit:'#2a4aa8',tie:'#ffffff',top:'#2a4aa8',legs:'#1b2450',accent:'#ff4fc8',shoes:'#141414',skin:'#e8a878',hair:'#2a1a12',special:'Placcaggio',superName:'Terzo tempo',proj:'dna',size:1.16,spriteKey:'ciuppa',
    bio:'Rugbista di fango e di cuore. Placca tutto quello che si muove, poi offre la birra. Innamorato perso di BDB. Quando parte la musica diventa la febbre del sabato sera.'});
 if(!PRESETS.some(p=>p.spriteKey==='monica')) PRESETS.push({base:'The Praticant',kind:'hoodie',suit:'#5d5a22',legs:'#5d5a22',accent:'#d8b23a',tie:'#d8b23a',top:'#f2f2f2',shoes:'#1a1a1a',skin:'#f3c08a',hair:'#e0a050',longHair:true,special:'Sussurro',superName:'Martello del Foro',proj:'faldoni',size:1.02,spriteKey:'monica',
    bio:'Praticante di SDB, timida e introversa: non parla quasi mai. Vuole diventare avvocato e sopravvivere alla giornata col suo capo. Volenterosa, ma appena può fa un pisolino con BLUE.'});
@@ -2626,10 +2620,10 @@ function updFighter(f,o,inp){
   if(f.maria) stepMaria(f); try{ cricStep(f,o); }catch(e){} if(f.leti) stepLeti(f); if(f.marrao) stepMarrao(f);
   if(f.remT>0) f.remT--;
   if(f.husky) stepHusky(f);
-  if(f.def.spriteKey==='socciaman') stepSocc(f,o); if(f.def.spriteKey==='monica') stepMonica(f,o); if(f.def.spriteKey==='ciuppa') stepCiuppa(f,o); if(f.def.spriteKey==='allibrator') stepAllib(f,o); if(f.def.spriteKey==='hispanico') stepHisp(f,o); if(f.def.spriteKey==='maurino') stepMaurino(f,o); if(f.def.spriteKey==='ciarli') stepCiarli(f,o); if(f.def.spriteKey==='gale') stepGale(f,o); if(f.ssup) stepSdbHam(f,o); if(f.def.spriteKey==='giovin') stepGiovin(f,o); if(f.def.spriteKey==='separatrice') stepSep(f,o); if(f.def.spriteKey==='livio') stepLivio(f,o); if(f.def.spriteKey==='albi') stepAlbi(f,o);
+  if(f.def.spriteKey==='socciaman') stepSocc(f,o); if(f.def.spriteKey==='monica') stepMonica(f,o); if(f.def.spriteKey==='ciuppa') stepCiuppa(f,o); if(f.dolce) dolStep(f); if(f.def.spriteKey==='allibrator') stepAllib(f,o); if(f.def.spriteKey==='hispanico') stepHisp(f,o); if(f.def.spriteKey==='maurino') stepMaurino(f,o); if(f.def.spriteKey==='ciarli') stepCiarli(f,o); if(f.def.spriteKey==='gale') stepGale(f,o); if(f.ssup) stepSdbHam(f,o); if(f.def.spriteKey==='giovin') stepGiovin(f,o); if(f.def.spriteKey==='separatrice') stepSep(f,o); if(f.def.spriteKey==='livio') stepLivio(f,o); if(f.def.spriteKey==='albi') stepAlbi(f,o);
   if(f.state==='ko'){ f.koT++; physics(f); return; }
   if(f.wrapT>0){ f.wrapT--; f.vx=0; f.vy=0; f.atk=null; f.state='hit'; if(f.wrapT===0) f.stun=12; return; } // nel fagottino di Carolluz
-  if(f.csup&&f.csup.dol&&f.state!=='ko'){ f.vx=0; f.atk=null; if(f.state!=='hit') f.state='idle'; physics(f); return; } /*DOLCETTO1: fermo mentre mangia*/
+  if(f.dolce&&f.state!=='ko'){ f.vx=0; f.atk=null; if(f.state!=='hit') f.state='idle'; physics(f); return; } /*DOLCETTO2: fermo mentre mangia*/
   if(f.state==='win'){ physics(f); return; }
   if(f.def.spriteKey==='zeta'&&G&&G.phase==='fight'){ if(f.state==='down'&&!f._tec){ f._tec=1; if(rnd()<0.55&&G.frame-(f.tecT||-999)>240){ f.tecT=G.frame; floatText(pick(['#@§!','%&#@!','#@!%$!']),f.x,f.y-150,'#ff3b3b',20,60,'balloon'); floatText('TECNICO!',f.x,f.y-205,'#ffc933',22,50); f.meter=Math.min(100,(f.meter||0)+6); } } if(f.state!=='down') f._tec=0; }
   if(f.state==='down'){ f.vx*=0.8; if(--f.downT<=0){ f.state='idle'; f.knock=false; f.stun=0; f.dirs=[]; } physics(f); return; } // a terra, poi si rialza
@@ -2757,8 +2751,27 @@ function updFighter(f,o,inp){
   else if(inp.pP||inp.pK) startAtk(f,'air');
   physics(f);
 }
+/*DOLCETTO2 - presa "Dolcetto" di Ciuppa (base ed evoluto): grida DOLCETTO!, bocca gigante, inghiotte, mastica e risputa. Pose e scritta di ChatGPT (20.11.2026) */
+const DOLAX={dol_grido:0.466,dol_bocca:0.354,dol_guance:0.484,dol_sputo:0.322};
+function dolPose(f,n){ const SP=rosaSP(f)||SPRITES.ciuppa; if(SP&&SP[n]){ if(SP[n].ax==null&&!(f.def&&f.def.lvSP)) SP[n].ax=DOLAX[n]; f.gp=n; } }
+function dolStart(f,o){ f.dolce={t:0,o:o,dir:f.facing||1}; dolPose(f,'dol_grido'); o.atk=null; o.vx=0; o.vy=0; o.state='hit'; o.stun=40; o.knock=false; o.dizzy=false;
+  floatText('DOLCETTO!',f.x,f.y-270,'#ff4fc8',24,64); G.excite=1; try{ tone('square',330,620,.28,.07); tone('square',620,240,.32,.06,0.28); }catch(e){} }
+function dolStep(f){ const M=f.dolce; if(!M) return; const o=M.o; M.t++; f.vx=0;
+  const end=()=>{ if(o&&o.wrapT>0&&o.wrapT<=30){ o.wrapT=0; o.stun=0; } f.gp=null; f.dolce=null; };
+  if(f.state==='hit'||f.state==='ko'||(G&&G.phase!=='fight')||!o||o.state==='ko'){ end(); return; }
+  if(M.t<14){ o.stun=Math.max(o.stun,10); o.vx=0; return; }
+  if(M.t===14){ dolPose(f,'dol_bocca'); try{ tone('sawtooth',90,40,.25,.08); }catch(e){} }
+  if(M.t>=14&&M.t<24){ o.stun=Math.max(o.stun,10); o.vx=0; o.x+=((f.x+M.dir*60)-o.x)*0.35; return; }
+  if(M.t>=24&&M.t<80){ if(M.t===24){ G.shake=Math.max(G.shake,10); try{ tone('square',180,60,.18,.12); }catch(e){} }
+    o.wrapT=30; o.atk=null; o.state='hit'; o.vx=0; o.vy=0; o.y=GROUND; o.onGround=true; o.x=Math.max(40,Math.min(W-40,f.x+M.dir*60));
+    if(M.t===32) dolPose(f,'dol_guance'); if(M.t>32&&M.t%14===0) try{ tone('square',150,90,.08,.07); }catch(e){} return; }
+  if(M.t===80){ dolPose(f,'dol_sputo'); o.wrapT=0; o.stun=0; const dmg=12*(f.def.dmgMul||1)*(o.def.defMul||1); o.hp=Math.max(0,o.hp-dmg); o.atk=null; o.state='hit'; o.stun=60; o.knock=true; o.flash=8;
+    o.x=Math.max(40,Math.min(W-40,f.x+M.dir*80)); o.onGround=false; o.vy=-11; o.vx=M.dir*7; o.facing=-M.dir;
+    G.hitstop=6; G.shake=Math.max(G.shake,14); SFX.heavy(); spark(o.x,o.y-100,'#ffd34d',14); try{ tone('sawtooth',500,120,.3,.07); }catch(e){} f.meter=Math.min(100,f.meter+10); f.combo=1; }
+  if(M.t>=104) end(); }
 function doThrow(f,o){ // presa da vicino: non si para
   if(Math.abs(o.x-f.x)>96||!o.onGround||['hit','down','ko'].includes(o.state)) return;
+  if(f.def.spriteKey==='ciuppa'&&!o.wrapT){ dolStart(f,o); return; } /*DOLCETTO2*/
   const dmg=12*(f.def.dmgMul||1)*(o.def.defMul||1); o.hp=Math.max(0,o.hp-dmg); o.atk=null; o.state='hit'; o.stun=60; o.knock=true; o.flash=8;
   o.x=f.x+f.facing*20; o.onGround=false; o.vy=-11; o.vx=-f.facing*6.5; o.facing=f.facing;
   G.hitstop=8; G.shake=10; G.excite=1; SFX.heavy(); spark(o.x,o.y-100,'#ffd34d',14);
@@ -3063,7 +3076,7 @@ Object.assign(SCR_KEY,{'OLÈ!':'OLE','ANDALE!':'ANDALE','CABRÒN!':'CABRON'}); (
 Object.assign(SCR_KEY,{'ALL-IN!':'ALL_IN','RADDOPPIO!':'RADDOPPIO','QUOTA 10!':'QUOTA_10','BRUUUM!':'BRUUUM','SORPASSO!':'SORPASSO','PARTBOY!':'PARTBOY','AFTERPARTY!':'AFTERPARTY','DISCO!':'DISCO','PERSA!':'PERSA'}); (function(){ const D=window.ALLIB_SCR||{}; for(const k in D){ const im=new Image(); im.src=D[k]; SCR[k]=im; } })(); /*ALLIB2: scritte di ChatGPT*/
 Object.assign(SCR_KEY,{"ADDEBITATO!": "ADDEBITATO", "SCUSA!": "SCUSA", "TRRRRR!": "TRRRRR", "TRRRRRUM!": "TRRRRRUM"}); (function(){ const D=window.SCRITTE3_IMG||{}; for(const k in D){ const im=new Image(); im.src=D[k]; SCR[k]=im; } })(); /*SCRITTE3*/
 const BAL={}; (function(){ const D=window.BALLOON_IMG||{}; for(const k in D){ const im=new Image(); im.src=D[k]; BAL[k]=im; } })(); function balImg(t){ const K=window.BALLOON_KEY||{}, k=K[t]; const im=k&&BAL[k]; return im&&im.complete&&im.width?im:null; } /*BALLOON1*/
-Object.assign(SCR_KEY,{'MISCHIA!':'MISCHIA','GENE CASNAGHI!':'GENE_CASNAGHI','TERZO TEMPO!':'TERZO_TEMPO','META!':'META','PLACCAGGIO!':'PLACCAGGIO','STIVALATA!':'STIVALATA','FEBBRE!':'FEBBRE','BUCATA!':'BUCATA','DISCO DNA!':'DISCO_DNA','DOLCETTO!':'DOLCETTO'}); /*DOLCETTO1*/ (function(){ const D=window.CIUPPA_SCR||{}; for(const k in D){ const im=new Image(); im.src=D[k]; SCR[k]=im; } })(); /*CIUPPA2: scritte di ChatGPT*/
+Object.assign(SCR_KEY,{'MISCHIA!':'MISCHIA','GENE CASNAGHI!':'GENE_CASNAGHI','TERZO TEMPO!':'TERZO_TEMPO','META!':'META','PLACCAGGIO!':'PLACCAGGIO','STIVALATA!':'STIVALATA','FEBBRE!':'FEBBRE','BUCATA!':'BUCATA','DISCO DNA!':'DISCO_DNA','DOLCETTO!':'DOLCETTO'}); /*DOLCETTO2*/ (function(){ const D=window.CIUPPA_SCR||{}; for(const k in D){ const im=new Image(); im.src=D[k]; SCR[k]=im; } })(); /*CIUPPA2: scritte di ChatGPT*/
 function scrImg(text){ const k=SCR_KEY[text]; const im=k&&SCR[k]; return im&&im.complete&&im.width?im:null; }
 { const _ftS=floatText; floatText=function(text,x,y,c,size,life,style){ const st=style||'burst';
   if(st==='balloon'||st==='combo') return _ftS.apply(this,arguments);
