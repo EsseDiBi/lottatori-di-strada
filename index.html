@@ -1378,7 +1378,7 @@ function drawOrbita(){ const t=G.phaseT, M=TORX.mappa, S=SPRITES.mecha||{}, fr=t
   ctx.fillStyle='rgba(10,7,22,.7)'; ctx.fillRect(0,0,W,64); ctx.textAlign='center'; ctx.lineJoin='round'; ctx.font='26px '+FD; ctx.lineWidth=7; ctx.strokeStyle='#120d22'; ctx.strokeText(nm,W/2,34); ctx.fillStyle='#8dff5a'; ctx.fillText(nm,W/2,34);
   ctx.font='15px '+FU; ctx.fillStyle='#f4efe6'; ctx.fillText(who,W/2,56);
   if(t>150){ ctx.fillStyle='rgba(10,7,22,'+Math.min(1,(t-150)/20)+')'; ctx.fillRect(0,0,W,H); } }
-{ const _arM=arcResult; arcResult=function(w,wf,lf){ const r=_arM.apply(this,arguments); try{ if(G&&G.arc&&G.d2&&G.d2.subKey==='mecha'&&w===0&&sel.diff==='hard'&&localStorage.getItem('lds-mecha')!=='1'){ localStorage.setItem('lds-mecha','1'); if(!ROSTER.some(x=>x.spriteKey==='mecha')){ ROSTER.push(fromPreset(MECHAP)); try{ save(); }catch(e){} try{ buildCards(); }catch(e){} } $('#resLine').textContent+=' Il MECHA-GATTO ora è un lottatore!'; } }catch(e){} return r; }; }
+{ const _arM=arcResult; arcResult=function(w,wf,lf){ const r=_arM.apply(this,arguments); try{ if(G&&G.arc&&G.d2&&G.d2.subKey==='mecha'&&!ARC.v2&&w===0&&sel.diff==='hard'&&localStorage.getItem('lds-mecha')!=='1'){ localStorage.setItem('lds-mecha','1'); if(!ROSTER.some(x=>x.spriteKey==='mecha')){ ROSTER.push(fromPreset(MECHAP)); try{ save(); }catch(e){} try{ buildCards(); }catch(e){} } $('#resLine').textContent+=' Il MECHA-GATTO ora è un lottatore!'; } }catch(e){} return r; }; }
 function torSub(k){ if(k==='mecha') return torMecha();  try{ TOR.home.maxbiondo=TOR.home.max||'serra'; if(TPOS.max) TPOS.maxbiondo=TPOS.max; }catch(e){} const d=fromPreset(MAXBP); d.sub=1; return d; }
 { const _arS=arcResult; arcResult=function(w,wf,lf){ const r=_arS.apply(this,arguments); try{ if(G&&G.arc&&G.d2&&G.d2.sub&&w===0&&sel.diff==='hard'&&localStorage.getItem('lds-maxbiondo')!=='1'){ localStorage.setItem('lds-maxbiondo','1'); if(!ROSTER.some(x=>x.spriteKey==='maxbiondo')){ ROSTER.push(fromPreset(MAXBP)); try{ save(); }catch(e){} try{ buildCards(); }catch(e){} } $('#resLine').textContent+=' MAX BIONDO ora è un lottatore!'; } }catch(e){} return r; }; }
 function drawMappa(){ const t=G.phaseT, A=G.arc, M=TORX.mappa, tk=A.boss?'evilsdb':G.d2.spriteKey, to=torPos(tk), fr=torPrev();
@@ -3175,7 +3175,7 @@ function makeDef(i,clone){ const b=ROSTER[i]; if(!clone) return b; const d=Objec
 function startMatch(){ try{ padHint(); }catch(_){} try{ if(cpuStesso()) sel.picks[1]=cpuAltro(sel.picks[0]); }catch(_){} /*DIVERSI1*/
   const arc=sel.mode==='arcade', boss=arc&&ARC.i>=ARC.list.length, sub=arc&&!boss&&typeof ARC.list[ARC.i]==='string'; if(arc&&!boss&&!sub) sel.picks[1]=ARC.list[ARC.i];/**/
   let d1=makeDef(sel.picks[0],false), d2=boss?evilBoss():sub?torSub(ARC.list[ARC.i]):makeDef(sel.picks[1],sel.picks[0]===sel.picks[1]);
-  if(arc){ /*CURVA1*/ const B=(sel.diff==='hard'?0.30:0.20)*Math.min(1,ARC.i/Math.max(1,ARC.list.length)), q=Math.sqrt(1+B), o=d2; d2=Object.create(o); d2.dmgMul=(o.dmgMul||1)*q; d2.defMul=(o.defMul||1)/q; d2.torB=B; }
+  if(arc){ /*CURVA1*/ const B=(sel.diff==='hard'?(ARC.v2?0.50:0.30):(ARC.v2?0.32:0.20))*Math.min(1,ARC.i/Math.max(1,ARC.list.length)), q=Math.sqrt(1+B), o=d2; d2=Object.create(o); d2.dmgMul=(o.dmgMul||1)*q; d2.defMul=(o.defMul||1)/q; d2.torB=B; }
   const homeSt=arc&&!boss?TOR.home[d2.spriteKey]:null; if(homeSt){ d2=Object.create(d2); d2.homeBonus=1; const hb=HOMEB[homeSt]; if(hb&&hb[0]==='danno') d2.dmgMul=(d2.dmgMul||1)*hb[1]; if(hb&&hb[0]==='dif') d2.defMul=(d2.defMul||1)*hb[1]; if(hb&&hb[0]==='vel') d2.speed=(d2.speed||4)*hb[1]; }/**/
   G={mode:arc?'cpu':sel.mode,diff:arc?arcDiff(ARC.i):sel.diff,arc:arc?{i:ARC.i,n:ARC.list.length+1,boss}:null,stage:boss?'spettrale':(homeSt||undefined),/**/d1,d2,round:1,wins:[0,0],meters:[0,0],hitstop:0,superFreeze:0,slow:0,shake:0,excite:0,banner:null,paused:false,phase:'intro',phaseT:0,frame:0};
   $('#ovResult').hidden=true; $('#ovPause').hidden=true; resetRound();
@@ -4715,6 +4715,167 @@ function loop(now){
   else { acc=0; if(scr==='select') drawCards(); }
   requestAnimationFrame(loop);
 }
+try{ /*ARCADE2 (20.11.2026) - Arcade "Insegui la coppa": si sblocca vincendo il Mondiale a Normale o Difficile, si gioca solo con il campione.
+   Furto della Mano d'Oro sul podio, 12 incontri: 5 lottatori nelle loro arene, 5 miniboss gia' trasformati con aura gigante
+   (Gale Leone a Venezia, Faja Dio del Mare ad Atlantide sottomarina, Yoghi Criceto mannaro, Marico Frankenstein nel laboratorio, Biscio Vampiro nel castello di Escher),
+   poi Mecha-gatto ed Evil SDB. Niente rivincite. Evil SDB scappa giurando vendetta e lascia la coppa. A Difficile si sbloccano Evil SDB e il Mecha-gatto.
+   Mappa con zoom. Arene nuove disegnate da ChatGPT. */
+const ARC2={
+  mb:{gale:{base:'gale',home:'laguna',pos:{it:[12.33,45.44,'Venezia']}},
+      faja:{base:'faja',home:'atlantide',pos:{w:[565,187],n:'Mar Egeo'}},
+      yoghi:{base:'yoghi',home:'golf',pos:{w:[503,146],n:'Svizzera'}},
+      marico:{base:'marico',mon:'Marico Frankenstein',home:'frankenlab',pos:{w:[504,133],n:'Germania'}},
+      biscio:{base:'biscio',mon:'Conte Biscio',home:'escher',pos:{w:[555,148],n:'Transilvania'}}},
+  ordine:['gale','faja','yoghi','marico','biscio'],
+  tracce:['Boogie e Mocambo annusano la pista. Occhiali da sole, passo da segugi. Si parte.',
+    'Un testimone: "Un incappucciato? Ha pagato il caffè con 500 euro e non ha voluto il resto."',
+    'Sul posto, un biglietto con la ceralacca nera. Dentro, una riga sola: "Troppo lento."',
+    'Un barista giura di averlo visto. Ha ordinato uno spritz e se l\'è bevuto col cappuccio.',
+    'Un vigile gli ha fatto la multa per eccesso di velocità. Era a piedi.',
+    'Le gatte trovano un pelo di mantello nero. Lo annusano, starnutiscono, ripartono.',
+    'Sul muro, una scritta col gesso: "Vi aspetto più avanti. Portatevi la merenda."',
+    'Qualcuno qui è stato pagato per fermarti. In anticipo, e in contanti.',
+    'Una vecchietta indica la strada col bastone: "È passato di qui. Maleducato. Non ha salutato."',
+    'Boogie si ferma, drizza le orecchie, guarda Mocambo. Mocambo sbadiglia. Ma la pista è giusta.'],
+  mbTxt:{gale:'Venezia. Fra calli e cicchetti si sente un ruggito. Qualcuno ha ricevuto un\'aura che non era sua.',
+    faja:'La scia di bolle scende in fondo all\'Egeo. Laggiù c\'è Atlantide. E qualcuno con un tridente.',
+    yoghi:'Svizzera. Sul green ci sono impronte strane. Piccole. Pelose. Arrabbiate.',
+    marico:'Germania, notte di tuoni. In un laboratorio qualcuno ha tirato la leva. Profumo di grigliata.',
+    biscio:'Transilvania. Un castello dove le scale vanno dove vogliono. Fuori, una bara con le ruote e due valigie.'},
+  mbPrima:'Da qui in poi l\'incappucciato non scappa e basta: lascia dietro di sé lottatori carichi di un\'aura oscura.'
+};
+try{ Object.assign(STAGES,{atlantide:'Gli Abissi',escher:'Scale del Conte',frankenlab:'Notte di tuoni'}); }catch(e){}
+try{ Object.assign(BGDATA,{atlantide:'img/arene/atlantide.png',escher:'img/arene/escher.png',frankenlab:'img/arene/frankenlab.png'}); }catch(e){}
+try{ ['atlantide','escher','frankenlab'].forEach(k=>{ if(BGIMG[k]) return; const im=new Image(); im.onload=()=>{ if(curStage===k) buildBg(k); }; im.src=BGDATA[k]; BGIMG[k]=im; }); }catch(e){ console.error('ARCADE2 arene',e); }
+try{ const SRC={atlantide:'grecia',escher:'mosca',frankenlab:'mosca'};
+  [typeof TIFLAY!=='undefined'?TIFLAY:null,typeof TIFSPOT!=='undefined'?TIFSPOT:null,typeof CROWDR!=='undefined'?CROWDR:null,typeof FANSPOT!=='undefined'?FANSPOT:null,typeof CROWDM!=='undefined'?CROWDM:null,typeof FANK!=='undefined'?FANK:null].forEach(t=>{ if(!t) return; for(const k in SRC) if(t[k]===undefined&&t[SRC[k]]!==undefined) t[k]=t[SRC[k]]; });
+  for(const k in SRC){ if(typeof THEMES!=='undefined'&&!THEMES[k]&&THEMES[SRC[k]]) THEMES[k]=Object.assign({},THEMES[SRC[k]],{seed:300+k.length*7}); if(typeof PAINT!=='undefined'&&!PAINT[k]) PAINT[k]=g=>{ g.fillStyle='#0b0816'; g.fillRect(0,0,320,180); }; }
+  Object.assign(HOMEB,{atlantide:['super',0.06,'Il mare è suo'],escher:['vel',1.06,'Conosce anche le scale al contrario'],frankenlab:['cura',0.012,'La corrente lo ricarica']});
+  Object.assign(STLOCK,{atlantide:'lds-arcade',escher:'lds-arcade',frankenlab:'lds-arcade'});
+}catch(e){ console.error('ARCADE2 tabelle',e); }
+try{ buildArenas(); }catch(e){}
+// il Mecha-gatto torna fra i lottatori quando e' sbloccato (solo dall'Arcade a Difficile)
+try{ const i=FORME_GRIGLIA.indexOf('mecha'); if(i>=0) FORME_GRIGLIA.splice(i,1); if(localStorage.getItem('lds-mecha')==='1'&&!ROSTER.some(r=>r.spriteKey==='mecha')) ROSTER.push(fromPreset(MECHAP)); }catch(e){}
+function arc2On(){ try{ return localStorage.getItem('lds-arcade')==='1'; }catch(e){ return false; } }
+function arc2Me(){ try{ return localStorage.getItem('lds-arcade-me')||''; }catch(e){ return ''; } }
+function arc2Toast(t){ try{ const d=document.createElement('div'); d.textContent=t; d.style.cssText='position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:99999;background:#1b1626;color:#ffd23a;border:3px solid #ffd23a;padding:10px 16px;font:bold 16px sans-serif;border-radius:10px;max-width:90vw;text-align:center'; document.body.appendChild(d); setTimeout(()=>d.remove(),4000); }catch(e){} }
+function arc2Go(diff){ const k=arc2Me(), i=ROSTER.findIndex(r=>(r.mk||r.spriteKey)===k);
+  if(!arc2On()||i<0){ arc2Toast('Vinci il Torneo Mondiale degli Schiaffi a Normale o Difficile: il campione insegue la coppa.'); return; }
+  try{ ac(); }catch(e){} sel.mode='arcade'; sel.picks[0]=i; if(diff) sel.diff=diff; if(sel.diff==='easy') sel.diff='normal'; try{ SFX.confirm(); }catch(e){} try{ goFull(); }catch(e){} arcStart(); showScreen('fight'); }
+// riquadro nel menu: Arcade, chiuso finche' non si vince il Mondiale
+(function(){ const add=()=>{ const m=document.querySelector('.modes'); if(!m||!document.getElementById('m-mon')){ setTimeout(add,400); return; } let b=document.getElementById('m-arc2'); if(!b){ b=document.createElement('label'); b.id='m-arc2'; b.className='mtile'; b.addEventListener('click',e=>{ e.preventDefault(); arc2Go(); }); m.appendChild(b); }
+    const on=arc2On(); b.innerHTML=on?'<b>Arcade</b><span>Insegui la coppa</span>':'<b>Arcade</b><span>Vinci il Mondiale</span>'; b.style.opacity=on?'':'0.5'; }; setTimeout(add,700); window.__arc2Tile=add; })();
+// Mondiale vinto a Normale o Difficile: si apre l'Arcade per il campione
+if(typeof monAfter==='function'){ const _maA=monAfter; monAfter=function(won){ const M=window.__mon||{}; const r=_maA.apply(this,arguments);
+    try{ if(won&&M.round>=5&&(M.diff==='normal'||M.diff==='hard')&&M.me){ const prima=!arc2On(); localStorage.setItem('lds-arcade','1'); localStorage.setItem('lds-arcade-me',M.me); M._arc2=prima?2:1; M._arc2d=M.diff; try{ window.__arc2Tile&&window.__arc2Tile(); }catch(_){} try{ buildArenas(); }catch(_){} } }catch(e){ console.error('ARCADE2 mondiale',e); } return r; }; }
+if(typeof monEnd==='function'){ const _meA=monEnd; monEnd=function(){ const r=_meA.apply(this,arguments); const M=window.__mon||{};
+    try{ if(M._arc2){ const bar=monOv().querySelector('#monBar'); const d=M._arc2d; bar.insertBefore(monBtn('Insegui la coppa!',()=>{ M.on=false; M.fighting=false; M.q=[]; M.then=null; try{ monHide(); }catch(_){} arc2Go(d); }),bar.firstChild); if(M._arc2===2) arc2Toast('Sbloccato l\'Arcade: Insegui la coppa!'); M._arc2=0; } }catch(e){ console.error('ARCADE2 fine mondiale',e); } return r; }; }
+// scaletta: 5 lottatori, 5 miniboss trasformati, Mecha-gatto, poi Evil SDB
+{ const _asA=arcStart; arcStart=function(){ const me=ROSTER[sel.picks[0]], meK=me&&(me.mk||me.spriteKey);
+    if(!arc2On()||meK!==arc2Me()){ ARC.v2=0; return _asA.apply(this,arguments); }
+    ARC.v2=1; const no=['pm','evilsdb','mecha'].concat(ARC2.ordine,[meK]);
+    let pool=ROSTER.map((r,i)=>i).filter(i=>{ const r=ROSTER[i]; return r&&i!==sel.picks[0]&&!r.dark&&r.spriteKey&&!no.includes(r.spriteKey)&&!TORMINI.all.includes(r.mk||r.spriteKey)&&!(typeof MOSTRI!=='undefined'&&MOSTRI[r.base])&&!r.dio; });
+    for(let i=pool.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    const reg=pool.slice(0,5), resto=pool.slice(5); const ri=ROSTER.findIndex(r=>r&&r.spriteKey===TOR.riv[meK]&&!r.dark);
+    if(ri>=0&&ri!==sel.picks[0]&&!ARC2.ordine.includes(ROSTER[ri].spriteKey)&&!reg.includes(ri)){ reg[3]=ri; }
+    const mb=ARC2.ordine.map(k=>{ if(k!==meK) return 'mb_'+k; const r=ROSTER[resto.shift()]; return r?'mb_'+r.spriteKey:null; }).filter(Boolean);
+    ARC.list=reg.concat(mb,['mecha']); ARC.i=0; ARC.riv=0; ARC.cont=0; ARC.next=''; startMatch(); }; }
+function arc2MB(k){ const b=k.slice(3), D=ARC2.mb[b]; return D||{base:b,home:TOR.home[b]||'aula',pos:TPOS[b]||TPOS.stefano}; }
+try{ ITXY['Venezia']=[742,272]; }catch(e){}
+try{ for(const b in ARC2.mb) TPOS['mb_'+b]=ARC2.mb[b].pos; }catch(e){}
+{ const _tsA=torSub; torSub=function(k){ if(typeof k!=='string'||k.indexOf('mb_')!==0) return _tsA.apply(this,arguments);
+    const D=arc2MB(k); if(!TPOS[k]) TPOS[k]=D.pos; let d;
+    if(D.mon&&typeof MOSTRI!=='undefined'&&MOSTRI[D.mon]){ const m=MOSTRI[D.mon]; try{ mostriLoad(m.pack); }catch(e){} d=mostroNuovo(m); d=Object.create(d); d.dmgMul=(d.dmgMul||1)*1.22; d.defMul=(d.defMul||1)*0.85; d.speed=(d.speed||4)*1.08; }
+    else { const r=ROSTER.find(x=>x&&x.spriteKey===D.base&&!x.dark&&!(typeof MOSTRI!=='undefined'&&MOSTRI[x.base])); d=Object.create(r); d.mbForm=1; try{ const t=FORME_T[D.base]; if(t&&t.indexOf('img:')===0&&window.FORME_LOAD) FORME_LOAD(t.slice(4)); }catch(e){} }
+    d.subKey=k; d.mbBase=D.base; d.mbHome=D.home; return d; }; }
+// difficolta' piu' alta: Normale parte da Difficile e dai miniboss in poi Difficilissimo; Difficile sempre Difficilissimo
+{ const _adA=arcDiff; arcDiff=function(i){ if(!ARC.v2) return _adA.apply(this,arguments); return sel.diff==='hard'?'vhard':(i<5?'hard':'vhard'); }; }
+// arena di casa del miniboss, scena del furto prima della prima sfida
+{ const _smA=startMatch; startMatch=function(){ const arc=sel.mode==='arcade', it=arc?ARC.list[ARC.i]:null; let sv=null, base=null;
+    if(arc&&ARC.v2&&typeof it==='string'&&it.indexOf('mb_')===0){ const D=arc2MB(it); base=D.mon?(MOSTRI[D.mon]&&MOSTRI[D.mon].sk)||D.base:D.base; sv=TOR.home[base]; TOR.home[base]=D.home; }
+    let r; try{ r=_smA.apply(this,arguments); } finally { if(base!==null) TOR.home[base]=sv; }
+    try{ if(G&&G.arc&&ARC.v2&&ARC.i===0&&ARC.next!=='retry'){ G._afterFurto=G.phase; G.phase='furto'; G.phaseT=0; G.furto={conf:[]}; try{ playMusic('trionfo'); }catch(e){} } }catch(e){ console.error('ARCADE2 furto',e); }
+    return r; }; }
+// miniboss: gia' trasformati all'inizio di ogni round, la forma non si perde, aura gigante sempre accesa
+{ const _rrA=resetRound; resetRound=function(){ const r=_rrA.apply(this,arguments); try{ const f=G&&G.f2, d=G&&G.d2; if(G.arc&&ARC.v2&&f&&d&&d.mbBase){ if(d.mbForm){ f.meter=100; formeUp(f); } f.mb=1; f.meter=0; G.hitstop=0; G.shake=0; } }catch(e){ console.error('ARCADE2 miniboss',e); } return r; }; }
+if(typeof formeDown==='function'){ const _fdA=formeDown; formeDown=function(f){ if(f&&f.mb) return; return _fdA.apply(this,arguments); }; }
+if(typeof formePerdi==='function'){ const _fpA=formePerdi; formePerdi=function(f){ if(f&&f.mb) return; return _fpA.apply(this,arguments); }; }
+if(typeof formeAura==='function'){ const _faA=formeAura; formeAura=function(g,F,ox,oy,sc){ const r=_faA.apply(this,arguments);
+    try{ if(F&&F.mb&&F.state!=='ko'&&!(F.wrapT>0)){ const b=(F.def&&F.def.mbBase)||(F._fd&&F._fd[0]&&F._fd[0].mbBase)||'', mon=!!(F.def&&typeof MOSTRI!=='undefined'&&MOSTRI[F.def.base]), col=(mon&&({marico:'#7fe0ff',biscio:'#d0203c'})[b])||(typeof FORME_AC!=='undefined'&&FORME_AC[b])||({gale:'#ffb020',faja:'#3fc8ff',yoghi:'#c86bff'})[b]||(F.def&&F.def.accent)||'#b44cff', im=formeAuraImg(col);
+      if(im){ const t=(G&&G.frame)||0, k=((t/5)|0)%2, hgt=250*sc*((F.def&&F.def.size)||1)*1.8*(0.92+0.08*Math.sin(t*0.18)), wid=im.width*hgt/im.height*1.25;
+        g.save(); g.imageSmoothingEnabled=false; g.globalAlpha=0.72; g.translate(ox,oy+10*sc); g.scale(k?-1:1,1); g.drawImage(im,-wid/2,-hgt,wid,hgt); g.restore(); } } }catch(e){} return r; }; }
+// il Mecha-gatto si sblocca solo vincendo l'Arcade a Difficile (non battendolo a meta' strada)
+{ const _tw=torWin; torWin=function(){ const r=_tw.apply(this,arguments);
+    try{ if(ARC.v2){ G.contDone=1; G.arc2Fin=1; if(TOR.st&&TOR.st.evil&&TOR.st.evil.dopo){ TOR.st.evil.dopo[0]='"MI VENDICHERÒ!"'; TOR.st.evil.dopo[1]='Evil SDB sparisce in una nube nera. Sul pavimento, ancora calda, resta la Mano d\'Oro. È di nuovo tua.'; }
+      if(sel.diff==='hard'){ localStorage.setItem('lds-evil','1'); localStorage.setItem('lds-mecha','1'); if(!ROSTER.some(x=>x.spriteKey==='evilsdb')) ROSTER.push(fromPreset(EVILP)); if(!ROSTER.some(x=>x.spriteKey==='mecha')) ROSTER.push(fromPreset(MECHAP)); try{ save(); }catch(_){} try{ buildCards(); }catch(_){} try{ buildArenas(); }catch(_){} } } }catch(e){ console.error('ARCADE2 vittoria',e); } return r; }; }
+{ const _arA=arcResult; arcResult=function(w,wf,lf){ const r=_arA.apply(this,arguments); try{ if(!ARC.v2) return r; const A=G.arc;
+    if(w===0&&A.boss){ $('#ovResult .k').textContent='Coppa ripresa!'; $('#resWho').textContent=wf.def.name+' riporta a casa la Mano d\'Oro!';
+      $('#resLine').textContent='Dodici sfide, nessuna rivincita. Evil SDB è scappato giurando vendetta. '+(sel.diff==='hard'?'Sbloccati: Evil SDB e il Mecha-gatto!':'Vinci a Difficile per sbloccare Evil SDB e il Mecha-gatto.'); $('#againBtn').textContent='Gioca ancora'; }
+    else if(w===0){ $('#ovResult .k').textContent='Tappa '+(A.i+1)+' di '+A.n+' superata'; $('#resLine').textContent=A.i===A.n-2?'La pista finisce qui. Anzi, no: ancora una.':'La pista continua.'; }
+    else { $('#ovResult .k').textContent='Game over - '+(A.boss?'sfida finale':'tappa '+(A.i+1)+' di '+A.n); $('#resLine').textContent='Nell\'Arcade non ci sono rivincite. L\'incappucciato è scappato: l\'inseguimento ricomincia dalla prima tappa.'; $('#againBtn').textContent='Ricomincia da capo'; ARC.next='restart'; } }catch(e){ console.error('ARCADE2 risultato',e); } return r; }; }
+// racconto fra una tappa e l'altra (niente nomi degli avversari in arrivo)
+{ const _tpA=torPages; torPages=function(){ if(!ARC.v2) return _tpA.apply(this,arguments); if(ARC.next==='retry') return []; const A=G.arc, it=ARC.list[A.i], P=[];
+    if(A.boss){ P.push({t:'L\'aereo atterra su una X rossa, in mezzo all\'Antartide.',k:null}); P.push({t:'La Mano d\'Oro è lì, su un trono di ghiaccio. Accanto, la figura incappucciata. Ti aspettava.',k:null}); return P; }
+    if(it==='mecha'){ P.push({t:'La pista sale. Sale ancora. Finisce su una rampa di lancio.',k:null}); P.push({t:'Un razzo ti aspetta. Destinazione: la base spaziale. L\'incappucciato ci ha fatto scalo.',k:null}); return P; }
+    if(A.i===0){ P.push({t:'La figura incappucciata è sparita con la Mano d\'Oro. Restano un po\' di fumo nero e un sigillo di ceralacca.',k:null}); P.push({t:'Boogie e Mocambo si mettono gli occhiali da sole. Comincia l\'inseguimento.',k:null}); return P; }
+    if(typeof it==='string'&&it.indexOf('mb_')===0){ const b=it.slice(3); if(A.i===5) P.push({t:ARC2.mbPrima,k:null}); P.push({t:ARC2.mbTxt[b]||'Qui la pista cambia colore. Qualcuno ha preso un\'aura che non era sua.',k:null}); return P; }
+    const T=ARC2.tracce; G._arc2u=G._arc2u||[]; let j=(Math.random()*T.length)|0; for(let n=0;n<T.length&&(ARC._tu||[]).includes(j);n++) j=(j+1)%T.length; ARC._tu=(ARC._tu||[]).concat([j]).slice(-6); P.push({t:T[j],k:null}); return P; }; }
+// scena del furto sul podio
+function arc2Furto(){ const t=G.phaseT, F=G.furto||{}, me=G.d1.spriteKey, nm=G.d1.name, M=window.__mon||{}, B=M.im&&M.im.podio, T=M.im&&M.im.trofeo, HM=(typeof EVIN!=='undefined'&&EVIN.mg)||{}, cl=(a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)));
+  ctx.save(); if((F.sh||0)>0.5) ctx.translate((Math.random()-.5)*F.sh,(Math.random()-.5)*F.sh);
+  if(evOk(B)) ctx.drawImage(B,0,0,W,H); else { const gr=ctx.createLinearGradient(0,0,0,H); gr.addColorStop(0,'#2a2045'); gr.addColorStop(1,'#0b0816'); ctx.fillStyle=gr; ctx.fillRect(0,0,W,H); }
+  if(t>=95){ ctx.fillStyle='rgba(16,4,26,'+(0.5*cl(95,130)+((t<125&&((t-95)>>2)%2===0)?0.25:0))+')'; ctx.fillRect(-30,-30,W+60,H+60); }
+  // coriandoli finche' c'e' la festa
+  if(t<110){ if(t%2===0) for(let i=0;i<4;i++) F.conf.push({x:Math.random()*W,y:-10,vy:2+Math.random()*3,vx:(Math.random()-.5)*2,c:['#ffc933','#ff4a64','#3fc8ff','#7be36a','#f4efe6'][(Math.random()*5)|0],r:Math.random()*6}); }
+  F.conf=F.conf.filter(p=>p.y<H+10); F.conf.forEach(p=>{ p.y+=p.vy; p.x+=p.vx+Math.sin((t+p.r)*0.1); ctx.fillStyle=p.c; ctx.fillRect(p.x,p.y,6,4); });
+  // il campione: festeggia, poi resta a guardare
+  const SP=SPRITES[me]||{}, pose=t<95?((t>>4)%2?'vittoria':(SP.esulta1?'esulta1':'vittoria')):(t<150?'colpito':'guardia'), im=evOk(SP[pose])?SP[pose]:SP.guardia;
+  if(evOk(im)){ const sc=1.7*((G.d1.size)||1); ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(430,372); ctx.drawImage(im,-im.width*sc/2,-im.height*sc,im.width*sc,im.height*sc); ctx.restore(); }
+  // la Mano d'Oro: alzata dal campione, poi presa dalla figura che vola via
+  const cupH=92; let cx=505, cy=250+Math.sin(t*0.15)*4;
+  const ex=640+(1-cl(95,122))*260, ey=-160+cl(95,122)*530, gx=ex+cl(150,205)*520, gy=ey-cl(150,205)*520;
+  if(t>=122&&t<150){ const u=cl(122,140); cx=505+(ex-505)*u; cy=cy+(ey-150-cy)*u; } else if(t>=150){ cx=gx-10; cy=gy-150; }
+  if(evOk(T)){ const w=cupH*T.width/T.height; ctx.save(); ctx.imageSmoothingEnabled=false; ctx.globalAlpha=1-cl(185,205); ctx.drawImage(T,cx-w/2,cy-cupH/2,w,cupH); ctx.restore(); if(t<95&&t%20<10){ ctx.save(); ctx.globalAlpha=0.5; ctx.fillStyle='#fff6c0'; ctx.beginPath(); ctx.arc(cx,cy,60,0,7); ctx.fill(); ctx.restore(); } }
+  const HI=HM[1]||HM[2]; if(t>=95&&evOk(HI)){ const sc=1.6, w=HI.width*sc, h=HI.height*sc, x=t<150?ex:gx, y=t<150?ey:gy; ctx.save(); ctx.globalAlpha=1-cl(185,205); ctx.imageSmoothingEnabled=false; ctx.translate(x,y); ctx.scale(-1,1); ctx.drawImage(HI,-w/2,-h,w,h); ctx.restore(); }
+  ctx.restore();
+  const cap=t<95?nm+' è campione del mondo! Alza la Mano d\'Oro davanti a tutti.':t<122?'Le luci tremano. Dal cielo piomba una figura incappucciata.':t<150?'"Questa la prendo io."':t<210?'La figura incappucciata vola via con la Mano d\'Oro.':'Non finisce qui. Comincia l\'inseguimento!';
+  ctx.fillStyle='rgba(10,7,22,.82)'; ctx.fillRect(40,452,880,74); torText(cap,W/2,486,840,22,t>=95&&t<210?'#c9a6ff':'#ffc933');
+  ctx.font='13px '+FU; ctx.textAlign='right'; ctx.fillStyle='rgba(255,255,255,.5)'; ctx.fillText('premi un tasto',W-14,H-10);
+  if(t>250){ ctx.fillStyle='rgba(10,7,22,'+Math.min(1,(t-250)/15)+')'; ctx.fillRect(0,0,W,H); } }
+{ const _stA2=step; step=function(){ if(G&&G.phase==='furto'&&!G.paused){ G.frame++; G.phaseT++; const t=G.phaseT, F=G.furto||(G.furto={conf:[]}); F.sh=(F.sh||0)*0.88;
+      try{ if(t===95){ SFX.heavy(); F.sh=12; stopMusic(); } if(t===140) SFX.select(); if(t===150) SFX.heavy(); }catch(e){}
+      const sk=BTN.some(b=>press[0][b]||press[1][b]); press=[{},{}]; if(t>=265||(sk&&t>30)){ G.phase=G._afterFurto||'mappa'; G.phaseT=0; G.pageI=0; } return; } return _stA2.apply(this,arguments); }; }
+{ const _rnA2=render; render=function(){ if(G&&G.phase==='furto'){ ctx.setTransform(DPR,0,0,DPR,0,0); arc2Furto(); return; } return _rnA2.apply(this,arguments); }; }
+// mappa con zoom: da tutta la cartina al tragitto, l'aereo vola, poi si stringe sulla tappa
+function arc2Key(i){ if(i<0) return G.d1.spriteKey; const v=ARC.list[i]; if(v===undefined) return 'evilsdb'; if(typeof v==='string') return v; const r=ROSTER[v]; return r?r.spriteKey:'stefano'; }
+function arc2Map(){ const t=G.phaseT, A=G.arc, toK=A.boss?'evilsdb':arc2Key(A.i), frK=arc2Key(A.i-1);
+  let img=TORX.mappa, P=k=>torW(k), lvl='w';
+  const a=torIt(frK), b=torIt(toK); if(!A.boss&&a&&b&&evOk(ITIMG)){ img=ITIMG; P=k=>torIt(k); lvl='it'; }
+  else if(!A.boss&&inEU(torW(frK))&&inEU(torW(toK))&&evOk(EUIMG)){ img=EUIMG; P=k=>euS(torW(k)); lvl='eu'; }
+  const fr=P(frK), to=P(toK), ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2, cl=(x,y)=>Math.max(0,Math.min(1,(t-x)/(y-x)));
+  const mx=(fr[0]+to[0])/2, my=(fr[1]+to[1])/2, dx=Math.abs(fr[0]-to[0]), dy=Math.abs(fr[1]-to[1]);
+  const ZM={w:[2.4,3.2],eu:[1.4,1.9],it:[2.2,3.4]}[lvl], zf=Math.max(1,Math.min(ZM[0],Math.min(W/(dx+300),H/(dy+220)))), zd=Math.min(ZM[1],zf*1.9);
+  const u1=ez(cl(0,30)), u3=ez(cl(118,150)); let z=1+(zf-1)*u1, cx=W/2+(mx-W/2)*u1, cy=H/2+(my-H/2)*u1; if(t>=118){ z=zf+(zd-zf)*u3; cx=mx+(to[0]-mx)*u3; cy=my+(to[1]-my)*u3; }
+  cx=Math.max(W/(2*z),Math.min(W-W/(2*z),cx)); cy=Math.max(H/(2*z),Math.min(H-H/(2*z),cy));
+  const S=p=>[(p[0]-cx)*z+W/2,(p[1]-cy)*z+H/2];
+  ctx.fillStyle='#08142e'; ctx.fillRect(0,0,W,H); if(evOk(img)){ ctx.save(); ctx.translate(W/2,H/2); ctx.scale(z,z); ctx.translate(-cx,-cy); ctx.imageSmoothingEnabled=false; ctx.drawImage(img,0,0,W,H); ctx.restore(); }
+  if(lvl!=='w'){ ctx.save(); ctx.strokeStyle='#c9a24a'; ctx.lineWidth=6; ctx.strokeRect(3,3,W-6,H-6); ctx.restore(); }
+  const Pn=TORX.spillo, pin=(p,on)=>{ if(!evOk(Pn)||!p) return; const q=S(p); ctx.save(); ctx.globalAlpha=on?1:0.55; const s=on?1.15:0.75; ctx.drawImage(Pn,q[0]-Pn.width*s/2,q[1]-Pn.height*s,Pn.width*s,Pn.height*s); ctx.restore(); };
+  for(let i=0;i<A.i;i++){ const k=arc2Key(i), p=lvl==='it'?torIt(k):lvl==='eu'?(inEU(torW(k))?euS(torW(k)):null):torW(k); if(p) pin(p,false); }
+  const f2=S(fr), t2=S(to); ctx.save(); ctx.setLineDash([10,8]); ctx.lineWidth=4; ctx.strokeStyle='#ffc933'; ctx.beginPath(); ctx.moveTo(f2[0],f2[1]); ctx.lineTo(t2[0],t2[1]); ctx.stroke(); ctx.restore();
+  if(A.boss) torX(t2,t); else pin(to,true);
+  // l'incappucciato e' sempre una tappa avanti: un'ombra che scappa dalla tappa
+  const HI=(typeof EVIN!=='undefined'&&EVIN.mg&&(EVIN.mg[1]||EVIN.mg[2]))||null; if(!A.boss&&evOk(HI)&&t>40&&t<150){ const u=cl(40,150), q=[t2[0]+40+u*200,t2[1]-10-u*60]; ctx.save(); ctx.globalAlpha=0.75*(1-u); ctx.imageSmoothingEnabled=false; const sc=0.42; ctx.drawImage(HI,q[0]-HI.width*sc/2,q[1]-HI.height*sc,HI.width*sc,HI.height*sc); ctx.restore(); }
+  const e=ez(cl(28,118)), P2=TORX.aereo; if(evOk(P2)&&(f2[0]!==t2[0]||f2[1]!==t2[1])){ const px=fr[0]+(to[0]-fr[0])*e, py=fr[1]+(to[1]-fr[1])*e, q=S([px,py]), ld=A.boss?Math.max(0,(e-0.7)/0.3):0, sz=1.5*(1-0.45*ld); ctx.save(); ctx.translate(q[0],q[1]); ctx.rotate(Math.atan2(to[1]-fr[1],to[0]-fr[0])); ctx.imageSmoothingEnabled=false; ctx.drawImage(P2,-P2.width*sz/2,-P2.height*sz/2,P2.width*sz,P2.height*sz); ctx.restore(); }
+  const nm=A.boss?'??? - ANTARTIDE':(STAGES[G.stage]||TORNOMI[G.stage]||'').toUpperCase()+' - '+String(torName(toK)||'').toUpperCase(), who=A.boss?'SFIDA FINALE':'TAPPA '+(A.i+1)+' DI '+A.n;
+  ctx.fillStyle='rgba(10,7,22,.7)'; ctx.fillRect(0,0,W,64); ctx.textAlign='center'; ctx.lineJoin='round'; ctx.font='26px '+FD; ctx.lineWidth=7; ctx.strokeStyle='#120d22'; ctx.strokeText(nm,W/2,34); ctx.fillStyle=A.boss?'#ff4a64':'#ffc933'; ctx.fillText(nm,W/2,34);
+  ctx.font='15px '+FU; ctx.fillStyle='#f4efe6'; ctx.fillText(who,W/2,56);
+  if(t>155){ ctx.fillStyle='rgba(10,7,22,'+Math.min(1,(t-155)/15)+')'; ctx.fillRect(0,0,W,H); } }
+{ const _dmA2=drawMappa; drawMappa=function(){ try{ if(ARC.v2&&G&&G.arc&&!(G.d2&&G.d2.subKey==='mecha'&&!G.arc.boss)){ arc2Map(); return; } }catch(e){ console.error('ARCADE2 mappa',e); } return _dmA2.apply(this,arguments); }; }
+{ const _dfA=drawFinale; drawFinale=function(){ const r=_dfA.apply(this,arguments); try{ if(G&&G.arc2Fin&&!(G.pageI||0)){ const M=window.__mon||{}, T=M.im&&M.im.trofeo; if(evOk(T)){ const t=G.phaseT, a=Math.min(1,Math.max(0,(t-20)/20)), h=110, w=h*T.width/T.height; ctx.save(); ctx.globalAlpha=a*0.5; ctx.fillStyle='#fff6c0'; ctx.beginPath(); ctx.arc(W/2,445,70+Math.sin(t*0.12)*6,0,7); ctx.fill(); ctx.globalAlpha=a; ctx.imageSmoothingEnabled=false; ctx.drawImage(T,W/2-w/2,500-h,w,h); ctx.restore(); } } }catch(e){} return r; }; }
+try{ if(location.hash==='#debug') window.__arc2={ARC,ARC2,arc2Go,mon:{after:()=>monAfter,start:()=>(typeof monStart==='function'?monStart:null),end:()=>monEnd},tw:()=>torWin,sr:()=>showResult,get G(){ return G; },get ROSTER(){ return ROSTER; }}; }catch(e){}
+}catch(e){ console.error('ARCADE2',e); }
+
 requestAnimationFrame(loop);
 })();
 </script>
