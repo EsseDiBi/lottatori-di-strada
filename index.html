@@ -5099,6 +5099,24 @@ try{ ['gag1', 'gag10', 'gag11', 'gag12', 'gag2', 'gag3', 'gag4', 'gag5', 'gag6',
     else { const pool=tutte.filter(x=>x!=='gag10'); ARC._gag=(ARC._gag||[]).filter(x=>pool.includes(x)); let lib=pool.filter(x=>!ARC._gag.includes(x)); if(!lib.length){ const u=ARC._gag[ARC._gag.length-1]; ARC._gag=[]; lib=pool.filter(x=>x!==u); if(!lib.length) lib=pool; } k=lib[(Math.random()*lib.length)|0]; if(k) ARC._gag.push(k); }
     if(!k) return P; const tr=ARC2.tracce||[]; if(typeof it==='number'&&P.length&&tr.includes(P[0].t)) P.shift();
     P.unshift({img:k,t:''}); }catch(e){ console.error('ARC14F gag',e); } return P; }; }
+/*ARC15 (21.11.2026) - correzioni dell'Avvocato: caveau di NicoZago a Soave; palude di Marico Frankenstein nel cuore dell'Amazzonia;
+   nella presentazione (VS) i miniboss si vedono gia' trasformati; a Difficile battere Marouges ostetrica, Conte Biscio, Marico Frankenstein e Mecha-gatto li sblocca */
+try{ ITXY['Soave']=[668,282]; TPOS.nicozago={it:[11.27,45.42,'Soave']}; }catch(e){ console.error('ARC15 soave',e); }
+try{ ITXY['Cerea']=[632,354]; TPOS.jj={it:[11.21,45.19,'Cerea']}; }catch(e){ console.error('ARC15 cerea',e); }
+// l'inseguimento parte dalla prima arena del primo sfidante: niente volo iniziale
+{ const _akF=arc2Key; arc2Key=function(i){ if(i<0&&ARC.v2) return _akF(0); return _akF.apply(this,arguments); }; }
+try{ ARC2.mb.marico.pos={w:[252,320],n:'Amazzonia'}; TPOS.mb_marico=ARC2.mb.marico.pos; }catch(e){ console.error('ARC15 amazzonia',e); }
+// presentazione: la stessa forma con cui il miniboss entra in campo
+{ const _smF=startMatch; startMatch=function(){ const r=_smF.apply(this,arguments); try{ const f=G&&G.f2, V=G&&G.vs; if(ARC.v2&&G.arc&&V&&V.F&&V.F[1]&&f&&f.mb&&f._fd&&f._fd.length>1) V.F[1].def=f.def; }catch(e){ console.error('ARC15 vs',e); } return r; }; }
+// immagini dei miniboss caricate subito, cosi' sono pronte per la presentazione
+{ const _asF=arcStart; arcStart=function(){ try{ if(arc2On()){ for(const b in ARC2.mb){ const D=ARC2.mb[b]; if(D.mon&&typeof MOSTRI!=='undefined'&&MOSTRI[D.mon]) mostriLoad(MOSTRI[D.mon].pack); else { const t=FORME_T[D.base]; if(t&&t.indexOf('img:')===0&&window.FORME_LOAD) FORME_LOAD(t.slice(4)); } } } }catch(e){} return _asF.apply(this,arguments); }; }
+// Marouges ostetrica sbloccata resta nella griglia
+function arc15Ost(){ try{ if(localStorage.getItem('lds-marougesost')==='1'){ const i=FORME_GRIGLIA.indexOf('marlav'); if(i>=0) FORME_GRIGLIA.splice(i,1); if(typeof MARLAVP!=='undefined'&&!ROSTER.some(x=>x&&x.spriteKey==='marlav')) ROSTER.push(fromPreset(MARLAVP)); } }catch(e){} }
+arc15Ost(); try{ buildCards(); }catch(e){}
+{ const _aSF=arc14Sblocca; arc14Sblocca=function(b){ const nuovo=(()=>{ try{ return b==='marouges'&&localStorage.getItem('lds-marougesost')!=='1'; }catch(e){ return false; } })();
+    const r=_aSF.apply(this,arguments); if(b==='marouges'){ arc15Ost(); try{ save(); }catch(e){} try{ buildCards(); }catch(e){} return nuovo?'Marouges ostetrica ora è una lottatrice!':''; } return r; }; }
+// Mecha-gatto: a Difficile basta batterlo nella sua tappa
+{ const _arF=arcResult; arcResult=function(w,wf,lf){ const r=_arF.apply(this,arguments); try{ if(ARC.v2&&w===0&&sel.diff==='hard'&&G&&G.d2&&G.d2.subKey==='mecha'){ const nuovo=localStorage.getItem('lds-mecha')!=='1'; localStorage.setItem('lds-mecha','1'); if(typeof MECHAP!=='undefined'&&!ROSTER.some(x=>x&&x.spriteKey==='mecha')){ ROSTER.push(fromPreset(MECHAP)); try{ save(); }catch(_){} try{ buildCards(); }catch(_){} } if(nuovo) $('#resLine').textContent+=' Il Mecha-gatto ora è un lottatore!'; } }catch(e){ console.error('ARC15 mecha',e); } return r; }; }
 try{ if(location.hash==='#debug') window.__arc2={ARC,ARC2,arc2Go,mon:{after:()=>monAfter,start:()=>(typeof monStart==='function'?monStart:null),end:()=>monEnd},tw:()=>torWin,sr:()=>showResult,get G(){ return G; },get ROSTER(){ return ROSTER; }}; }catch(e){}
 }catch(e){ console.error('ARCADE2',e); }
 
