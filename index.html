@@ -2268,6 +2268,11 @@ const MOSTRI={
   p:{base:'Faja uomo pesce',size:1.12,special:'Sputo Abissale',superName:'Tsunami di Melma',accent:'#7fd13a',suit:'#3c5a1e',legs:'#c89a6a',
      bio:'Durante un\'immersione nel Golfo del Messico, Faja seguì una remora fin dentro un tempio sommerso. Ne uscì con le branchie, una rana in testa e un pessimo carattere.'}};
 PROJ.melma={l:'Sputo Abissale',v:10,d:10}; PROJLBL.melma=PROJ.melma.l;
+/*SCHELETRO1*/ MOSTRI['Zeta scheletro']={key:'lds-zetascheletro',pack:'zeta_scheletro',sk:'zeta',code:'scheletro-3e81d7',rk:'teschio',aura:0,msg:'ZETA SCHELETRO ora è un lottatore!',
+  nomi:{rangedName:'Teschio da tre',spName:'Sfondamento d\'oltretomba',upName:'Stoppata dalla tomba',superName:'Schiacciata dei morti'},
+  p:{base:'Zeta scheletro',size:1.16,special:'Sfondamento d\'oltretomba',superName:'Schiacciata dei morti',accent:'#7dff5a',suit:'#1a1a1f',legs:'#1a1a1f',
+     bio:'In tournée in Scozia ha perso una partita a mezzanotte in un cimitero. Ha giocato la rivincita fino all\'alba ed è rimasto lì. Gli occhiali li ha tenuti. Il pallone no: adesso palleggia un teschio.'}};
+PROJ.teschio={l:'Teschio da tre',v:9,d:9}; PROJLBL.teschio=PROJ.teschio.l;
 PROJ.pipistrelli={l:'Stormo di pipistrelli',v:9,d:10}; PROJLBL.pipistrelli=PROJ.pipistrelli.l;
 PROJ.scarica={l:'Scarica elettrica',v:10,d:10}; PROJLBL.scarica=PROJ.scarica.l;
 /*MUMMIA1 (22.11.2026) - Marouges Mummia: stesso fisico e stesse mosse di Marouges, bendata; scoperti solo le labbra e un occhio. Pose ChatGPT in img/mostri_marouges_mummia.js. Arena: Egitto notturno surreale (egitto). Si apre col link #mostro-mummia-302537 */
@@ -2314,6 +2319,11 @@ function mostriProj(p){ if(p.kind==='melma'){ const M=mostriSP.im&&mostriSP.im.f
     ctx.lineWidth=3; ctx.lineJoin='miter'; for(let a=0;a<5;a++){ const an=a*1.257+p._t*0.35; ctx.strokeStyle=a%2?'#ffffff':'#7fe0ff'; ctx.beginPath(); ctx.moveTo(0,0); let x=0,y=0; for(let s=1;s<=4;s++){ x+=Math.cos(an)*8+(((p._t*7+a*13+s*29)%11)-5); y+=Math.sin(an)*8+(((p._t*5+a*17+s*23)%11)-5); ctx.lineTo(x,y); } ctx.stroke(); }
     ctx.fillStyle='#ffffff'; ctx.fillRect(-4,-4,8,8); ctx.restore(); if(p._t%2===0) FX.push({x:p.x-d*16,y:p.y+(rnd()-.5)*20,vx:-d*2,vy:(rnd()-.5)*2,life:10,c:rnd()<.5?'#7fe0ff':'#ffffff'}); return true; }
   return false; }
+/*SCHELETRO1 teschio*/ { const _spS=spawnProj; spawnProj=function(f){ const n=P.length, r=_spS.apply(this,arguments); try{ for(let i=n;i<P.length;i++){ const q=P[i]; if(q&&q.kind==='teschio'){ q.x=f.x+f.facing*78; q.y=f.y-255; q.vy=-2; q.g=0.2; } } }catch(e){} return r; }; }
+{ const _mpS=mostriProj; mostriProj=function(p){ if(p.kind==='teschio'){ const M=mostriSP.im&&mostriSP.im.zeta_scheletro, im=M&&M.teschio_volo; if(!im||!im.complete||!im.width) return false; if(p._t===undefined) p._t=0; p._t++;
+      const d=Math.sign(p.vx)||1, w=60, h=im.height*w/im.width; ctx.save(); ctx.translate(p.x,p.y); ctx.scale(d,1); ctx.rotate(p._t*0.18); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore();
+      if(p._t%3===0) FX.push({x:p.x-d*14,y:p.y+(rnd()-.5)*14,vx:-d*1.5,vy:-0.4,life:12,c:rnd()<.5?'#7dff5a':'#c8ffb0'}); return true; }
+    return _mpS.apply(this,arguments); }; }
 // niente trasformazioni per i mostri: sono già la loro forma
 { const _fc=formeCan; formeCan=function(f){ if(f&&f.def&&mostroOf(f.def)) return false; return _fc(f); }; }
 mostriRoster(); addEventListener('load',()=>setTimeout(mostriHash,300)); addEventListener('hashchange',mostriHash);
@@ -4921,7 +4931,7 @@ if(typeof formeAura==='function'){ const _faA=formeAura; formeAura=function(g,F,
       if(sel.diff==='hard'){ localStorage.setItem('lds-evil','1'); localStorage.setItem('lds-mecha','1'); if(!ROSTER.some(x=>x.spriteKey==='evilsdb')) ROSTER.push(fromPreset(EVILP)); if(!ROSTER.some(x=>x.spriteKey==='mecha')) ROSTER.push(fromPreset(MECHAP)); try{ save(); }catch(_){} try{ buildCards(); }catch(_){} try{ buildArenas(); }catch(_){} } } }catch(e){ console.error('ARCADE2 vittoria',e); } return r; }; }
 { const _arA=arcResult; arcResult=function(w,wf,lf){ const r=_arA.apply(this,arguments); try{ if(!ARC.v2) return r; const A=G.arc;
     if(w===0&&A.boss){ $('#ovResult .k').textContent='Coppa ripresa!'; $('#resWho').textContent=wf.def.name+' riporta a casa la Mano d\'Oro!';
-      $('#resLine').textContent='Quattordici sfide, nessuna rivincita. Evil SDB è scappato giurando vendetta. '+(sel.diff==='hard'?'Sbloccati: Evil SDB e il Mecha-gatto!':'Vinci a Difficile per sbloccare Evil SDB e il Mecha-gatto.'); $('#againBtn').textContent='Gioca ancora'; }
+      $('#resLine').textContent='Sedici sfide, nessuna rivincita. Evil SDB è scappato giurando vendetta. '+(sel.diff==='hard'?'Sbloccati: Evil SDB e il Mecha-gatto!':'Vinci a Difficile per sbloccare Evil SDB e il Mecha-gatto.'); $('#againBtn').textContent='Gioca ancora'; }
     else if(w===0){ $('#ovResult .k').textContent='Tappa '+(A.i+1)+' di '+A.n+' superata'; $('#resLine').textContent=A.i===A.n-2?'La pista finisce qui. Anzi, no: ancora una.':'La pista continua.'; }
     else { $('#ovResult .k').textContent='Game over - '+(A.boss?'sfida finale':'tappa '+(A.i+1)+' di '+A.n); $('#resLine').textContent='Nell\'Arcade non ci sono rivincite. L\'incappucciato è scappato: l\'inseguimento ricomincia dalla prima tappa.'; $('#againBtn').textContent='Ricomincia da capo'; ARC.next='restart'; } }catch(e){ console.error('ARCADE2 risultato',e); } return r; }; }
 // racconto fra una tappa e l'altra (niente nomi degli avversari in arrivo)
@@ -5214,6 +5224,20 @@ try{ const OV=new Image(); OV.src='img/fx/onda_palude.png';
 // nella super evoca la sua onda di palude: posa del pacco
 { const _stU=step; step=function(){ const r=_stU.apply(this,arguments); try{ for(const f of [G&&G.f1,G&&G.f2]){ if(!f||!f.def||f.def.base!=='Faja uomo pesce') continue; const a=f.atk; if(a&&a.type==='sup') f.gp='surf'; else if(f.gp==='surf') f.gp=null; } }catch(e){} return r; }; }
 
+/*SCHELETRO1 (22.11.2026) - Zeta scheletro, miniboss dell'Arcade: cimitero spettrale in Scozia, si sblocca battendolo a Difficile */
+try{ Object.assign(STAGES,{cimitero:'Ossa e Cornamuse'}); Object.assign(BGDATA,{cimitero:'img/arene/cimitero.png'});
+  if(!BGIMG.cimitero){ const im=new Image(); im.onload=()=>{ if(curStage==='cimitero') buildBg('cimitero'); }; im.src=BGDATA.cimitero; BGIMG.cimitero=im; }
+  [typeof TIFLAY!=='undefined'?TIFLAY:null,typeof TIFSPOT!=='undefined'?TIFSPOT:null,typeof CROWDR!=='undefined'?CROWDR:null,typeof FANSPOT!=='undefined'?FANSPOT:null,typeof CROWDM!=='undefined'?CROWDM:null,typeof FANK!=='undefined'?FANK:null].forEach(t=>{ if(t&&t.cimitero===undefined&&t.frankenlab!==undefined) t.cimitero=t.frankenlab; });
+  if(typeof THEMES!=='undefined'&&!THEMES.cimitero&&THEMES.frankenlab) THEMES.cimitero=Object.assign({},THEMES.frankenlab,{seed:419});
+  if(typeof PAINT!=='undefined'&&!PAINT.cimitero) PAINT.cimitero=g=>{ g.fillStyle='#0b1210'; g.fillRect(0,0,320,180); };
+  HOMEB.cimitero=['dif',0.93,'Le ossa non sentono i colpi']; STLOCK.cimitero='lds-arcade'; TOR.home.scheletro='cimitero';
+  ARC2.mb.zeta={base:'zeta',mon:'Zeta scheletro',home:'cimitero',pos:{w:[468,104],n:'Scozia'}}; TPOS.mb_zeta=ARC2.mb.zeta.pos;
+  if(!ARC2.ordine.includes('zeta')){ const i=ARC2.ordine.indexOf('marico'); ARC2.ordine.splice(i>=0?i:ARC2.ordine.length,0,'zeta'); }
+  ARC2.col.zeta='#7dff5a'; ARC2.mbTxt.zeta='Scozia, mezzanotte. Nebbia sulle lapidi, una cornamusa suona da sola. In mezzo al cimitero qualcuno palleggia. Il rimbalzo non è quello di un pallone.';
+  ARC14FURTI.zeta='il pallone autografato'; { const im=new Image(); im.src='img/vignette/inc_zeta.jpg'; ARC14V2.inc_zeta=im; }
+  try{ mostriLoad('zeta_scheletro'); }catch(e){} try{ buildArenas(); }catch(e){}
+}catch(e){ console.error('SCHELETRO1 arcade',e); }
+{ const _sbZ=arc14Sblocca; arc14Sblocca=function(b){ if(b==='zeta'&&typeof MOSTRI!=='undefined'&&MOSTRI['Zeta scheletro']){ try{ const m=MOSTRI['Zeta scheletro'], nuovo=localStorage.getItem(m.key)!=='1'; mostroSblocca(m); return nuovo?m.msg:''; }catch(e){ console.error('SCHELETRO1 sblocco',e); return ''; } } return _sbZ.apply(this,arguments); }; }
 // presentazione: la stessa forma con cui il miniboss entra in campo
 { const _smF=startMatch; startMatch=function(){ const r=_smF.apply(this,arguments); try{ const f=G&&G.f2, V=G&&G.vs; if(ARC.v2&&G.arc&&V&&V.F&&V.F[1]&&f&&f.mb&&f._fd&&f._fd.length>1) V.F[1].def=f.def; }catch(e){ console.error('ARC15 vs',e); } return r; }; }
 // immagini dei miniboss caricate subito, cosi' sono pronte per la presentazione
