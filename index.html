@@ -5399,6 +5399,16 @@ try{ (ROSTER||[]).forEach(r=>{ if(r&&r.spriteKey==='drste'&&r.name==='DR. STE') 
 { const _rnK=render; render=function(){ const r=_rnK.apply(this,arguments); try{ if(G&&G._attesa&&G.phase!=='storia'&&G.phase!=='finale'&&G.phase!=='furto'){ ctx.save(); ctx.globalAlpha=0.55+0.45*Math.sin(G.frame*0.12); ctx.font='16px '+FU; ctx.textAlign='right'; ctx.fillStyle='#ffc933'; ctx.fillText('tocca per continuare',W-14,H-10); ctx.restore(); } }catch(e){} return r; }; }
 /*CLICK2 - un clic o un tocco sullo schermo fa andare avanti le schermate di racconto, mappa e presentazione */
 addEventListener('pointerdown',e=>{ try{ if(scr!=='fight'||!G||G.paused) return; if(!['storia','mappa','furto','vs','finale','bossin','crediti'].includes(G.phase)) return; if(e.target&&e.target.closest&&e.target.closest('button,a,input,label,select,.ov:not([hidden])')) return; press[0][BTN[0]]=true; }catch(_){} },true);
+/*ARCDIFF1 (22.11.2026) - ordine dell'Avvocato: la difficolta' dell'Arcade si sceglie insieme al campione, nella stessa schermata */
+function arcDiffSel(){ let d=''; try{ d=localStorage.getItem('lds-arcade-diff')||''; }catch(e){} if(d!=='normal'&&d!=='hard') d=(sel.diff==='hard')?'hard':'normal'; return d; }
+{ const _apD=arc2Pick; arc2Pick=function(){ const r=_apD.apply(this,arguments); try{ const o=document.getElementById('arcCampOv'); if(!o) return r; const box=o.firstElementChild; if(!box) return r;
+    let bar=document.getElementById('arcDiffBar'); if(bar) bar.remove(); bar=document.createElement('div'); bar.id='arcDiffBar'; bar.style.cssText='display:flex;gap:10px;justify-content:center;align-items:center;margin:0 0 12px;font:700 14px sans-serif;color:#c9bfe6';
+    const draw=()=>{ const d=arcDiffSel(); bar.innerHTML='<span>Difficoltà:</span>'+[['normal','Normale'],['hard','Difficile']].map(([k,t])=>'<button type="button" data-d="'+k+'" style="font:800 15px sans-serif;padding:.45em 1.1em;border-radius:8px;cursor:pointer;border:3px solid '+(d===k?'#ffc933':'#3a3166')+';background:'+(d===k?'#ffc933':'#1a1430')+';color:'+(d===k?'#120d22':'#f4efe6')+'">'+t+'</button>').join(''); };
+    draw(); const grid=box.querySelector('div[style*="grid"]'); if(grid) box.insertBefore(bar,grid); else box.appendChild(bar);
+    const old=o.onclick; o.onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
+      if(b.dataset.d){ try{ localStorage.setItem('lds-arcade-diff',b.dataset.d); }catch(_){} draw(); return; }
+      if(b.dataset.k){ o.style.display='none'; arc2GoK(b.dataset.k,arcDiffSel()); return; }
+      return old&&old.call(o,e); }; }catch(e){ console.error('ARCDIFF1',e); } return r; }; }
 try{ if(location.hash==='#debug') window.__arc2={ARC,ARC2,arc2Go,mon:{after:()=>monAfter,start:()=>(typeof monStart==='function'?monStart:null),end:()=>monEnd},tw:()=>torWin,sr:()=>showResult,get G(){ return G; },get ROSTER(){ return ROSTER; }}; }catch(e){}
 }catch(e){ console.error('ARCADE2',e); }
 
