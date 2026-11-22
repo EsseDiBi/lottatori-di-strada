@@ -5192,6 +5192,13 @@ try{ Object.assign(STAGES,{paludatl:'Melmabissia Perduta'}); Object.assign(BGDAT
   try{ buildArenas(); }catch(e){}
 }catch(e){ console.error('UOMOPESCE1 arcade',e); }
 { const _sbU=arc14Sblocca; arc14Sblocca=function(b){ if(b==='faja'&&typeof MOSTRI!=='undefined'&&MOSTRI['Faja uomo pesce']){ try{ const m=MOSTRI['Faja uomo pesce'], nuovo=localStorage.getItem(m.key)!=='1'; mostroSblocca(m); return nuovo?m.msg:''; }catch(e){ console.error('UOMOPESCE1 sblocco',e); return ''; } } return _sbU.apply(this,arguments); }; }
+/*ONDAVERDE1 (22.11.2026) - l'onda gigante della super dell'uomo pesce è verde di palude (ChatGPT, img/fx/onda_palude.png); le altre onde restano blu */
+try{ const OV=new Image(); OV.src='img/fx/onda_palude.png';
+  drawOndaFaja=function(){ if(!ONDAF.complete||!ONDAF.width) return; for(let i=ONDE.length-1;i>=0;i--){ const o=ONDE[i], t=G.frame-o.b, IM=(o.f&&o.f.def&&o.f.def.base==='Faja uomo pesce'&&OV.complete&&OV.width)?OV:ONDAF, Wd=ONDAF.width*1.05, Hd=ONDAF.height*1.05, sp=20;
+    if(t>(W+Wd)/sp||t<0){ ONDE.splice(i,1); continue; } const L=o.dir>0?t*sp:W-t*sp;
+    G.shake=Math.max(G.shake,5); ctx.save(); ctx.imageSmoothingEnabled=false; ctx.translate(L,GROUND+34+Math.sin(t*0.4)*4); ctx.scale(o.dir,1); ctx.drawImage(IM,-Wd,-Hd,Wd,Hd); ctx.restore();
+    const F=o.f; if(F&&F.atk&&F.atk.type==='sup') drawFighter(ctx,F,F.x,F.y,1); } };
+}catch(e){ console.error('ONDAVERDE1',e); }
 // nella super evoca la sua onda di palude: posa del pacco
 { const _stU=step; step=function(){ const r=_stU.apply(this,arguments); try{ for(const f of [G&&G.f1,G&&G.f2]){ if(!f||!f.def||f.def.base!=='Faja uomo pesce') continue; const a=f.atk; if(a&&a.type==='sup') f.gp='surf'; else if(f.gp==='surf') f.gp=null; } }catch(e){} return r; }; }
 
