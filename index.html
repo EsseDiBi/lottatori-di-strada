@@ -5192,6 +5192,18 @@ try{ Object.assign(STAGES,{paludatl:'Melmabissia Perduta'}); Object.assign(BGDAT
   try{ buildArenas(); }catch(e){}
 }catch(e){ console.error('UOMOPESCE1 arcade',e); }
 { const _sbU=arc14Sblocca; arc14Sblocca=function(b){ if(b==='faja'&&typeof MOSTRI!=='undefined'&&MOSTRI['Faja uomo pesce']){ try{ const m=MOSTRI['Faja uomo pesce'], nuovo=localStorage.getItem(m.key)!=='1'; mostroSblocca(m); return nuovo?m.msg:''; }catch(e){ console.error('UOMOPESCE1 sblocco',e); return ''; } } return _sbU.apply(this,arguments); }; }
+/*ARCMUM1 (22.11.2026) - ordine dell'Avvocato delle 01:47: Marouges Mummia è l'ultimo miniboss dell'Arcade, subito prima del Mecha-gatto,
+   nelle Sabbie del sogno (Egitto); vignetta ChatGPT img/vignette/inc_mummia.jpg; a Difficile battendola si sblocca. Gale leone tolto dall'Arcade. */
+try{ ARC2.mb.mummia={base:'mummia',mon:'Marouges Mummia',home:'egitto',pos:{w:[590,220],n:'Egitto'}}; TPOS.mb_mummia=ARC2.mb.mummia.pos;
+  ARC2.ordine=ARC2.ordine.filter(k=>k!=='gale'&&k!=='mummia'); ARC2.ordine.push('mummia');
+  ARC2.col=ARC2.col||{}; ARC2.col.mummia='#2fd6c8';
+  ARC2.mbTxt.mummia='Egitto, notte fonda. La luna cola sulle piramidi e una sfinge passeggia sui trampoli. Da un sarcofago aperto arriva un urlo: qualcuno ha toccato il suo rossetto.';
+  ARC14FURTI.mummia='il rossetto millenario'; { const im=new Image(); im.src='img/vignette/inc_mummia.jpg'; ARC14V2.inc_mummia=im; }
+}catch(e){ console.error('ARCMUM1',e); }
+// chi gioca con Marouges Mummia non incontra se stessa: al suo posto un lottatore a caso
+{ const _asM=arcStart; arcStart=function(){ const me=ROSTER[sel.picks[0]]; if(me&&me.base==='Marouges Mummia'&&ARC2.ordine.includes('mummia')){ const o=ARC2.ordine.slice(), k=me.mk||me.spriteKey; ARC2.ordine=o.map(x=>x==='mummia'?k:x); try{ return _asM.apply(this,arguments); } finally { ARC2.ordine=o; } } return _asM.apply(this,arguments); }; }
+{ const _sbM=arc14Sblocca; arc14Sblocca=function(b){ if(b==='mummia'&&typeof MOSTRI!=='undefined'&&MOSTRI['Marouges Mummia']){ try{ const m=MOSTRI['Marouges Mummia'], nuovo=localStorage.getItem(m.key)!=='1'; mostroSblocca(m); try{ buildArenas(); }catch(_){} return nuovo?m.msg:''; }catch(e){ console.error('ARCMUM1 sblocco',e); return ''; } } return _sbM.apply(this,arguments); }; }
+{ const _tpM=torPages; torPages=function(){ const P=_tpM.apply(this,arguments); try{ (P||[]).forEach(x=>{ if(x&&x.img==='inc_mummia'&&x.t) x.t=x.t.replace('Gli hanno rubato','Le hanno rubato'); }); }catch(e){} return P; }; } /*ARCMUM1 testo al femminile*/
 /*ONDAVERDE1 (22.11.2026) - l'onda gigante della super dell'uomo pesce è verde di palude (ChatGPT, img/fx/onda_palude.png); le altre onde restano blu */
 try{ const OV=new Image(); OV.src='img/fx/onda_palude.png';
   drawOndaFaja=function(){ if(!ONDAF.complete||!ONDAF.width) return; for(let i=ONDE.length-1;i>=0;i--){ const o=ONDE[i], t=G.frame-o.b, IM=(o.f&&o.f.def&&o.f.def.base==='Faja uomo pesce'&&OV.complete&&OV.width)?OV:ONDAF, Wd=ONDAF.width*1.05, Hd=ONDAF.height*1.05, sp=20;
