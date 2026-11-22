@@ -5295,7 +5295,7 @@ try{ Object.assign(STAGES,{cimitero:'Ossa e Cornamuse'}); Object.assign(BGDATA,{
 }catch(e){ console.error('SCHELETRO1 arcade',e); }
 { const _sbZ=arc14Sblocca; arc14Sblocca=function(b){ if(b==='zeta'&&typeof MOSTRI!=='undefined'&&MOSTRI['Zeta scheletro']){ try{ const m=MOSTRI['Zeta scheletro'], nuovo=localStorage.getItem(m.key)!=='1'; mostroSblocca(m); return nuovo?m.msg:''; }catch(e){ console.error('SCHELETRO1 sblocco',e); return ''; } } return _sbZ.apply(this,arguments); }; }
 
-/*FANTASMA1 (22.11.2026) - ordine dell'Avvocato: Socciaman Fantasma, nuovo miniboss dell'Arcade, castello spettrale di Praga.
+try{ /*FANTASMA1 tutto il blocco: se manca qualcosa non si ferma l'Arcade*//*FANTASMA1 (22.11.2026) - ordine dell'Avvocato: Socciaman Fantasma, nuovo miniboss dell'Arcade, castello spettrale di Praga.
    Fifone, semitrasparente, sospeso da terra; nella super diventa furente, alto come lo schermo, e attraversa l'avversario stordendolo. */
 try{ Object.assign(STAGES,{praga:'Castello delle ombre'}); Object.assign(BGDATA,{praga:'img/arene/praga.png'});
   if(!BGIMG.praga){ const im=new Image(); im.onload=()=>{ if(curStage==='praga') buildBg('praga'); }; im.src=BGDATA.praga; BGIMG.praga=im; }
@@ -5314,10 +5314,11 @@ try{ Object.assign(STAGES,{praga:'Castello delle ombre'}); Object.assign(BGDATA,
 { const _asF=arcStart; arcStart=function(){ const me=ROSTER[sel.picks[0]]; if(me&&me.base==='Socciaman Fantasma'&&ARC2.ordine.includes('fantasma')){ const o=ARC2.ordine.slice(), k=me.mk||me.spriteKey; ARC2.ordine=o.map(x=>x==='fantasma'?k:x); try{ return _asF.apply(this,arguments); } finally { ARC2.ordine=o; } } return _asF.apply(this,arguments); }; }
 // scritte ChatGPT del fantasma
 try{ Object.assign(SCR_KEY,{'BUUUUH!':'F_BUUUUH','BRIVIDO!':'F_BRIVIDO'}); }catch(e){ console.error('FANTASMA1 scritte',e); }
+function fantFT(text,x,y,size,life){ try{ fantScr(); const k=SCR_KEY[text], im=k&&SCR[k]; if(im&&im.complete&&im.width) floatText(text,x,y,'#9fd8ff',size,life); }catch(e){} } /*solo immagini ChatGPT, mai scritte disegnate dal codice*/
 function fantScr(){ if(fantScr.ok) return; const D=window.FANTASMA_SCR; if(!D) return; for(const k in D){ const im=new Image(); im.src=D[k]; SCR[k]=im; } fantScr.ok=1; } /*le scritte arrivano col pacco delle pose*/
 function isFantasma(F){ return !!(F&&F.def&&F.def.base==='Socciaman Fantasma'); }
 // il grido di Socciaman non è del fantasma: al suo posto BUUUUH!
-{ const _ftF=floatText; floatText=function(text,x,y,c,size,life,style){ try{ if(text==="SOCC'MEL!"&&G){ const F=[G.f1,G.f2].find(q=>isFantasma(q)&&Math.abs(q.x-x)<200); if(F){ if(G.phase==='fight') return; text='BUUUUH!'; } } }catch(e){} return _ftF.call(this,text,x,y,c,size,life,style); }; }
+{ const _ftF=floatText; floatText=function(text,x,y,c,size,life,style){ try{ if(text==="SOCC'MEL!"&&G){ const F=[G.f1,G.f2].find(q=>isFantasma(q)&&Math.abs(q.x-x)<200); if(F){ if(G.phase==='fight') return; fantFT('BUUUUH!',x,y,size||24,life||60); return; } } }catch(e){} return _ftF.call(this,text,x,y,c,size,life,style); }; }
 const FANT={dmg:13,stun:85,cresce:34,vel:15}; /*FANTBIL1: tarato sul Socciaman di base*/
 // sospeso da terra e semitrasparente; durante la super il corpo normale sparisce
 { const _dfF=drawFighter; drawFighter=function(g,F,ox,oy,sc){ if(!isFantasma(F)) return _dfF.apply(this,arguments); fantScr(); if(F.spettro) return;
@@ -5326,7 +5327,7 @@ const FANT={dmg:13,stun:85,cresce:34,vel:15}; /*FANTBIL1: tarato sul Socciaman d
 // super: si gonfia furente fino al cielo e attraversa l'avversario
 { const _caF=callAraldo; callAraldo=function(f,o){ if(!isFantasma(f)) return _caF.apply(this,arguments);
   fantScr(); f.spettro={t:0,ph:'su',x0:f.x,x:f.x,dir:f.facing,tgt:o,colpito:0}; G.shake=Math.max(G.shake,8); try{ SFX.rage&&SFX.rage(); }catch(e){}
-  floatText('BUUUUH!',f.x,f.y-280,'#9fd8ff',30,70); }; }
+  fantFT('BUUUUH!',f.x,f.y-280,30,70); }; }
 function spettroStep(f,o){ const S=f.spettro; S.t++; f.vx=0; f.x=S.x0; if(f.atk&&f.atk.type!=='sup') f.atk=null;
   if(S.ph==='su'){ if(S.t>=FANT.cresce){ S.ph='via'; S.tv=0; } }
   else if(S.ph==='via'){ S.tv++; S.x+=S.dir*FANT.vel; const t=o||S.tgt;
@@ -5334,14 +5335,14 @@ function spettroStep(f,o){ const S=f.spettro; S.t++; f.vx=0; f.x=S.x0; if(f.atk&
       if(G.phase==='fight'&&!['ko','down'].includes(t.state)){ const sb=t.back; t.back=false; if(t.state==='block'||t.state==='cblock') t.state='idle';
         hit(f,t,FANT.dmg,2,40,{sup:true,heavy:true,dirx:S.dir,y:t.y-130}); t.back=sb;
         if(t.hp>0&&t.state==='hit'){ t.stun=FANT.stun; t.dizzy=true; t.vx=0; t.knock=false; }
-        G.shake=Math.max(G.shake,12); floatText('BRIVIDO!',t.x,t.y-230,'#9fd8ff',28,60);
+        G.shake=Math.max(G.shake,12); fantFT('BRIVIDO!',t.x,t.y-230,28,60);
         for(let k=0;k<18;k++) FX.push({x:t.x+(rnd()-.5)*70,y:t.y-60-rnd()*140,vx:S.dir*(2+rnd()*5),vy:(rnd()-.5)*4,life:26,c:k%2?'#cfe6ff':'#9fd8ff'}); } }
     if(S.x<-260||S.x>W+260) { S.ph='torna'; S.tt=0; } }
   else if(S.ph==='torna'){ S.tt++; if(S.tt>16) f.spettro=null; } }
 { const _ssF=stepSocc; stepSocc=function(f,o){ const r=_ssF.apply(this,arguments); try{ if(isFantasma(f)&&f.spettro) spettroStep(f,o); }catch(e){ console.error('FANTASMA1 step',e); f.spettro=null; } return r; }; }
-// mentre è spettro non si può colpire; da fifone, quando le prende, chiede aiuto
+// mentre è spettro non si può colpire
 { const _hF=hit; hit=function(a,d,dmg,kb,stun,o){ if(d&&d.spettro) return; const r=_hF.apply(this,arguments);
-  try{ if(isFantasma(d)&&d.state==='hit'&&d.hp>0&&rnd()<0.22&&!(d._fifa>0)){ d._fifa=90; floatText(['Aiuto!','Mamma mia!','Non sono qui!','Scusa, scusa!'][(rnd()*4)|0],d.x,d.y-250,'#9fd8ff',15,50,'balloon'); } }catch(e){} return r; }; }
+  return r; }; }
 function drawSpettro(F){ const S=F.spettro; if(!S) return; const SP=mostriSP(F); const im=SP&&(S.ph==='via'?(SP.furente2_hd||SP.furente2):(SP.furente_hd||SP.furente)); if(!im||!im.complete||!im.width) return;
   const g=ctx, base=196*(F.def.size||1), full=GROUND+40, k=S.ph==='su'?Math.min(1,S.t/FANT.cresce):1, h=(base+(full-base)*(1-Math.pow(1-k,3)))*(S.ph==='via'?0.8:1), w=im.width*h/im.height;
   const fade=S.ph==='torna'?Math.max(0,1-S.tt/16):1;
@@ -5350,6 +5351,7 @@ function drawSpettro(F){ const S=F.spettro; if(!S) return; const SP=mostriSP(F);
   g.globalAlpha=0.35*fade; g.globalCompositeOperation='lighter'; g.drawImage(im,-w/2-6,-h-6,w+12,h+12);
   g.globalCompositeOperation='source-over'; g.globalAlpha=0.72*fade; const j=S.ph==='su'?(rnd()-.5)*6*k:0; g.drawImage(im,-w/2+j,-h,w,h); g.restore(); }
 { const _dsF=drawSocc; drawSocc=function(F){ if(isFantasma(F)){ try{ drawSpettro(F); }catch(e){} return; } return _dsF.apply(this,arguments); }; }
+}catch(e){ console.error('FANTASMA1',e); }
 // presentazione: la stessa forma con cui il miniboss entra in campo
 { const _smF=startMatch; startMatch=function(){ const r=_smF.apply(this,arguments); try{ const f=G&&G.f2, V=G&&G.vs; if(ARC.v2&&G.arc&&V&&V.F&&V.F[1]&&f&&f.mb&&f._fd&&f._fd.length>1) V.F[1].def=f.def; }catch(e){ console.error('ARC15 vs',e); } return r; }; }
 // immagini dei miniboss caricate subito, cosi' sono pronte per la presentazione
