@@ -2266,7 +2266,7 @@ const MOSTRI={
 /*UOMOPESCE1*/ MOSTRI['Faja uomo pesce']={key:'lds-uomopesce',pack:'faja_uomopesce',sk:'faja',code:'uomopesce-5c31a9',rk:'melma',aura:0,msg:'FAJA UOMO PESCE ora è un lottatore!',
   nomi:{rangedName:'Sputo Abissale',spName:'Siluro Melmoso',upName:'Geyser degli Abissi',superName:'Tsunami di Melma'},
   p:{base:'Faja uomo pesce',size:1.12,special:'Sputo Abissale',superName:'Tsunami di Melma',accent:'#7fd13a',suit:'#3c5a1e',legs:'#c89a6a',
-     bio:'Durante un\'immersione nel Pacifico, Faja seguì una remora fin dentro un tempio sommerso. Ne uscì con le branchie, una rana in testa e un pessimo carattere.'}};
+     bio:'Durante un\'immersione nel Golfo del Messico, Faja seguì una remora fin dentro un tempio sommerso. Ne uscì con le branchie, una rana in testa e un pessimo carattere.'}};
 PROJ.melma={l:'Sputo Abissale',v:10,d:10}; PROJLBL.melma=PROJ.melma.l;
 PROJ.pipistrelli={l:'Stormo di pipistrelli',v:9,d:10}; PROJLBL.pipistrelli=PROJ.pipistrelli.l;
 PROJ.scarica={l:'Scarica elettrica',v:10,d:10}; PROJLBL.scarica=PROJ.scarica.l;
@@ -5183,8 +5183,8 @@ try{ Object.assign(STAGES,{paludatl:'Melmabissia Perduta'}); Object.assign(BGDAT
   if(typeof THEMES!=='undefined'&&!THEMES.paludatl&&THEMES.atlantide) THEMES.paludatl=Object.assign({},THEMES.atlantide,{seed:391});
   if(typeof PAINT!=='undefined'&&!PAINT.paludatl) PAINT.paludatl=g=>{ g.fillStyle='#0b1a12'; g.fillRect(0,0,320,180); };
   HOMEB.paludatl=['super',0.06,'Qui comanda la marea']; STLOCK.paludatl='lds-arcade'; TOR.home.uomopesce='paludatl';
-  Object.assign(ARC2.mb.faja,{mon:'Faja uomo pesce',home:'paludatl'}); ARC2.col.faja='#7fd13a';
-  ARC2.mbTxt.faja='Sul fondo del Pacifico, una città dimenticata riemerge dal fango. Tra colonne spezzate e rane in scafandro, qualcuno ha lasciato un biglietto con la tua firma.'; ARC14FURTI.faja='la remora domestica';
+  Object.assign(ARC2.mb.faja,{mon:'Faja uomo pesce',home:'paludatl',pos:{w:[170,220],n:'Golfo del Messico'}}); TPOS.mb_faja=ARC2.mb.faja.pos; /*GOLFO1*/ ARC2.col.faja='#7fd13a';
+  ARC2.mbTxt.faja='Sul fondo del Golfo del Messico, una città dimenticata riemerge dal fango. Tra colonne spezzate e rane in scafandro, qualcuno ha lasciato un biglietto con la tua firma.'; ARC14FURTI.faja='la remora domestica';
   { const im=new Image(); im.src='img/vignette/inc_faja_pesce.jpg'; ARC14V2.inc_faja=im; }
   try{ mostriLoad('faja_uomopesce'); }catch(e){}
   /*UOMOPESCE1b - ordine delle 01:35: Atlantide è l'arena di casa di Faja, aperta a tutti; la Grecia resta libera e esce a caso */
