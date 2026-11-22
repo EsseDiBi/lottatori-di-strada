@@ -5199,9 +5199,9 @@ if(typeof monPages==='function'&&typeof monStart==='function'){
 }
 
 /*ARC14F (20.11.2026) - gag di viaggio a vignette fra una tappa e l'altra */
-try{ ['gag1', 'gag10', 'gag11', 'gag12', 'gag2', 'gag3', 'gag4', 'gag5', 'gag6', 'gag7', 'gag8', 'gag9'].forEach(k=>{ if(ARC14V2[k]) return; const im=new Image(); im.src='img/vignette/'+k+'.jpg'; ARC14V2[k]=im; }); }catch(e){}
+try{ ['gag1', 'gag10', 'gag11', 'gag12', 'gag2', 'gag3', 'gag4', 'gag5', 'gag6', 'gag7', 'gag8', 'gag9', 'gag13', 'gag14', 'gag15', 'gag16', 'gag17'].forEach(k=>{ if(ARC14V2[k]) return; const im=new Image(); im.src='img/vignette/'+k+'.jpg'; ARC14V2[k]=im; }); }catch(e){}
 { const _tpF=torPages; torPages=function(){ const P=_tpF.apply(this,arguments); try{ if(!ARC.v2||ARC.next==='retry'||!G||!G.arc||G.arc.i<1) return P; const it=G.arc.boss?null:ARC.list[G.arc.i];
-    const tutte=['gag1', 'gag10', 'gag11', 'gag12', 'gag2', 'gag3', 'gag4', 'gag5', 'gag6', 'gag7', 'gag8', 'gag9'].filter(k=>ARC14V2[k]); let k=null;
+    const tutte=['gag1', 'gag10', 'gag11', 'gag12', 'gag2', 'gag3', 'gag4', 'gag5', 'gag6', 'gag7', 'gag8', 'gag9', 'gag13', 'gag14', 'gag15', 'gag16', 'gag17'].filter(k=>ARC14V2[k]); let k=null;
     if(it==='mecha'&&tutte.includes('gag10')) k='gag10';
     else { const pool=tutte.filter(x=>x!=='gag10'); ARC._gag=(ARC._gag||[]).filter(x=>pool.includes(x)); let lib=pool.filter(x=>!ARC._gag.includes(x)); if(!lib.length){ const u=ARC._gag[ARC._gag.length-1]; ARC._gag=[]; lib=pool.filter(x=>x!==u); if(!lib.length) lib=pool; } k=lib[(Math.random()*lib.length)|0]; if(k) ARC._gag.push(k); }
     if(!k) return P; const tr=ARC2.tracce||[]; if(typeof it==='number'&&P.length&&tr.includes(P[0].t)) P.shift();
