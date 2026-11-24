@@ -5068,7 +5068,7 @@ try{
   ARC2.mb.faja.pos={w:[60,290],n:'Oceano Pacifico'}; ARC2.mb.marico.home='palude'; ARC2.mb.marico.pos={w:[315,298],n:'Amazzonia'}; ARC2.mb.biscio.pos={w:[555,148],n:'Romania'};
   ARC2.ordine=['marouges','gale','faja','max','yoghi','marico','biscio'];
   ARC2.col={marouges:'#ff4f8b',gale:'#ffc933',faja:'#3fc8ff',max:'#5cff5a',yoghi:'#c86bff',marico:'#3dff6a',biscio:'#e8203c'};
-  Object.assign(ARC2.mbTxt,{marouges:'Bardolino, reparto d\'ospedale. Turno di notte. Qualcuno ha firmato un foglio senza leggerlo.',
+  Object.assign(ARC2.mbTxt,{marouges:'Peschiera del Garda, reparto d\'ospedale. Turno di notte. Qualcuno ha firmato un foglio senza leggerlo.',
     faja:'Oceano Pacifico, in mezzo al nulla. La scia di bolle scende fino ad Atlantide. Laggiù qualcuno ha un tridente.',
     max:'Salò, Giardini pensili. Le piante tremano. Qualcuno è diventato biondo, e non l\'ha presa bene.',
     marico:'Amazzonia, notte di tuoni. In mezzo alla palude un vecchio laboratorio fa ancora scintille. Qualcosa di enorme si è svegliato.',
@@ -5145,7 +5145,7 @@ try{ ARC2.col.evilsdb='#d0103a'; }catch(e){}
 
 /*ARC14E (20.11.2026) - vignette prima degli avversari: spritz per i lottatori a sorte, furto incastrato per i miniboss */
 const ARC14V2={}; try{ ['inc_biscio', 'inc_faja', 'inc_gale', 'inc_marico', 'inc_marouges', 'inc_max', 'inc_mecha', 'inc_yoghi', 'spritz1', 'spritz2', 'spritz3', 'spritz4'].forEach(k=>{ const im=new Image(); im.src='img/vignette/'+k+'.jpg'; ARC14V2[k]=im; }); }catch(e){}
-try{ Object.assign(ARC2.mbTxt,{marouges:'Bardolino, reparto d\'ospedale. Turno di notte. Qualcuno ha toccato la Mini sbagliata.',gale:'Venezia. Fra calli e cicchetti si sente un ruggito. Qualcuno ha fatto arrabbiare il leone.'}); ARC2.mbPrima='Da qui in poi l\'incappucciato non scappa e basta: ruba, firma col tuo nome e lascia gli altri ad aspettarti.'; }catch(e){}
+try{ Object.assign(ARC2.mbTxt,{marouges:'Peschiera del Garda, reparto d\'ospedale. Turno di notte. Qualcuno ha toccato la Mini sbagliata.',gale:'Venezia. Fra calli e cicchetti si sente un ruggito. Qualcuno ha fatto arrabbiare il leone.'}); ARC2.mbPrima='Da qui in poi l\'incappucciato non scappa e basta: ruba, firma col tuo nome e lascia gli altri ad aspettarti.'; }catch(e){}
 const ARC14FURTI={marouges:'le chiavi della Mini grigia',gale:'il vassoio dei cicchetti',faja:'il tridente',max:'il bonsai preferito',yoghi:'i semi di girasole',marico:'la leva del laboratorio',biscio:'il cuscino della bara',mecha:'i croccantini delle gatte'};
 { const _tpE=torPages; torPages=function(){ const P=_tpE.apply(this,arguments); try{ if(!ARC.v2||ARC.next==='retry'||!G||!G.arc||G.arc.boss) return P; const it=ARC.list[G.arc.i], nm=G.d1.name;
     if(typeof it==='number'){ const sp=['spritz1','spritz2','spritz3','spritz4'].filter(k=>ARC14V2[k]); ARC._sp=(ARC._sp||[]).filter(k=>sp.includes(k)); let lib=sp.filter(k=>!ARC._sp.includes(k)); if(!lib.length){ const u=ARC._sp[ARC._sp.length-1]; ARC._sp=[]; lib=sp.filter(x=>x!==u); if(!lib.length) lib=sp; } /*NOREP1*/ const k=lib[(Math.random()*lib.length)|0]; ARC._sp.push(k); if(k) P.push({img:k,t:''}); }
@@ -5218,7 +5218,7 @@ try{ STAGES.egitto='Sabbie del sogno'; BGDATA.egitto='img/arene/egitto.png';
 /*ARC15 (21.11.2026) - correzioni dell'Avvocato: caveau di NicoZago a Soave; palude di Marico Frankenstein nel cuore dell'Amazzonia;
    nella presentazione (VS) i miniboss si vedono gia' trasformati; a Difficile battere Marouges ostetrica, Conte Biscio, Marico Frankenstein e Mecha-gatto li sblocca */
 try{ ITXY['Soave']=[668,282]; TPOS.nicozago={it:[11.27,45.42,'Soave']}; }catch(e){ console.error('ARC15 soave',e); }
-try{ ITXY['Cerea']=[632,354]; TPOS.jj={it:[11.21,45.19,'Cerea']}; }catch(e){ console.error('ARC15 cerea',e); }
+try{ ITXY['Cerea']=[632,354]; TPOS.jj={it:[11.21,45.19,'Cerea']}; }catch(e){ console.error('ARC15 cerea',e); } try{ ITXY['Cerea']=[624,304]; ITXY['Lainate']=[186,262]; TPOS.ciuppa={it:[9.03,45.57,'Lainate']}; }catch(e){ console.error('GEO1',e); } /*GEO1: Cerea a sud di Verona (sopra il Po); Ciuppa a Lainate*/ try{ ITXY['Peschiera del Garda']=[572,290]; if(TPOS.frisbee) TPOS.frisbee.it=[10.69,45.44,'Peschiera del Garda']; else TPOS.frisbee={it:[10.69,45.44,'Peschiera del Garda']}; }catch(e){ console.error('GEO2',e); } /*GEO2: clinica ostetrica di Marouges e Frisbee a Peschiera del Garda*/
 // l'inseguimento parte dalla prima arena del primo sfidante: niente volo iniziale
 { const _akF=arc2Key; arc2Key=function(i){ if(i<0&&ARC.v2) return _akF(0); return _akF.apply(this,arguments); }; }
 try{ ARC2.mb.marico.pos={w:[252,320],n:'Amazzonia'}; TPOS.mb_marico=ARC2.mb.marico.pos; }catch(e){ console.error('ARC15 amazzonia',e); }
