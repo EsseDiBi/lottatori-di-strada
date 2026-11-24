@@ -5411,6 +5411,12 @@ function arcDiffSel(){ let d=''; try{ d=localStorage.getItem('lds-arcade-diff')|
       return old&&old.call(o,e); }; }catch(e){ console.error('ARCDIFF1',e); } return r; }; }
 try{ if(location.hash==='#debug') window.__arc2={ARC,ARC2,arc2Go,mon:{after:()=>monAfter,start:()=>(typeof monStart==='function'?monStart:null),end:()=>monEnd},tw:()=>torWin,sr:()=>showResult,get G(){ return G; },get ROSTER(){ return ROSTER; }}; }catch(e){}
 }catch(e){ console.error('ARCADE2',e); }
+/*FACILE10 (24.11.2026) - ordine dell'Avvocato: difficolta' -10% contro il computer, in tutte le modalita' (libero, Torneo, Mondiale, Arcade). Il 2 giocatori non cambia.
+  Forza complessiva del computer x0.90, come la scala CURVA1: danno che fa x0.949, danno che subisce /0.949. */
+try{ if(!window.__facile10){ window.__facile10=1; const _hF=hit; const K10=Math.sqrt(0.9);
+  hit=function(a,d,dmg,kb,stun,o){ try{ if(G&&G.mode==='cpu'&&typeof dmg==='number'){ if(a&&a.cpu&&!(d&&d.cpu)) dmg*=K10; else if(d&&d.cpu&&!(a&&a.cpu)) dmg/=K10; } }catch(e){} return _hF.call(this,a,d,dmg,kb,stun,o); };
+  try{ if(location.hash==='#debug') window.__f10={get G(){ return G; },get sel(){ return sel; },hit:(...x)=>hit(...x),startMatch:()=>startMatch(),showScreen:s=>showScreen(s)}; }catch(e){} } }catch(e){ console.error('FACILE10',e); }
+
 
 requestAnimationFrame(loop);
 })();
