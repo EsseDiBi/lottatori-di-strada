@@ -4614,11 +4614,11 @@ function pagineRoster(root){
   let wrap=root.parentNode.classList.contains('rwrap')?root.parentNode:null;
   if(ROSTER.length<=PAGESZ){ root.classList.remove('paged'); order.forEach(i=>root.appendChild(cards[i].el)); if(wrap){ const pg=wrap.querySelector('#ppager'); if(pg) pg.remove(); } return; }
   root.classList.add('paged');
-  const pages=[order.slice(0,PAGESZ),order.slice(PAGESZ)];
+  const pages=[]; for(let q=0;q<order.length;q+=PAGESZ) pages.push(order.slice(q,q+PAGESZ)); /*PAGINE2*/
   pages.forEach(list=>{ const p=document.createElement('div'); p.className='ppage'; list.forEach(i=>p.appendChild(cards[i].el)); root.appendChild(p); });
   if(!wrap){ wrap=document.createElement('div'); wrap.className='rwrap'; root.parentNode.insertBefore(wrap,root); wrap.appendChild(root); }
   let pg=wrap.querySelector('#ppager'); if(!pg){ pg=document.createElement('div'); pg.id='ppager'; wrap.appendChild(pg); }
-  pg.innerHTML='<button type="button" data-p="0" class="on">1</button><span>scorri</span><button type="button" data-p="1">2</button>';
+  pg.innerHTML=pages.map((_,q)=>'<button type="button" data-p="'+q+'"'+(q?'':' class="on"')+'>'+(q+1)+'</button>'+(q===0?'<span>scorri</span>':'')).join('');
   pg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{ root.scrollTo({left:(+b.dataset.p)*root.clientWidth,behavior:'smooth'}); }));
   const upd=()=>{ const p=Math.round(root.scrollLeft/Math.max(1,root.clientWidth)); pg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.p===p)); };
   root.onscroll=upd; root.scrollLeft=0; upd();
@@ -4633,7 +4633,7 @@ function casualeFill(root){ if(!root||!root.classList.contains('paged')) return;
 function buildCards(){
   try{ formeGriglia(); }catch(e){} /*SOLOFORME1*/
   const root=$('#roster'); root.innerHTML=''; cards=[]; root.className='pgrid'; { const nn=Math.min(PAGESZ,ROSTER.length), pc=nn>9?4:3; root.style.setProperty('--pc',pc); root.style.setProperty('--pr',Math.ceil(nn/pc)); } // con piu' di 9 lottatori: 4 colonne, tutto in una schermata
-  if(!root.parentNode.classList.contains('vsel')){ const w=document.createElement('div'); w.className='vsel'; root.parentNode.insertBefore(w,root);
+  if(!root.closest('.vsel')){ /*PAGINE2: una sola cornice*/ const w=document.createElement('div'); w.className='vsel'; root.parentNode.insertBefore(w,root);
     const mk=s=>{ const c=document.createElement('canvas'); c.width=260*DPR; c.height=330*DPR; c.className='bigsel'; c.setAttribute('aria-hidden','true'); return c; };
     SELC[0]=mk(0); SELC[1]=mk(1); w.appendChild(SELC[0]); w.appendChild(root); w.appendChild(SELC[1]); }
   ROSTER.forEach((r,i)=>{
@@ -4705,7 +4705,7 @@ function portraitOf(key){ if(PORTC[key]) return PORTC[key]; const SP=SPRITES[key
   const o=document.createElement('canvas'); o.width=side*2; o.height=side*2; const q=o.getContext('2d'); q.imageSmoothingEnabled=false;
   q.drawImage(im,x0,y0,side,side,0,0,side*2,side*2); return PORTC[key]=o.toDataURL(); }
 function drawCards(){
-  cards.forEach((c,i)=>{ if(c.pdone) return; const k=ROSTER[i]&&ROSTER[i].spriteKey, u=(ROSTER[i]&&ROSTER[i].dio&&dioRitr())||(k&&portraitOf(k)), im=c.el.querySelector('img'); if(u&&im){ im.src=u; c.pdone=1; } });
+  cards.forEach((c,i)=>{ if(c.pdone) return; const k=ROSTER[i]&&ROSTER[i].spriteKey, u=(function(r){ try{ return (r&&typeof MOSTRI!=='undefined'&&MOSTRI[r.base]&&mostriRitr(r))||(r&&r.dark&&SPRITES[k+'_dark']&&portraitOf(k+'_dark'))||null; }catch(e){ return null; } })(ROSTER[i])/*RITRATTI2*/||(ROSTER[i]&&ROSTER[i].dio&&dioRitr())||(k&&portraitOf(k)), im=c.el.querySelector('img'); if(u&&im){ im.src=u; c.pdone=1; } });
   for(let s=0;s<2;s++){ const cv=SELC[s]; if(!cv) continue; const r=ROSTER[sel.picks[s]]; if(!r) continue; const g=cv.getContext('2d');
     if(s===1&&sel.mode==='arcade'){ g.setTransform(DPR,0,0,DPR,0,0); g.clearRect(0,0,260,330); g.fillStyle='rgba(236,58,82,.2)'; g.beginPath(); g.ellipse(130,298,104,18,0,0,7); g.fill(); g.lineWidth=2.5; g.strokeStyle='#ec3a52'; g.stroke();
       const bob=Math.sin(performance.now()/300)*6; g.textAlign='center'; g.textBaseline='alphabetic'; g.lineJoin='round'; g.font='150px '+FD; g.lineWidth=12; g.strokeStyle='#120d22'; g.strokeText('?',130,240+bob); g.fillStyle='#ffc933'; g.fillText('?',130,240+bob);
