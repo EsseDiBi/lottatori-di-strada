@@ -23,7 +23,7 @@
 #ppager button{border:2px solid var(--line,#342b62);background:var(--panel2,#211a40);color:var(--fg,#fff);border-radius:999px;padding:1px 10px;font:inherit;cursor:pointer}
 #ppager button.on{border-color:var(--gold,#ffc933);color:var(--gold,#ffc933)}
 @media (max-height:520px){ #roster.pgrid.paged{width:calc(var(--pc,6)*var(--ps) + (var(--pc,6) - 1)*4px)} #roster.paged>.ppage{gap:4px} #ppager{font-size:9px} #ppager button{padding:0 8px} }
-</style></head><body>
+<style>/*PAGINE3*/ @media (max-height:520px){ #scrSelect #roster.pgrid{--ps:clamp(34px,min(calc((100dvh - 156px)/var(--pr,3) - 6px),calc((54vw - 20px)/var(--pc,6) - 4px)),84px)} #roster.paged>.ppage{grid-auto-rows:var(--ps)} #roster .pcard{overflow:hidden;min-height:0;height:var(--ps)} } #roster .pcasuale i{min-height:0;line-height:1;font-size:calc(var(--ps,80px)*.5)!important;overflow:hidden} </style></head><body>
 <title>Lottatori di Strada</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -4610,7 +4610,7 @@ addEventListener('load',()=>{ let n=0; const t=setInterval(()=>{ n++; try{ if(di
 /*PAGINE1 - due schermate: prima i 16 lottatori creati per primi, poi gli altri; gli sbloccabili sempre in fondo */
 const PAGESZ=18 /*PIENA1: 6 colonne per 3 righe, tutte piene*/, SBLOCCABILI=['maxbiondo','marougesost','marlav','mecha','evilsdb','evil','poseidone','criceto'];
 function pagineRoster(root){
-  const all=ROSTER.map((r,i)=>i), base=all.filter(i=>!SBLOCCABILI.includes(ROSTER[i].spriteKey)), lock=all.filter(i=>SBLOCCABILI.includes(ROSTER[i].spriteKey)), order=base.concat(lock);
+  const all=ROSTER.map((r,i)=>i), isL=i=>{ const r=ROSTER[i]; try{ return SBLOCCABILI.includes(r.spriteKey)||r.spriteKey==='drste'||!!r.dark||!!(typeof MOSTRI!=='undefined'&&MOSTRI[r.base]); }catch(e){ return false; } }, base=all.filter(i=>!isL(i)), lock=all.filter(i=>isL(i)) /*PAGINE3: sbloccabili in fondo*/, order=base.concat(lock);
   let wrap=root.parentNode.classList.contains('rwrap')?root.parentNode:null;
   if(ROSTER.length<=PAGESZ){ root.classList.remove('paged'); order.forEach(i=>root.appendChild(cards[i].el)); if(wrap){ const pg=wrap.querySelector('#ppager'); if(pg) pg.remove(); } return; }
   root.classList.add('paged');
@@ -4630,6 +4630,14 @@ function casualeFill(root){ if(!root||!root.classList.contains('paged')) return;
     el.addEventListener('click',()=>{ const ok=cards.map((c,i)=>[c,i]).filter(([c])=>c&&c.el&&root.contains(c.el)&&!c.el.classList.contains('pcasuale')); if(!ok.length) return; const [c,i]=ok[Math.floor(Math.random()*ok.length)]; try{ ac(); SFX.select(); }catch(e){} choose(i); });
     last.appendChild(el); } }
 { const _prC=pagineRoster; pagineRoster=function(root){ const r=_prC.apply(this,arguments); try{ casualeFill(root); }catch(e){} return r; }; } /*CASUALE1*/
+casualeFill=function(root){ /*PAGINE3: un solo punto interrogativo, dopo l'ultimo lottatore*/ if(!root||!root.classList.contains('paged')) return; root.querySelectorAll('.pcasuale').forEach(e=>e.remove());
+  root.querySelectorAll('.ppage').forEach(pp=>{ if(!pp.children.length) pp.remove(); }); const pp=root.querySelectorAll('.ppage'); let tgt=pp[pp.length-1]; if(!tgt) return;
+  if(tgt.children.length>=PAGESZ){ tgt=document.createElement('div'); tgt.className='ppage'; root.appendChild(tgt);
+    try{ const pg=root.closest('.rwrap').querySelector('#ppager'), q=root.querySelectorAll('.ppage').length-1, b=document.createElement('button'); b.type='button'; b.dataset.p=q; b.textContent=q+1; b.addEventListener('click',()=>{ root.scrollTo({left:q*root.clientWidth,behavior:'smooth'}); }); pg.appendChild(b); }catch(e){} }
+  const el=document.createElement('button'); el.type='button'; el.className='pcard pcasuale'; el.setAttribute('aria-label','Casuale');
+  el.innerHTML='<div class="badges"></div><i style="display:flex;align-items:center;justify-content:center;font-weight:900;color:#ffd84a;text-shadow:3px 3px 0 #b0306a,-2px -2px 0 #1a1030;font-style:normal">?</i><span class="cname">CASUALE</span>';
+  el.addEventListener('click',()=>{ const ok=cards.map((c,i)=>[c,i]).filter(([c])=>c&&c.el&&root.contains(c.el)); if(!ok.length) return; const [c,i]=ok[Math.floor(Math.random()*ok.length)]; try{ ac(); SFX.select(); }catch(e){} choose(i); });
+  tgt.appendChild(el); };
 function buildCards(){
   try{ formeGriglia(); }catch(e){} /*SOLOFORME1*/
   const root=$('#roster'); root.innerHTML=''; cards=[]; root.className='pgrid'; { const nn=Math.min(PAGESZ,ROSTER.length), pc=nn>9?4:3; root.style.setProperty('--pc',pc); root.style.setProperty('--pr',Math.ceil(nn/pc)); } // con piu' di 9 lottatori: 4 colonne, tutto in una schermata
