@@ -5149,7 +5149,7 @@ try{ Object.assign(ARC2.mbTxt,{marouges:'Peschiera del Garda, reparto d\'ospedal
 const ARC14FURTI={marouges:'le chiavi della Mini grigia',gale:'il vassoio dei cicchetti',faja:'il tridente',max:'il bonsai preferito',yoghi:'i semi di girasole',marico:'la leva del laboratorio',biscio:'il cuscino della bara',mecha:'i croccantini delle gatte'};
 { const _tpE=torPages; torPages=function(){ const P=_tpE.apply(this,arguments); try{ if(!ARC.v2||ARC.next==='retry'||!G||!G.arc||G.arc.boss) return P; const it=ARC.list[G.arc.i], nm=G.d1.name;
     if(typeof it==='number'){ const sp=['spritz1','spritz2','spritz3','spritz4'].filter(k=>ARC14V2[k]); ARC._sp=(ARC._sp||[]).filter(k=>sp.includes(k)); let lib=sp.filter(k=>!ARC._sp.includes(k)); if(!lib.length){ const u=ARC._sp[ARC._sp.length-1]; ARC._sp=[]; lib=sp.filter(x=>x!==u); if(!lib.length) lib=sp; } /*NOREP1*/ const k=lib[(Math.random()*lib.length)|0]; ARC._sp.push(k); if(k) P.push({img:k,t:''}); }
-    else if(typeof it==='string'){ const b=it.indexOf('mb_')===0?it.slice(3):it; const k='inc_'+b; if(ARC14V2[k]) P.push({img:k,t:'Gli hanno rubato '+(ARC14FURTI[b]||'qualcosa')+'. Sul biglietto c\'è una firma sola: '+nm+'.'}); }
+    else if(typeof it==='string'){ const b=it.indexOf('mb_')===0?it.slice(3):it; const k='inc_'+b; if(ARC14V2[k]) P.push({img:k,t:(['marouges','mummia'].includes(b)?'Le':'Gli')+' hanno rubato '+(ARC14FURTI[b]||'qualcosa')+'. Sul biglietto c\'è una firma sola: '+nm+'.'}); }
   }catch(e){ console.error('ARC14E pagine',e); } return P; }; }
 { const _dsE=drawStoria; drawStoria=function(){ const P=G&&G.pages&&G.pages[G.pageI||0]; if(P&&P.img&&evOk(ARC14V2[P.img])){ const t=G.phaseT, a=Math.min(1,t/14); ctx.fillStyle='#0b0816'; ctx.fillRect(0,0,W,H); ctx.save(); ctx.globalAlpha=a; ctx.imageSmoothingEnabled=true; ctx.drawImage(ARC14V2[P.img],0,0,W,H); ctx.restore();
     if(P.t){ ctx.save(); ctx.globalAlpha=a; ctx.fillStyle='rgba(10,7,22,.82)'; ctx.fillRect(40,452,880,74); torText(P.t,W/2,486,840,22,'#ffc933'); ctx.restore(); }
@@ -5409,6 +5409,56 @@ function arcDiffSel(){ let d=''; try{ d=localStorage.getItem('lds-arcade-diff')|
       if(b.dataset.d){ try{ localStorage.setItem('lds-arcade-diff',b.dataset.d); }catch(_){} draw(); return; }
       if(b.dataset.k){ o.style.display='none'; arc2GoK(b.dataset.k,arcDiffSel()); return; }
       return old&&old.call(o,e); }; }catch(e){ console.error('ARCDIFF1',e); } return r; }; }
+/*LEGLI1 (25.11.2026): "Le hanno rubato" per Marouges ostetrica e Marouges Mummia*/
+/*SALVA1 (25.11.2026) - ordini dell'Avvocato: (1) nell'Arcade si salvano i progressi della partita e si riparte da li'; (2) controllo degli sblocchi a Difficile.
+  - La difficolta' scelta all'inizio dell'inseguimento resta ferma fino alla fine (ARC.diff): niente cambi a meta' strada, sblocchi sempre calcolati su quella.
+  - "Insegui la coppa!" a fine Mondiale apre la scelta del campione e della difficolta', invece di partire con la difficolta' del Mondiale.
+  - Dopo ogni tappa vinta la partita si salva da sola (lds-arcade-save); "Salva ed esci" torna al titolo. Sconfitta o coppa ripresa: il salvataggio si cancella (nessuna rivincita).
+  - Nella scelta del campione: riquadro "Partita salvata" con Riprendi e Cancella.
+  - Il risultato di ogni tappa a Difficile dice anche se il miniboss era gia' sbloccato; a fine Arcade l'elenco di chi e' stato sbloccato. */
+try{ if(!window.__salva1){ window.__salva1=1;
+  const SK='lds-arcade-save';
+  const keyOf=r=>r&&(r.mk||r.spriteKey);
+  const arcSaveGet=()=>{ try{ const s=JSON.parse(localStorage.getItem(SK)||'null'); return s&&s.v===1&&Array.isArray(s.list)?s:null; }catch(e){ return null; } };
+  const arcSaveDel=()=>{ try{ localStorage.removeItem(SK); }catch(e){} };
+  const arcSavePut=i=>{ try{ const me=ROSTER[sel.picks[0]]; const list=ARC.list.map(x=>typeof x==='number'?{k:keyOf(ROSTER[x])}:x);
+      localStorage.setItem(SK,JSON.stringify({v:1,me:keyOf(me),diff:ARC.diff||'normal',i,list,cont:ARC.cont||0,sp:ARC._sp||[],gag:ARC._gag||[],tu:ARC._tu||[],sb:ARC._sb||[],t:Date.now()})); }catch(e){ console.error('SALVA1 salva',e); } };
+  // difficolta' ferma per tutto l'inseguimento
+  { const _as=arcStart; arcStart=function(){ ARC.diff=sel.diff==='hard'?'hard':'normal'; ARC._sb=[]; const r=_as.apply(this,arguments); try{ if(ARC.v2&&G&&G.arc&&ARC.list&&ARC.list.length){ arcSavePut(0); } }catch(e){} return r; }; }
+  { const _sm=startMatch; startMatch=function(){ try{ if(sel.mode==='arcade'&&ARC.v2&&ARC.diff) sel.diff=ARC.diff; }catch(e){} return _sm.apply(this,arguments); }; }
+  // sblocchi: avviso anche se il miniboss era gia' sbloccato
+  const NOMI={marouges:'Marouges ostetrica',biscio:'Conte Biscio',marico:'Marico Frankenstein',faja:'Faja uomo pesce',zeta:'Zeta scheletro',fantasma:'Socciaman Fantasma',mummia:'Marouges Mummia',drste:'Dr. Ste e Mr. Andre',mecha:'Mecha-gatto'};
+  { const _ar=arcResult; arcResult=function(w,wf,lf){ const line0=($('#resLine')||{}).textContent; const r=_ar.apply(this,arguments);
+      try{ if(!ARC.v2||!G||!G.arc) return r; const A=G.arc, rl=$('#resLine'), bk=$('#backBtn');
+        if(w===0&&ARC.diff==='hard'&&!A.boss){ const b=(G.d2&&(G.d2.mbBase||(G.d2.subKey==='mecha'?'mecha':'')))||'', nm=NOMI[b];
+          if(nm){ ARC._sb=(ARC._sb||[]); if(!ARC._sb.includes(nm)) ARC._sb.push(nm); if(rl&&!/ora è un|ora è una|Mecha-gatto ora/.test(rl.textContent)) rl.textContent+=' '+nm+' è già fra i tuoi lottatori.'; } }
+        if(w===0&&!A.boss){ arcSavePut(ARC.i+1); if(bk) bk.textContent='Salva ed esci'; }
+        else if(w===0&&A.boss){ arcSaveDel(); if(rl){ if(ARC.diff==='hard'){ const L=['Evil SDB','Mecha-gatto'].concat((ARC._sb||[]).filter(x=>x!=='Mecha-gatto')); rl.textContent=A.n+' sfide, nessuna rivincita. Evil SDB è scappato giurando vendetta. Sbloccati: '+L.join(', ')+'.'; } } if(bk) bk.textContent='Torna al titolo'; }
+        else { arcSaveDel(); } }catch(e){ console.error('SALVA1 risultato',e); } return r; }; }
+  // "Salva ed esci": il salvataggio e' gia' fatto, si torna al titolo
+  $('#backBtn').addEventListener('click',()=>{ try{ if(arcSaveGet()&&$('#backBtn').textContent==='Salva ed esci') arc2Toast('Partita salvata. Per riprendere: Arcade, poi Riprendi.'); }catch(e){} },true);
+  // fine Mondiale: "Insegui la coppa!" apre la scelta di campione e difficolta'
+  { const _go=arc2Go; arc2Go=function(diff){ try{ if(diff&&window.__mon&&!window.__arcCamp&&arc2On()){ try{ ac(); }catch(_){} arc2Pick(); return; } }catch(e){} return _go.apply(this,arguments); }; }
+  // ripresa della partita salvata
+  function arcResume(){ const s=arcSaveGet(); if(!s) return false;
+    const mi=ROSTER.findIndex(r=>r&&keyOf(r)===s.me&&!r.dark); if(mi<0){ arc2Toast('Il campione della partita salvata non c\'è più.'); return false; }
+    const list=[]; for(const x of s.list){ if(x&&typeof x==='object'){ const j=ROSTER.findIndex(r=>r&&keyOf(r)===x.k&&!r.dark&&!(typeof MOSTRI!=='undefined'&&MOSTRI[r.base])); if(j<0){ arc2Toast('Partita salvata non più valida: un avversario non c\'è più.'); return false; } list.push(j); } else list.push(x); }
+    try{ ac(); }catch(e){} sel.mode='arcade'; sel.picks[0]=mi; sel.diff=s.diff==='hard'?'hard':'normal';
+    try{ for(const b in ARC2.mb){ const D=ARC2.mb[b]; if(D.mon&&typeof MOSTRI!=='undefined'&&MOSTRI[D.mon]) mostriLoad(MOSTRI[D.mon].pack); else { const t=FORME_T[D.base]; if(t&&t.indexOf('img:')===0&&window.FORME_LOAD) FORME_LOAD(t.slice(4)); } } }catch(e){}
+    ARC.v2=1; ARC.diff=sel.diff; ARC.list=list; ARC.i=Math.max(0,Math.min(s.i|0,list.length)); ARC.riv=0; ARC.cont=s.cont||0; ARC.next=''; ARC._sp=s.sp||[]; ARC._gag=s.gag||[]; ARC._tu=s.tu||[]; ARC._sb=s.sb||[];
+    window.__arcCamp=s.me; try{ try{ SFX.confirm(); }catch(_){} try{ goFull(); }catch(_){} startMatch(); showScreen('fight'); } finally{ window.__arcCamp=null; }
+    return true; }
+  { const _ap=arc2Pick; arc2Pick=function(){ const r=_ap.apply(this,arguments); try{ const o=document.getElementById('arcCampOv'), s=arcSaveGet(); if(!o||!s) return r; const box=o.firstElementChild; if(!box) return r;
+      const me=ROSTER.find(x=>x&&keyOf(x)===s.me), n=s.list.length+1; let p=document.getElementById('arcSaveBox'); if(p) p.remove(); p=document.createElement('div'); p.id='arcSaveBox';
+      p.style.cssText='margin:0 auto 12px;max-width:520px;padding:10px 12px;border:3px solid #ffc933;border-radius:10px;background:#231a3d;font:700 15px sans-serif;color:#f4efe6';
+      p.innerHTML='<div style="color:#ffc933;margin-bottom:6px">PARTITA SALVATA</div><div style="margin-bottom:8px">'+((me&&me.name)||s.me)+' - tappa '+(Math.min(s.i,s.list.length)+1)+' di '+n+' - '+(s.diff==='hard'?'Difficile':'Normale')+'</div>'
+        +'<button type="button" data-r="1" style="font:800 15px sans-serif;padding:.45em 1.2em;border-radius:8px;cursor:pointer;border:3px solid #ffc933;background:#ffc933;color:#120d22;margin-right:8px">Riprendi</button>'
+        +'<button type="button" data-c="1" style="font:700 14px sans-serif;padding:.45em 1em;border-radius:8px;cursor:pointer;border:2px solid #3a3166;background:#1a1430;color:#f4efe6">Cancella</button>';
+      const bar=document.getElementById('arcDiffBar'); box.insertBefore(p,bar||box.children[2]||null);
+      const old=o.onclick; o.onclick=e=>{ const b=e.target.closest('button'); if(b&&b.dataset.r){ o.style.display='none'; if(!arcResume()) arc2Pick(); return; } if(b&&b.dataset.c){ arcSaveDel(); p.remove(); return; } return old&&old.call(o,e); };
+    }catch(e){ console.error('SALVA1 scelta',e); } return r; }; }
+  try{ if(location.hash==='#debug') window.__salva1={get:arcSaveGet,resume:arcResume,get ARC(){ return ARC; }}; }catch(e){}
+} }catch(e){ console.error('SALVA1',e); }
 try{ if(location.hash==='#debug') window.__arc2={ARC,ARC2,arc2Go,mon:{after:()=>monAfter,start:()=>(typeof monStart==='function'?monStart:null),end:()=>monEnd},tw:()=>torWin,sr:()=>showResult,get G(){ return G; },get ROSTER(){ return ROSTER; }}; }catch(e){}
 }catch(e){ console.error('ARCADE2',e); }
 /*FACILE10 (24.11.2026) - ordine dell'Avvocato: difficolta' -10% contro il computer, in tutte le modalita' (libero, Torneo, Mondiale, Arcade). Il 2 giocatori non cambia.
