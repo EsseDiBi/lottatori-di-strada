@@ -1066,17 +1066,18 @@ const mechaIs=f=>f&&f.def&&f.def.spriteKey==='mecha';
     if(type==='kick') a.m=Object.assign({},a.m,{s:20,a:6,r:26,dmg:13,reach:170,hy:-110,hh:120,kb:9,stun:26,knock:1});
     if(type==='punch') a.m=Object.assign({},a.m,{s:9,r:14,dmg:7,reach:120});
     if(type==='ranged') a.m=Object.assign({},a.m,{s:26,r:26});
-    if(type==='sup') a.m=Object.assign({},a.m,{s:24,a:30,r:70});
+    if(type==='sup') a.m=Object.assign({},a.m,{s:40,a:46,r:40}); /*MECHAMISSILI1*/
     if(type==='razzo'&&rnd()<0.5) quip(f,['PUGNO. A. RAZZO.','Bip. Lancio.','Torna qui dopo.']);
     if(type==='raggio'){ a.last=0; a.hits=0; if(rnd()<0.8) floatText('PRRRR...',f.x,f.y-360,'#8dff5a',20,40); }
     if(type==='sup'||type==='raggio'||type==='kick'){ a.last=a.last||0; a.hits=a.hits||0; } } }catch(e){} return r; }; }
 function mechaMove(f,a){ const m=a.m;
   if(a.type==='sup'){ if(a.f===m.s){ floatText('MIAO!',f.x,f.y-380,'#ffc21a',40,50); G.shake=Math.max(G.shake,18); G.flashW=Math.max(G.flashW||0,6); }
+    if(!a.ms) a.ms={hits:0,last:-99,n:0}; if(a.f>m.s&&a.f<=m.s+MMI.fire&&(a.f-m.s)%MMI.every===0) mmiLaunch(f,a); /*MECHAMISSILI1*/
  }
   if(a.type==='raggio'&&a.f===m.s){ G.shake=Math.max(G.shake,10); SFX.proj&&SFX.proj(); }
   if(a.type==='razzo'&&a.f===m.s){ const sz=f.def.size||1; P.push({o:f,kind:'pugnoraz',dir:f.facing,vx:14*f.facing,x:f.x+f.facing*60,y:f.y-118*sz,dmg:11,r:0}); G.shake=Math.max(G.shake,6); SFX.proj&&SFX.proj(); } }
 function mechaHits(a,d,at){ const m=at.m, fw=a.facing;
-  if(at.type==='razzo') return; // colpisce il pugno che vola
+  if(at.type==='razzo'||at.type==='sup') return; // colpisce il pugno che vola; nella super colpiscono i missili (MECHAMISSILI1)
   if(at.type==='raggio'){ if(at.f>m.s&&at.f<=m.s+m.a&&at.f-at.last>=6&&at.hits<4){ const box={x0:fw===1?a.x+60:0,x1:fw===1?W:a.x-60,y0:a.y-270,y1:a.y-150};
       if(ov(box,hurt(d))){ at.last=at.f; at.hits++; hit(a,d,5,6,22,{heavy:true,proj:true,y:d.y-170}); if(d.state==='hit'&&at.hits===1) floatText('ZOT!',d.x,d.y-215,'#8dff5a',24); } } return; }
   if(at.f>m.s&&at.f<=m.s+m.a&&at.f-at.last>=9&&at.hits<3){ const box={x0:a.x-270,x1:a.x+270,y0:a.y-360,y1:a.y};
@@ -1088,8 +1089,8 @@ function drawMechaFx(){ if(!G) return; for(const f of [G.f1,G.f2]){ if(!mechaIs(
       else if(a.f<=m.s+m.a){ const im=SPRITES.mecha.fx_raggio, x1=fw===1?W+20:-20, y1=f.y-185, len=Math.hypot(x1-e.x,y1-e.y), an=Math.atan2(y1-e.y,x1-e.x), th=44+10*Math.sin(a.f*1.7);
         if(im&&im.complete&&im.width){ ctx.globalAlpha=1; ctx.translate(e.x,e.y); ctx.rotate(an); ctx.imageSmoothingEnabled=false; for(let x=0;x<len;x+=im.width*2-2) ctx.drawImage(im,x,-th/2,im.width*2,th); } }
       ctx.restore(); }
-    if(a.type==='sup'&&a.f>m.s+m.a){ const im=SPRITES.mecha.fx_fumo; if(im&&im.complete&&im.width){ const t=a.f-m.s-m.a; for(let k=0;k<3;k++){ const u=((t+k*17)%50)/50; ctx.save(); ctx.globalAlpha=0.9*(1-u); ctx.imageSmoothingEnabled=false; const w=im.width*(1+u*0.8), h=im.height*(1+u*0.8); ctx.drawImage(im,f.x+(k-1)*70-w/2,f.y-250-u*120-h/2,w,h); ctx.restore(); } } }
   }
+  try{ mmiDraw(); }catch(e){} /*MECHAMISSILI1*/
   mechaScene(); }
 function mechaCat(k,x,y,dir,h){ const C=SPRITES.gatti, im=C&&C[k]; if(!im||!im.complete||!im.width) return; const w=im.width*h/im.height; ctx.save(); ctx.translate(x,y); ctx.scale(dir,1); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,-w/2,-h/2,w,h); ctx.restore(); }
 /* Le gatte del mecha sono le due della prima fila (posto 0 Mocambo, posto 3 Boogie), le stesse che SDB chiama nella sua super.
@@ -1117,6 +1118,38 @@ function mechaScene(){ const M=SPRITES.mecha; if(!M||!G) return; if(!M._g){ M._g
     if(f.state==='ko'&&f.onGround&&f.koT>10){ f._outT=(f._outT||0)+1; vuoto=true;
       MCAT.forEach(c=>{ const b=mechaBack(f,c); if(!b||!b.x||b.done) return; mechaCat(c[0]+'_corsa'+(((b.t/5)|0)%2+1),b.x,b.y,b.dir,80); }); } }
   M.guardia=vuoto?M.vuoto:M._g; M.guardia2=vuoto?M.vuoto:M._g2; }
+
+/*MECHAMISSILI1 (26.11.2026): super = missili-croccantino a pioggia + nuvola di fumo enorme che si dirada in 2 secondi; distanza = Occhiata laser */
+const MMI={fire:36,every:1,fly:24,smokeLife:120,dmg:[4,4,4,4,8],gap:5}, MMS=[], MSM=[];
+function mmiLaunch(f,a){ const o=f===G.f1?G.f2:G.f1, sz=f.def.size||1, fw=f.facing, side=a.ms.n%2; a.ms.n++;
+  const x0=f.x+fw*(side?62:-58)*sz, y0=f.y-178*sz, tx=o.x+(rnd()-.5)*150, ty=GROUND-20-rnd()*110;
+  MMS.push({o:f,S:a.ms,x0,y0,cx:x0+fw*(60+rnd()*90),cy:y0-200-rnd()*140,tx,ty,t:0,T:MMI.fly+((rnd()*6)|0),x:x0,y:y0,an:-Math.PI/2});
+  if(a.ms.n%3===1) SFX.proj&&SFX.proj(); }
+function mmiPuff(x,y,big){ MSM.push({x:x+(rnd()-.5)*40,y:y+(rnd()-.5)*30,k:(big?2.6:1.7)+rnd()*0.7,vx:(rnd()-.5)*0.5,vy:-0.15-rnd()*0.35,t:0,dr:(rnd()<.5?-1:1)}); }
+function mmiStep(){ if(!G) return;
+  for(let i=MSM.length-1;i>=0;i--){ const p=MSM[i]; p.t++; p.x+=p.vx; p.y+=p.vy; if(p.t>=MMI.smokeLife) MSM.splice(i,1); } // la nuvola invecchia col tempo di gioco: 120 fotogrammi = 2 secondi
+  for(let i=MMS.length-1;i>=0;i--){ const m=MMS[i]; m.t++; const u=Math.min(1,m.t/m.T), v=1-u;
+    const x=v*v*m.x0+2*v*u*m.cx+u*u*m.tx, y=v*v*m.y0+2*v*u*m.cy+u*u*m.ty; m.an=Math.atan2(y-m.y,x-m.x); m.x=x; m.y=y;
+    if(u<1) continue; MMS.splice(i,1);
+    mmiPuff(m.x,m.y,true); mmiPuff(m.x,m.y-50,false); G.shake=Math.max(G.shake,7);
+    for(let k=0;k<6;k++) FX.push({x:m.x,y:m.y,vx:(rnd()-.5)*9,vy:-rnd()*6,life:16,c:rnd()<.5?'#ffb020':'#ff6a1a'});
+    const f=m.o, o=f===G.f1?G.f2:G.f1, S=m.S;
+    if(G.phase!=='fight'||!o||o.state==='ko'||S.hits>=MMI.dmg.length||G.frame-S.last<MMI.gap) continue;
+    const box={x0:m.x-60,x1:m.x+60,y0:m.y-110,y1:m.y+40}; if(!ov(box,hurt(o))) continue;
+    S.last=G.frame; const fin=S.hits===MMI.dmg.length-1; S.hits++;
+    hit(f,o,MMI.dmg[S.hits-1],fin?14:3,fin?42:22,{sup:true,heavy:true,launch:fin,dirx:Math.sign(o.x-f.x)||f.facing,y:m.y-40}); } }
+{ const _upMMI=updProj; updProj=function(){ try{ mmiStep(); }catch(e){ console.error('MECHAMISSILI step',e); }
+    try{ for(const p of P) if(p.kind==='laserm'&&p.vy&&p.y>=p.yt){ p.y=p.yt; p.vy=0; } }catch(e){} return _upMMI.apply(this,arguments); }; }
+function mmiDraw(){ const M=SPRITES.mecha||{}, mi=M.fx_crocc, fu=M.fx_fumo;
+  if(mi&&mi.complete&&mi.width) for(const m of MMS){ ctx.save(); ctx.translate(m.x,m.y); ctx.rotate(m.an); ctx.scale(0.6,0.6); ctx.imageSmoothingEnabled=false; ctx.drawImage(mi,-mi.width/2,-mi.height/2); ctx.restore(); }
+  for(const p of MSM){ if(p.t>=MMI.smokeLife) continue;
+    if(!fu||!fu.complete||!fu.width) continue; const u=p.t/MMI.smokeLife, gr=Math.min(1,p.t/10), k=p.k*(0.55+0.45*gr)*(1+u*0.5), al=u<0.35?0.95:0.95*(1-(u-0.35)/0.65);
+    ctx.save(); ctx.globalAlpha=Math.max(0,al); ctx.translate(p.x,p.y); ctx.scale(k*p.dr,k); ctx.imageSmoothingEnabled=false; ctx.drawImage(fu,-fu.width/2,-fu.height/2); ctx.restore(); } }
+{ const _spMMI=spawnProj; spawnProj=function(f){ if(mechaIs(f)){ const e=mechaEye(f), yt=f.y-125; P.push({o:f,kind:'laserm',x:e.x+f.facing*10,y:e.y,vx:PROJ.laserm.v*f.facing,vy:(yt-e.y)/22,yt,dmg:PROJ.laserm.d,r:0,dir:f.facing}); SFX.proj&&SFX.proj(); return; } return _spMMI.apply(this,arguments); }; }
+function mmiLaser(p){ const im=SPRITES.mecha&&SPRITES.mecha.fx_raggio; if(!im||!im.complete||!im.width) return false;
+  const an=Math.atan2(p.vy||0,p.vx), L=110, th=20; ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.translate(p.x,p.y); ctx.rotate(an); ctx.imageSmoothingEnabled=false;
+  ctx.globalAlpha=0.55; ctx.drawImage(im,-L,-th,L+12,th*2); ctx.globalAlpha=1; ctx.drawImage(im,-L*0.8,-th/2,L*0.8+8,th); ctx.restore(); return true; }
+try{ if(SPRITES.mecha&&SPRITES.mecha.raggio1) SPRITES.mecha.sguardo=SPRITES.mecha.raggio1; }catch(e){}
 function drawCrocc(p){ const M=SPRITES.mecha, im=M&&M[p.kind==='pugnoraz'?'fx_pugno':'fx_crocc']; if(!im||!im.complete||!im.width) return false;
   const k=p.kind==='pugnoraz'?1.5:0.85, wob=p.kind==='pugnoraz'?0:Math.sin(p.x*0.05)*10; ctx.save(); ctx.translate(p.x,p.y+wob); ctx.scale((p.dir||Math.sign(p.vx)||1)*k,k); ctx.imageSmoothingEnabled=false; ctx.drawImage(im,-im.width/2,-im.height/2); ctx.restore(); return true; }
 
@@ -2049,8 +2082,8 @@ PROJ.bounty={l:'BOUNTYYYY!',v:0,d:10}; PROJLBL.bounty=PROJ.bounty.l;
 MOVESET.marlav={ranged:'bounty',sp:'nuoto',rName:'BOUNTYYYY!',sName:'Fine turno!',uName:'Pugnetto al cielo',supName:'Blasfemia',rage:1,temper:1};
 STATS.marlav={forza:4,resistenza:5,velocita:9,agilita:6}; STATS_BASE['Marouges ostetrica']='marlav';
 
-PROJ.crocc={l:'Missili-croccantino',v:5.5,d:10}; PROJLBL.crocc=PROJ.crocc.l;
-MOVESET.mecha={ranged:'crocc',sp:'razzo',rName:'Missili-croccantino',sName:'Pugno a razzo',uName:'Coda-frusta',supName:'MIAO! Scarica totale',armor:1};
+PROJ.crocc={l:'Missili-croccantino',v:5.5,d:10}; PROJ.laserm={l:'Occhiata laser',v:9,d:10}; /*MECHAMISSILI1*/ PROJLBL.crocc=PROJ.crocc.l;
+MOVESET.mecha={ranged:'laserm',sp:'razzo',rName:'Occhiata laser',sName:'Pugno a razzo',uName:'Coda-frusta',supName:'MIAO! Scarica totale',armor:1};
 STATS.mecha={forza:9,resistenza:9,velocita:2,agilita:1}; STATS_BASE['MECHA-GATTO']='mecha';
 
 PROJ.cilindro={l:'Cilindro volante',v:10,d:9}; PROJLBL.cilindro=PROJ.cilindro.l;
@@ -2117,7 +2150,7 @@ if(!PRESETS.some(p=>p.spriteKey==='orio')) PRESETS.push({base:'Orio',kind:'suit'
 if(!PRESETS.some(p=>p.spriteKey==='maxbiondo')&&(()=>{ try{ return localStorage.getItem('lds-maxbiondo')==='1'; }catch(e){ return false; } })()) PRESETS.push(MAXBP);
 if(!PRESETS.some(p=>p.spriteKey==='nicozago')) PRESETS.push({base:'NicoZago',kind:'suit',suit:'#1d2450',legs:'#1d2450',accent:'#3a62c9',tie:'#2c4a9a',top:'#f2f2f2',shoes:'#141414',skin:'#e6ad86',hair:'#7a3f1c',special:'Conto salato',superName:'Blasfemia',proj:'cilindro',size:1.36,spriteKey:'nicozago',
    bio:'Direttore di banca, cilindro in testa e cravatta slacciata. Si arrabbia per niente, soprattutto con Carolluz. Ma si amano.'});
-const MECHAP={base:'MECHA-GATTO',kind:'suit',suit:'#2f6f73',legs:'#2f6f73',accent:'#8dff5a',tie:'#8dff5a',top:'#2f6f73',shoes:'#c9ced3',skin:'#2f6f73',hair:'#2f6f73',special:'Pugno a razzo',superName:'MIAO! Scarica totale',proj:'crocc',size:1.7,spriteKey:'mecha',
+const MECHAP={base:'MECHA-GATTO',kind:'suit',suit:'#2f6f73',legs:'#2f6f73',accent:'#8dff5a',tie:'#8dff5a',top:'#2f6f73',shoes:'#c9ced3',skin:'#2f6f73',hair:'#2f6f73',special:'Pugno a razzo',superName:'MIAO! Scarica totale',proj:'laserm',size:1.7,spriteKey:'mecha',
    bio:'Robot gatto pilotato da Boogie e Mocambo, con gli occhiali da sole. Lentissimo, corazzato, e ogni colpo fa male. Schivalo e picchia quando fuma.'};
 if(!PRESETS.some(p=>p.spriteKey==='mecha')&&(()=>{ try{ return localStorage.getItem('lds-mecha')==='1'; }catch(e){ return false; } })()) PRESETS.push(MECHAP);
 /**/const MARLAVP={base:'Marouges ostetrica',kind:'hoodie',suit:'#e8679f',legs:'#e8679f',accent:'#ff4f8b',tie:'#ffffff',top:'#f4f1ea',shoes:'#f4f1ea',skin:'#f0b070',hair:'#8a2f14',longHair:true,lashes:true,special:'Fine turno!',superName:'Blasfemia',proj:'bounty',size:0.86,hipKick:true,spriteKey:'marlav',
@@ -2243,7 +2276,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='marlav')){ const mp=PRESETS.find(p=>p.spriteKey==='marlav'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='marlav') r.size=0.86; });
   if(!ROSTER.some(r=>r.spriteKey==='mecha')){ const mp=PRESETS.find(p=>p.spriteKey==='mecha'); if(mp){ ROSTER.push(fromPreset(mp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='mecha') r.size=1.7; });
+  ROSTER.forEach(r=>{ if(r.spriteKey==='mecha'){ r.size=1.7; r.proj='laserm'; r.rangedKind='laserm'; } }); /*MECHAMISSILI1*/
   if(!ROSTER.some(r=>r.spriteKey==='nicozago')){ const np=PRESETS.find(p=>p.spriteKey==='nicozago'); if(np){ ROSTER.push(fromPreset(np)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='nicozago') r.size=1.36; });
   if(!ROSTER.some(r=>r.spriteKey==='maxbiondo')){ const bp=PRESETS.find(p=>p.spriteKey==='maxbiondo'); if(bp){ ROSTER.push(fromPreset(bp)); try{ save(); }catch(e){} } }
@@ -3753,7 +3786,7 @@ function drawSprite(g,F,ox,oy,sc,SP){
   else if(a&&a.type==='sup'&&d.spriteKey==='maxbiondo') im=(early?SP.ulivo1:SP.ulivo2)||im;
   else if(a&&a.type==='sismico') im=(early?SP.sismico1:SP.sismico2)||im;
   else if(a&&a.type==='ranged'&&d.spriteKey==='maxbiondo') im=(a.f<a.m.s?SP.zolla1:SP.zolla2)||im;
-  else if(a&&a.type==='sup'&&d.spriteKey==='mecha') im=(a.f<a.m.s?(((a.f/5)|0)%2?SP.guardia3:SP.raggio1):a.f<=a.m.s+a.m.a?(SP.super||SP.guardia3):(SP.stordito||SP.atterra))||im;
+  else if(a&&a.type==='sup'&&d.spriteKey==='mecha') im=(a.f<=a.m.s+a.m.a?(SP.missili||SP.guardia3):(SP.guardia3||SP.guardia))||im; /*MECHAMISSILI1*/
   else if(a&&a.type==='razzo') im=(a.f<a.m.s?SP.caricapugno:(SP.pugnovia||SP.pugnorazzo))||im;
   else if(a&&a.type==='raggio') im=(a.f<a.m.s?(((a.f/6)|0)%2?SP.guardia3:SP.raggio1):SP.raggio2)||im;
   else if(a&&a.type==='sup'&&d.surf) im=(early?SP.caricapugno:SP.surf)||SP.pugno||im;
@@ -3890,7 +3923,7 @@ function drawProj(p){
   if((p.kind==='getto'||p.kind==='ondasis')&&drawPoseidoneProj(p)) return;
   if(p.kind==='hummus'&&drawDivinoProj(p)) return;
   if(p.kind==='dentiera'&&drawBdbProj(p)) return;
-  if((p.kind==='crocc'||p.kind==='pugnoraz')&&drawCrocc(p)) return;
+  if((p.kind==='crocc'||p.kind==='pugnoraz')&&drawCrocc(p)) return; if(p.kind==='laserm'&&mmiLaser(p)) return; /*MECHAMISSILI1*/
   if(p.kind==='cilindro'&&drawNicoProj(p)) return;
   if((p.kind==='zolla'||p.kind==='ondasis')&&drawMbProj(p)) return;
   if(p.kind==='elastico'){ drawElastico(p); return; }
