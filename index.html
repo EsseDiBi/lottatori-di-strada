@@ -2146,7 +2146,7 @@ if(!PRESETS.some(p=>p.spriteKey==='marghera')) PRESETS.push({base:'MARGHERA',kin
    bio:'Ostetrica di Marghera, con la erre che si sente fino a Mestre. Due gatti grigi, Odino e Furio, sempre pronti a saltare in faccia a chi disturba. Quando evolve i capelli diventano d\'argento e alle sue spalle compare lo spirito di una tigre siberiana.'});
 if(!PRESETS.some(p=>p.spriteKey==='andre')) PRESETS.push({base:'EVIL GEME',kind:'suit',suit:'#6a6a72',legs:'#6a6a72',accent:'#e02a2a',tie:'#e02a2a',top:'#6a6a72',shoes:'#1a1a1a',skin:'#e8b48a',hair:'#7a4a28',special:'Accertamento',superName:'Maximum attack',proj:'f24',size:1.03,spriteKey:'andre',
    bio:'AndVe, gemello di Geme. Commercialista: ti trova sempre un F24 da pagare. Pilota di go-kart, sciatore, juventino fino al midollo. Quando evolve diventa un ultras assatanato e carica a cavallo di una zebra. VIULEEENZA!'});
-if(!PRESETS.some(p=>p.spriteKey==='ugo')) PRESETS.push({base:'UGO',kind:'suit',suit:'#1f2a5a',legs:'#1f2a5a',accent:'#2a5bd8',tie:'#ffffff',top:'#1f2a5a',shoes:'#7a4a22',skin:'#e0a983',hair:'#4a2e1c',special:'Crollo in Borsa',superName:'Onda di burro',proj:'moneta',size:1.12,spriteKey:'ugo',
+if(!PRESETS.some(p=>p.spriteKey==='ugo')) PRESETS.push({base:'UGO',kind:'suit',suit:'#1f2a5a',legs:'#1f2a5a',accent:'#2a5bd8',tie:'#ffffff',top:'#1f2a5a',shoes:'#7a4a22',skin:'#e0a983',hair:'#4a2e1c',special:'Crollo in Borsa',superName:'Onda di burro',proj:'moneta',size:1.21,spriteKey:'ugo',
    bio:'Francese, banchiere, fierissimo. Abito blu, niente cravatta. Monete d\'oro, crolli in Borsa e un\'onda di burro. Quando evolve diventa Napoleone. Il Monte Bianco, per lui, è francese.'});
 if(!PRESETS.some(p=>p.spriteKey==='tonio')) PRESETS.push({base:'TONIO',kind:'hoodie',suit:'#1a1a1a',legs:'#2a4a8a',accent:'#ff1a1a',tie:'#ff1a1a',top:'#1a1a1a',shoes:'#222222',skin:'#d9a27a',hair:'#3a2616',special:'Avvitatore pneumatico',superName:'Furio e Odino',proj:'gomma',size:1.1,spriteKey:'tonio',
    bio:'Ingegnere di Formula 1, serio e di poche parole. Due orecchini. Fidanzato di Marghera. Chiama Furio e Odino, i suoi gatti grigi dagli occhi gialli. Quando evolve indossa la tuta rossa del box e arriva in monoposto.'});
@@ -2223,7 +2223,7 @@ function load(){ let arr=null; try{ arr=JSON.parse(localStorage.getItem(KEY)||'n
   if(!ROSTER.some(r=>r.spriteKey==='tonio')){ const cp=PRESETS.find(p=>p.spriteKey==='tonio'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='tonio'){ r.size=1.1; r.proj='gomma'; r.rangedKind='gomma'; } }); /*TONIO2*/
   if(!ROSTER.some(r=>r.spriteKey==='ugo')){ const cp=PRESETS.find(p=>p.spriteKey==='ugo'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
-  ROSTER.forEach(r=>{ if(r.spriteKey==='ugo'){ r.size=1.12; r.proj='moneta'; r.rangedKind='moneta'; } }); /*UGO2*/
+  ROSTER.forEach(r=>{ if(r.spriteKey==='ugo'){ r.size=1.21; r.proj='moneta'; r.rangedKind='moneta'; } }); /*UGO2*/
   if(!ROSTER.some(r=>r.spriteKey==='andre')){ const cp=PRESETS.find(p=>p.spriteKey==='andre'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
   ROSTER.forEach(r=>{ if(r.spriteKey==='andre'){ r.size=1.03; r.proj='f24'; r.rangedKind='f24'; } }); /*ANDRE2*/
   if(!ROSTER.some(r=>r.spriteKey==='marghera')){ const cp=PRESETS.find(p=>p.spriteKey==='marghera'); if(cp){ ROSTER.push(fromPreset(cp)); try{ save(); }catch(e){} } }
