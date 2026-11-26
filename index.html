@@ -5548,8 +5548,8 @@ try{ if(!window.__salva1){ window.__salva1=1;
 /*SBLOCCATI1 arcade (26.11.2026) - gli sbloccati inseguono la coppa come i campioni; niente specchio coi miniboss */
 try{
   const SBAL={dracula:'biscio',frankenstein:'marico',uomopesce:'faja',zetascheletro:'zeta',marlav:'marouges'};
-  const sbOn=r=>!!(r&&((typeof MOSTRI!=='undefined'&&MOSTRI[r.base])||['drste','evilsdb','mecha','marlav'].includes(r.spriteKey)));
-  { const _acS=arc2Champs; arc2Champs=function(){ const L=_acS.apply(this,arguments); ROSTER.forEach(r=>{ if(sbOn(r)&&!r.dark){ const k=r.mk||r.spriteKey; if(!L.includes(k)) L.push(k); } }); return L; }; }
+  const sbOn=r=>!!(r&&((typeof MOSTRI!=='undefined'&&MOSTRI[r.base])||['drste','mecha','marlav'].includes(r.spriteKey)));
+  { const _acS=arc2Champs; arc2Champs=function(){ const L=_acS.apply(this,arguments); ROSTER.forEach(r=>{ if(sbOn(r)&&!r.dark){ const k=r.mk||r.spriteKey; if(!L.includes(k)) L.push(k); } }); /*SBLOCCATI2: Evil SDB non gioca l'Arcade*/ return L.filter(k=>k!=='evilsdb'); }; }
   { const _asS=arcStart; arcStart=function(){ const me=ROSTER[sel.picks[0]], k=me&&(me.mk||me.spriteKey), a=k&&SBAL[k]; let o=null;
       if(a&&ARC2.ordine.includes(a)&&!ARC2.ordine.includes(k)){ o=ARC2.ordine.slice(); ARC2.ordine=o.map(x=>x===a?k:x); }
       try{ const r=_asS.apply(this,arguments);
