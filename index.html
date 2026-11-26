@@ -5259,10 +5259,10 @@ function arc2GoK(k,diff){ const i=ROSTER.findIndex(r=>r&&(r.mk||r.spriteKey)===k
 function arc2Pick(){ const C=arc2Champs(); let o=document.getElementById('arcCampOv');
   if(!o){ o=document.createElement('div'); o.id='arcCampOv'; o.style.cssText='position:fixed;inset:0;z-index:99990;background:rgba(11,8,22,.96);display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto'; document.body.appendChild(o); }
   let h='<div style="max-width:760px;width:100%;text-align:center;color:#f4efe6;font-family:sans-serif"><div style="font:800 clamp(20px,3.6vw,32px) sans-serif;color:#ffc933">INSEGUI LA COPPA</div>';
-  h+='<div style="font-size:15px;margin:6px 0 12px;color:#c9bfe6">'+(C.length?'Inseguono la Mano d\'Oro i campioni del Mondiale e i lottatori sbloccati. Tocca il tuo.':'Nessun campione ancora. Vinci il Torneo Mondiale degli Schiaffi a Normale o Difficile.')+'</div>';
+  h+='<div style="font-size:15px;margin:6px 0 12px;color:#c9bfe6">'+(C.length?'Inseguono la Mano d\'Oro i lottatori classici, i campioni del Mondiale e gli sbloccati. Tocca il tuo.':'Nessun campione ancora. Vinci il Torneo Mondiale degli Schiaffi a Normale o Difficile.')+'</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(110px,22vh),1fr));gap:8px;justify-content:center">';
   C.forEach(k=>{ const r=ROSTER.find(x=>x&&(x.mk||x.spriteKey)===k); let u=null; try{ u=portraitOf(k); }catch(e){}
-    h+='<button type="button" data-k="'+k+'" style="padding:5px;border-radius:8px;cursor:pointer;background:#1a1430;color:#f4efe6;border:3px solid #ffc933;font:700 12px sans-serif">'+(u?'<img src="'+u+'" style="width:100%;aspect-ratio:1;object-fit:cover;image-rendering:pixelated;display:block;border-radius:4px">':'')+'<div style="margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+((r&&r.name)||k)+'</div><div style="font:800 10px sans-serif;color:#ffc933">'+((r&&((typeof MOSTRI!=='undefined'&&MOSTRI[r.base])||['drste','evilsdb','mecha','marlav'].includes(r.spriteKey)))?'SBLOCCATO':'CAMPIONE')+'</div></button>'; });
+    h+='<button type="button" data-k="'+k+'" style="padding:5px;border-radius:8px;cursor:pointer;background:#1a1430;color:#f4efe6;border:3px solid #ffc933;font:700 12px sans-serif">'+(u?'<img src="'+u+'" style="width:100%;aspect-ratio:1;object-fit:cover;image-rendering:pixelated;display:block;border-radius:4px">':'')+'<div style="margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+((r&&r.name)||k)+'</div><div style="font:800 10px sans-serif;color:#ffc933">'+((r&&((typeof MOSTRI!=='undefined'&&MOSTRI[r.base])||['drste','evilsdb','mecha','marlav'].includes(r.spriteKey)))?'SBLOCCATO':((window.arc2IsChamp&&window.arc2IsChamp(k))?'CAMPIONE':'&nbsp;'))+'</div></button>'; });
   h+='</div><div style="margin-top:14px"><button type="button" data-x="1" style="font:700 15px sans-serif;background:#3a3166;color:#f4efe6;border:2px solid #120d22;border-radius:6px;padding:.5em 1.2em;cursor:pointer">Indietro</button></div></div>';
   o.innerHTML=h; o.style.display='flex';
   o.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; o.style.display='none';
@@ -5558,6 +5558,20 @@ try{
             if(c.length) ARC.list[j]=c[(Math.random()*c.length)|0]; } } }catch(e){}
         return r; } finally{ if(o) ARC2.ordine=o; } }; }
 }catch(e){ console.error('SBLOCCATI1 arcade',e); }
+/*ARCTUTTI1 (26.11.2026) - nell'Arcade si gioca con gli sbloccati E con tutti i lottatori classici; Evil SDB resta fuori */
+try{
+  const atSb=r=>!!(r&&((typeof MOSTRI!=='undefined'&&MOSTRI[r.base])||['drste','evilsdb','mecha','marlav'].includes(r.spriteKey)));
+  const atNo=['pm','evilsdb','evil'].concat(typeof SBLOCCABILI!=='undefined'?SBLOCCABILI:[]);
+  const atCl=r=>!!(r&&r.spriteKey&&!r.dark&&!r.dio&&!atSb(r)&&!atNo.includes(r.spriteKey)&&!atNo.includes(r.mk||r.spriteKey));
+  window.arc2IsChamp=function(k){ try{ let L=JSON.parse(localStorage.getItem('lds-arcade-champs')||'[]'); if(!Array.isArray(L)) L=[]; return L.includes(k)||localStorage.getItem('lds-arcade-me')===k; }catch(e){ return false; } };
+  { const _acT=arc2Champs; arc2Champs=function(){ const L=_acT.apply(this,arguments), C=[];
+      ROSTER.forEach(r=>{ if(atCl(r)){ const k=r.mk||r.spriteKey; if(!C.includes(k)) C.push(k); } });
+      L.forEach(k=>{ if(!C.includes(k)) C.push(k); });
+      return C.filter(k=>k!=='evilsdb'); }; }
+  /* la schermata si scorre fino in cima: con 46 caselle il centraggio tagliava titolo e difficolta' */
+  { const _apT=arc2Pick; arc2Pick=function(){ const r=_apT.apply(this,arguments); try{ const o=document.getElementById('arcCampOv'); if(o){ o.style.alignItems='flex-start'; const c=o.firstElementChild; if(c) c.style.margin='auto'; o.scrollTop=0; } }catch(e){} return r; }; }
+  try{ if(location.hash==='#debug') window.__arcTutti={champs:()=>arc2Champs(),pick:()=>arc2Pick(),goK:(k,d)=>arc2GoK(k,d),get ARC(){ return ARC; },get G(){ return G; }}; }catch(e){}
+}catch(e){ console.error('ARCTUTTI1',e); }
 try{ if(location.hash==='#debug') window.__arc2={ARC,ARC2,arc2Go,mon:{after:()=>monAfter,start:()=>(typeof monStart==='function'?monStart:null),end:()=>monEnd},tw:()=>torWin,sr:()=>showResult,get G(){ return G; },get ROSTER(){ return ROSTER; }}; }catch(e){}
 }catch(e){ console.error('ARCADE2',e); }
 /*FACILE10 (24.11.2026) - ordine dell'Avvocato: difficolta' -10% contro il computer, in tutte le modalita' (libero, Torneo, Mondiale, Arcade). Il 2 giocatori non cambia.
